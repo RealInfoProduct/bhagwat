@@ -8,14 +8,15 @@ import { LoaderService } from 'src/app/services/loader.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { WithdrawalList } from 'src/app/interface/invoice';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-withdrawal',
   templateUrl: './withdrawal.component.html',
   styleUrls: ['./withdrawal.component.scss']
 })
-export class WithdrawalComponent implements OnInit{
- dateWithdrawalForm: FormGroup;
+export class WithdrawalComponent implements OnInit {
+  dateWithdrawalForm: FormGroup;
   withdrawalDataColumns: string[] = [
     '#',
     'employee',
@@ -23,32 +24,32 @@ export class WithdrawalComponent implements OnInit{
     'date',
     'action',
   ];
-  WithdrawalList :any = []
-  employeeList :any = []
+  WithdrawalList: any = []
+  employeeList: any = []
   WithdrawalListDataSource = new MatTableDataSource(this.WithdrawalList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
 
-  constructor(private dialog: MatDialog , 
-    private firebaseService : FirebaseService ,
-    private loaderService : LoaderService,
+  constructor(private dialog: MatDialog,
+    private firebaseService: FirebaseService,
+    private loaderService: LoaderService,
     private _snackBar: MatSnackBar,
-   private fb: FormBuilder) { }
+    private fb: FormBuilder) { }
 
 
   ngOnInit(): void {
-     const today = new Date();
+    const today = new Date();
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
     const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     this.dateWithdrawalForm = this.fb.group({
       start: [startDate],
       end: [endDate]
     });
-  this.getWithdrawalList();
-  this.getEmployeeList();
+    this.getWithdrawalList();
+    this.getEmployeeList();
   }
 
-   filterDate() {
+  filterDate() {
     if (!this.WithdrawalList) return;
     const startDate = this.dateWithdrawalForm.value.start ? new Date(this.dateWithdrawalForm.value.start) : null;
     const endDate = this.dateWithdrawalForm.value.end ? new Date(this.dateWithdrawalForm.value.end) : null;
@@ -67,9 +68,27 @@ export class WithdrawalComponent implements OnInit{
 
   applyFilter(filterValue: string): void {
     this.WithdrawalListDataSource.filter = filterValue.trim().toLowerCase();
+    this.SearchFilter()
   }
 
-  
+  SearchFilter() {
+    this.WithdrawalListDataSource.filterPredicate = (data: any, filter: string) => {
+      const searchText = filter.trim().toLowerCase();
+      const amount = data.amount?.toString().toLowerCase() || '';
+
+      const EmployeeName =
+        this.employeeList.find((p: any) => p.id === data.employee)?.firstName
+          ?.toLowerCase() || '';
+
+      return (
+        amount.includes(searchText) ||
+        EmployeeName.includes(searchText)
+      );
+    };
+  }
+
+
+
   openwithdrawal(action: string, obj: any) {
     obj.action = action;
 
@@ -82,17 +101,17 @@ export class WithdrawalComponent implements OnInit{
           employee: result.data.employee,
           amount: result.data.amount,
           date: result.data.date,
-          userId : localStorage.getItem("userId")
+          userId: localStorage.getItem("userId")
         }
 
         this.firebaseService.addWithdrawal(payload).then((res) => {
           if (res) {
-              this.getWithdrawalList()
-              this.openConfigSnackBar('record create successfully')
-            }
-        } , (error) => {
-          console.log("error=>" , error);
-          
+            this.getWithdrawalList()
+            this.openConfigSnackBar('record create successfully')
+          }
+        }, (error) => {
+          console.log("error=>", error);
+
         })
       }
       if (result?.event === 'Edit') {
@@ -105,23 +124,23 @@ export class WithdrawalComponent implements OnInit{
               date: result.data.date,
               userId: localStorage.getItem("userId")
             }
-              this.firebaseService.updateWithdrawal(result.data.id , payload).then((res:any) => {
-                  this.getWithdrawalList()
-                  this.openConfigSnackBar('record update successfully')
-              }, (error) => {
-                console.log("error => " , error);
-                
-              })
+            this.firebaseService.updateWithdrawal(result.data.id, payload).then((res: any) => {
+              this.getWithdrawalList()
+              this.openConfigSnackBar('record update successfully')
+            }, (error) => {
+              console.log("error => ", error);
+
+            })
           }
         });
       }
       if (result?.event === 'Delete') {
-        this.firebaseService.deleteWithdrawal(result.data.id).then((res:any) => {
-            this.getWithdrawalList()
-            this.openConfigSnackBar('record delete successfully')
+        this.firebaseService.deleteWithdrawal(result.data.id).then((res: any) => {
+          this.getWithdrawalList()
+          this.openConfigSnackBar('record delete successfully')
         }, (error) => {
-          console.log("error => " , error);
-          
+          console.log("error => ", error);
+
         })
       }
     });
@@ -131,7 +150,7 @@ export class WithdrawalComponent implements OnInit{
     this.loaderService.setLoader(true)
     this.firebaseService.getAllWithdrawal().subscribe((res: any) => {
       if (res) {
-        this.WithdrawalList = res.filter((id:any) => id.userId === localStorage.getItem("userId"))
+        this.WithdrawalList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
         this.WithdrawalListDataSource = new MatTableDataSource(this.WithdrawalList);
         this.WithdrawalListDataSource.paginator = this.paginator;
         this.loaderService.setLoader(false)
@@ -148,26 +167,81 @@ export class WithdrawalComponent implements OnInit{
   }
 
 
-   getEmployeeList() {
-  this.loaderService.setLoader(true);
+  getEmployeeList() {
+    this.loaderService.setLoader(true);
 
-  this.firebaseService.getAllEmployee().subscribe((res: any) => {
-    if (res) {
-      this.employeeList = res.filter(
-        (item: any) => item.userId === localStorage.getItem("userId")
-      );
-      this.loaderService.setLoader(false);
+    this.firebaseService.getAllEmployee().subscribe((res: any) => {
+      if (res) {
+        this.employeeList = res.filter(
+          (item: any) => item.userId === localStorage.getItem("userId")
+        );
+        this.loaderService.setLoader(false);
 
-      this.getWithdrawalList();
-    }
-  });
-}
+        this.getWithdrawalList();
+      }
+    });
+  }
 
   getemployeeid(nameid: any) {
     return this.employeeList.find((id: any) => id.id === nameid)?.firstName
   }
-getemployeelastid(nameid: any) {
+  getemployeelastid(nameid: any) {
     return this.employeeList.find((id: any) => id.id === nameid)?.lastName
   }
+
+ filedownload() {
+  if (!this.WithdrawalListDataSource || this.WithdrawalListDataSource.data.length === 0) {
+    this.openConfigSnackBar('No withdrawal data available to generate PDF.');
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  // Get date range from form
+  const startDate = new Date(this.dateWithdrawalForm.value.start);
+  const endDate = new Date(this.dateWithdrawalForm.value.end);
+
+  const formattedStart = startDate.toLocaleDateString('en-GB');
+  const formattedEnd = endDate.toLocaleDateString('en-GB');
+
+  // PDF Title
+  doc.setFontSize(12);
+  doc.text(`Withdrawal Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
+
+  // Total amount
+  const totalAmount = this.WithdrawalListDataSource.data.reduce(
+    (sum: number, w: any) => sum + parseFloat(w.amount || 0),
+    0
+  );
+  const formattedAmount = totalAmount.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  doc.text(`Total Withdrawal Amount: ${formattedAmount}`, 131, 15);
+
+  // Table headers
+  const headers = ['S.No', 'Employee Name', 'Amount', 'Date'];
+
+  // Table data
+  const data = this.WithdrawalListDataSource.data.map((w: any, index: number) => {
+    const emp = this.employeeList.find((e:any) => e.id === w.employee);
+    const employeeName = emp ? `${emp.firstName} ${emp.lastName}` : '';
+    const date = w.date?.seconds ? new Date(w.date.seconds * 1000).toLocaleDateString('en-GB') : '';
+    return [index + 1, employeeName, w.amount, date];
+  });
+
+  // Generate table
+  (doc as any).autoTable({
+    head: [headers],
+    body: data,
+    startY: 25,
+    theme: 'grid',
+    headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
+    styles: { fontSize: 10, halign: 'center', valign: 'middle' }
+  });
+
+  // Save PDF
+  doc.save(`Withdrawal_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
+}
 
 }

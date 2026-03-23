@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource, MatTable } from '@angular/material/table';
+import jsPDF from 'jspdf';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { LoaderService } from 'src/app/services/loader.service';
 
@@ -56,7 +57,30 @@ export class BrokerListComponent implements OnInit {
 
   applyFilter(filterValue: string): void {
     this.brokerageDataSource.filter = filterValue.trim().toLowerCase();
+    this.SearchFilter()
   }
+
+  SearchFilter() {
+    this.brokerageDataSource.filterPredicate = (data: any, filter: string) => {
+      const searchText = filter.trim().toLowerCase();
+      const invoiceNo = data.invoiceNo?.toString().toLowerCase() || '';
+
+      const partyName =
+        this.partyList.find((p: any) => p.id === data.party)?.partyName
+          ?.toLowerCase() || '';
+
+      const brokerName =
+        this.brokerList.find((p: any) => p.id === data.broker)?.accountholdersname?.toLowerCase() || '';
+
+      return (
+        invoiceNo.includes(searchText) ||
+        partyName.includes(searchText) ||
+        brokerName.includes(searchText)
+
+      );
+    };
+  }
+
 
   filterDate() {
     if (!this.brokerageList) return;
@@ -116,10 +140,6 @@ export class BrokerListComponent implements OnInit {
   getBrokerName(nameId: any) {
     return this.brokerList.find((id: any) => id.id === nameId)?.header
   }
-  getBrokerlast(nameId: any) {
-    return this.brokerList.find((id: any) => id.id === nameId)?.subHeader
-  }
-
   getBrokerAmount(element: any): number {
     const finalAmount = Number(element.finalAmount) || 0;
     const brokerPercentage = Number(element.brokerPercentage) || 0;
@@ -152,5 +172,74 @@ export class BrokerListComponent implements OnInit {
       verticalPosition: 'top',
     });
   }
+  
+ filedownload() {
+  if (!this.brokerageDataSource || this.brokerageDataSource.data.length === 0) {
+    this.openConfigSnackBar('No brokerage data available to generate PDF.');
+    return;
+  }
 
+  const doc = new jsPDF();
+
+  // Get date range from form
+  const startDate = new Date(this.dateBrokerageListForm.value.start);
+  const endDate = new Date(this.dateBrokerageListForm.value.end);
+
+  const formattedStart = startDate.toLocaleDateString('en-GB');
+  const formattedEnd = endDate.toLocaleDateString('en-GB');
+
+  // PDF Title
+  doc.setFontSize(12);
+  doc.text(`Brokerage Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
+
+  // Total broker amount
+  const totalBrokerAmount = this.brokerageDataSource.data.reduce(
+    (sum: number, item: any) => sum + this.getBrokerAmount(item),
+    0
+  );
+  const formattedTotal = totalBrokerAmount.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  doc.text(`Total Broker Amount: ${formattedTotal}`, 135, 15);
+
+  // Table headers
+  const headers = [
+    '#',
+    'Party',
+    'Broker',
+    'Invoice No',
+    'PO Number',
+    'Final Amount',
+    'Broker %',
+    'Broker Amount',
+    'Status'
+  ];
+
+  // Table data
+  const data = this.brokerageDataSource.data.map((item: any, index: number) => [
+    index + 1,
+    this.getPartyName(item.party) || '',
+    this.getBrokerName(item.broker) || '',
+    item.invoiceNo || '',
+    item.pONumber || '',
+    item.finalAmount || 0,
+    item.brokerPercentage || 0,
+    this.getBrokerAmount(item),
+    item.status || ''
+  ]);
+
+  // Generate table
+  (doc as any).autoTable({
+    head: [headers],
+    body: data,
+    startY: 25,
+    theme: 'grid',
+    headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
+    styles: { fontSize: 10, halign: 'center', valign: 'middle' }
+  });
+
+  // Save PDF
+  doc.save(`Brokerage_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
+}
 }

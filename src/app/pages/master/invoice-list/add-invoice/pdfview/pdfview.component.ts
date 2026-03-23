@@ -16,9 +16,9 @@ import { BrokerageList } from 'src/app/interface/invoice';
   templateUrl: './pdfview.component.html',
   styleUrls: ['./pdfview.component.scss']
 })
-export class PdfviewComponent  implements OnInit{
+export class PdfviewComponent implements OnInit {
   blobUrl: any
-  invoiceData :any
+  invoiceData: any
   firmList: any = []
   partyList: any = []
   toWords = new ToWords({
@@ -32,11 +32,11 @@ export class PdfviewComponent  implements OnInit{
 
   constructor(
     private sanitizer: DomSanitizer,
-    private loaderService : LoaderService,
-    private firebaseService : FirebaseService,
-    private router : Router,
+    private loaderService: LoaderService,
+    private firebaseService: FirebaseService,
+    private router: Router,
     private _snackBar: MatSnackBar,
-    private pdfgenService :PdfgenService
+    private pdfgenService: PdfgenService
   ) {
     if (this.loaderService.getInvoiceData()) {
       this.invoiceData = this.loaderService.getInvoiceData()
@@ -56,13 +56,13 @@ export class PdfviewComponent  implements OnInit{
         case 5:
           // this.generatePDF5(this.loaderService.getInvoiceData())
           break;
-          
+
         default:
           break;
       }
     } else {
       this.router.navigate(['/master/addinvoice'])
-    }  
+    }
   }
 
   ngOnInit(): void {
@@ -76,7 +76,7 @@ export class PdfviewComponent  implements OnInit{
   }
 
   generatePDF1(invoiceData: any) {
-    
+
     this.loaderService.setLoader(true)
     const doc: any = new jsPDF();
     const header = (doc: any) => {
@@ -203,7 +203,7 @@ export class PdfviewComponent  implements OnInit{
     doc.rect(box2XPosition - 25, boxYPosition, box2Width, boxHeight, 'F');
 
     const fieldsRight = ["Invoice:", "Date:", "PAN:"];
-    const fieldsRightValues = [`${invoiceData.invoiceNumber}`, `${invoiceData.date}`, `${ invoiceData.partyName.partyPanNo }`]; // Corresponding values
+    const fieldsRightValues = [`${invoiceData.invoiceNumber}`, `${invoiceData.date}`, `${invoiceData.partyName.partyPanNo}`]; // Corresponding values
     const rightYPosition = boxYPosition + 5;
 
     fieldsRight.forEach((field, index) => {
@@ -219,7 +219,7 @@ export class PdfviewComponent  implements OnInit{
       const textWidth = doc.getTextWidth(field);
 
       doc.setTextColor(0, 0, 0);
-      
+
       if (index === 1) {
         doc.setFont(undefined, 'bold');
       }
@@ -242,17 +242,37 @@ export class PdfviewComponent  implements OnInit{
     data.forEach((ele: any) => { ele.total = Number(ele.qty) * Number(ele.price) })
 
     const body: any = [];
+    // for (let i = 0; i < 10; i++) {
+    //   const bodyRows = [
+    //     i + 1, // Convert number to string
+    //     data[i]?.productName?.productName ? data[i]?.productName?.productName : '',
+    //     data[i]?.poNumber ? data[i]?.poNumber.toString() : '',
+    //     data[i]?.qty ? Number(data[i]?.qty).toFixed(2).toString() : '',
+    //     data[i]?.defectiveItem ? Number(data[i]?.defectiveItem).toFixed(2).toString() : '',
+    //     data[i]?.price ? Number(data[i]?.price).toFixed(2).toString() : '',
+    //     data[i]?.finalAmount ? `${Number(data[i]?.finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''
+    //   ];
+    //   body.push(bodyRows);
     for (let i = 0; i < 10; i++) {
-      const bodyRows = [
-        i + 1, // Convert number to string
-        data[i]?.productName?.productName ? data[i]?.productName?.productName : '',
-        data[i]?.poNumber ? data[i]?.poNumber.toString() : '',
-        data[i]?.qty ? Number(data[i]?.qty).toFixed(2).toString() : '',
-        data[i]?.defectiveItem ? Number(data[i]?.defectiveItem).toFixed(2).toString() : '',
-        data[i]?.price ? Number(data[i]?.price).toFixed(2).toString() : '',
-        data[i]?.finalAmount ? `${Number(data[i]?.finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''
+
+      const hasData = data[i] && data[i]?.productName?.productName;
+
+      const row = [
+        hasData ? i + 1 : '', // ✅ Only show number if data exists
+        hasData ? data[i]?.productName?.productName : '',
+        hasData ? (data[i]?.poNumber || '') : '',
+        hasData ? (data[i]?.qty ? Number(data[i]?.qty).toFixed(2) : '') : '',
+        hasData ? (data[i]?.defectiveItem ? Number(data[i]?.defectiveItem).toFixed(2) : '') : '',
+        hasData ? (data[i]?.price ? Number(data[i]?.price).toFixed(2) : '') : '',
+        hasData
+          ? `${Number(data[i]?.finalAmount).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}`
+          : ''
       ];
-      body.push(bodyRows);
+
+      body.push(row);
     }
 
     const productsSubTotal = invoiceData.products.reduce((acc: any, product: any) => acc + product.finalAmount, 0).toFixed(2);
@@ -266,7 +286,7 @@ export class PdfviewComponent  implements OnInit{
     const Amount = new Intl.NumberFormat('en-IN').format(parseFloat(finalAmount.toFixed(2)));
     const discountAmountFormatted = new Intl.NumberFormat('en-IN').format(parseFloat(discountAmount.toFixed(2)));
     const sGstAmountFormatted = new Intl.NumberFormat('en-IN').format(parseFloat(sGstAmount.toFixed(2)));
-    const cGstAmountFormatted = new Intl.NumberFormat('en-IN').format(parseFloat( cGstAmount.toFixed(2)));
+    const cGstAmountFormatted = new Intl.NumberFormat('en-IN').format(parseFloat(cGstAmount.toFixed(2)));
     const roundedAmount = Math.round(finalAmount);
     const formattedRoundedAmount = new Intl.NumberFormat('en-IN').format(roundedAmount);
     const finalAmountInWords = this.toWords.convert(Number(roundedAmount));
@@ -303,34 +323,88 @@ export class PdfviewComponent  implements OnInit{
         lineWidth: 0.50
       },
       styles: {
+        // lineWidth: 0.1,
+        // lineColor: [0, 0, 0]
         cellPadding: 2,
-        lineWidth: 0.1,
-        lineColor: [0, 0, 0]
+        lineWidth: 0,
       },
-      didParseCell: (data) => {
-        const { row, column } = data;
-        const lastRowIndex = body.length - 1;
+      // didParseCell: (data) => {
+      //   const { row, column } = data;
+      //   const lastRowIndex = body.length - 1;
 
-        if (row.index >= lastRowIndex - 6 && row.index <= lastRowIndex - 1 && (column.index === 5 || column.index === 6)) {
+      //   if (row.index >= lastRowIndex - 6 && row.index <= lastRowIndex - 1 && (column.index === 5 || column.index === 6)) {
+      //     data.cell.styles.fontStyle = 'bold';
+      //   }
+
+      //   if (data.row.index === body.length - 1) {
+      //     data.cell.styles.textColor = '#000';
+      //     data.cell.styles.fillColor = '#6fd32c';
+      //     data.cell.styles.fontStyle = 'bold';
+      //   }
+
+      //   if (data.row.index === body.length ) {
+      //     data.cell.styles.textColor = '#000';
+      //     data.cell.styles.fillColor = '#eee';
+      //   }
+      // },
+      // didDrawPage: (data) => {
+      //   header(doc);
+      //   const pageNumber = doc.internal.getNumberOfPages();
+      //   footer(doc, pageNumber, pageNumber);
+      // },
+      didParseCell: (data) => {
+        const rowIndex = data.row.index;
+        const colIndex = data.column.index;
+        const rowData = body[rowIndex];
+
+        const hasData = rowData && rowData[1] && rowData[1].toString().trim() !== '';
+        const lastRowIndex = body.length;
+        doc.setLineWidth(0.1);
+        data.cell.styles.lineColor = [0, 0, 0];
+        doc.line(10, 100, 10, 229);
+        doc.setLineWidth(0.1);
+        data.cell.styles.lineColor = [0, 0, 0];
+        doc.line(200, 100, 200, 229);
+        // 👉 PRODUCT ROWS (first 10)
+        if (rowIndex < 10) {
+
+          if (hasData) {
+            // ✅ Data row → full border
+            data.cell.styles.lineWidth = 0.1;
+            data.cell.styles.lineColor = [0, 0, 0];
+          } else {
+            // ❌ Empty row → remove all borders
+            data.cell.styles.lineWidth = 0;
+
+          }
+
+        } else {
+          // ✅ Total section → full border
+          data.cell.styles.lineWidth = 0.1;
+          data.cell.styles.lineColor = [0, 0, 0];
+        }
+
+        // 🔥 Bold totals
+        if (
+          rowIndex >= lastRowIndex - 6 &&
+          rowIndex <= lastRowIndex - 1 &&
+          (colIndex === 5 || colIndex === 6)
+        ) {
           data.cell.styles.fontStyle = 'bold';
         }
 
-        if (data.row.index === body.length - 1) {
-          data.cell.styles.textColor = '#000';
+        // 🎨 Final row highlight
+        if (rowIndex === lastRowIndex - 1) {
           data.cell.styles.fillColor = '#6fd32c';
           data.cell.styles.fontStyle = 'bold';
         }
-
-        if (data.row.index === body.length ) {
-          data.cell.styles.textColor = '#000';
-          data.cell.styles.fillColor = '#eee';
-        }
       },
-      didDrawPage: (data) => {
+
+      didDrawPage: () => {
         header(doc);
         const pageNumber = doc.internal.getNumberOfPages();
         footer(doc, pageNumber, pageNumber);
-      },
+      }
     });
 
     doc.setFontSize(13);
@@ -367,12 +441,12 @@ export class PdfviewComponent  implements OnInit{
     doc.line(signatureXPosition, signatureLabelYPosition + 5, signatureXPosition + signatureLineLength, signatureLabelYPosition + 5);
 
     const blobUrlshow: any = doc.output('bloburl')
-        this.blobUrl = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrlshow + '#toolbar=0&navpanes=0&scrollbar=0');
-      this.loaderService.setLoader(false)
+    this.blobUrl = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrlshow + '#toolbar=0&navpanes=0&scrollbar=0');
+    this.loaderService.setLoader(false)
   }
 
- 
-  submitInvoice(){
+
+  submitInvoice() {
     this.firebaseService.addInvoice(this.invoiceData).then((res) => {
       const partyData = this.getPartyName(this.invoiceData.partyId)
       const firmData = this.getFirmHeader(this.invoiceData.firmId)
@@ -396,50 +470,50 @@ export class PdfviewComponent  implements OnInit{
       //       case 5:
       //         // this.pdfgenService.generatePDF5Download(this.invoiceData)
       //         break;
-          
+
       //       default:
       //         break;
       //     }
       //     this.router.navigate(['/master/addinvoice'])
       //   }
       if (res) {
-  const partyData = this.getPartyName(this.invoiceData.partyId)
-  const firmData = this.getFirmHeader(this.invoiceData.firmId)
+        const partyData = this.getPartyName(this.invoiceData.partyId)
+        const firmData = this.getFirmHeader(this.invoiceData.firmId)
 
-  this.invoiceData['firmName'] = firmData
-  this.invoiceData['partyName'] = partyData
- if (partyData?.isBroker) {
-  const payload: BrokerageList = {
-    id: '',
-    party: partyData.id,
-    invoiceNo: this.invoiceData.invoiceNumber,
-    pONumber: this.invoiceData.products[0]?.poNumber || '',
-    finalAmount: this.invoiceData.finalSubAmount,
-    broker: partyData.isBroker,
-    selectDate: this.invoiceData.date,
-    brokerPercentage: partyData.broerpercentage,
-    status: 'Pending',
-    userId: localStorage.getItem("userId"),
-  }
+        this.invoiceData['firmName'] = firmData
+        this.invoiceData['partyName'] = partyData
+        if (partyData?.isBroker) {
+          const payload: BrokerageList = {
+            id: '',
+            party: partyData.id,
+            invoiceNo: this.invoiceData.invoiceNumber,
+            pONumber: this.invoiceData.products[0]?.poNumber || '',
+            finalAmount: this.invoiceData.finalSubAmount,
+            broker: partyData.isBroker,
+            selectDate: this.invoiceData.date,
+            brokerPercentage: partyData.broerpercentage,
+            status: 'Pending',
+            userId: localStorage.getItem("userId"),
+          }
 
-  this.firebaseService.addBrokerage(payload)
- }
-  this.openConfigSnackBar('record create successfully')
+          this.firebaseService.addBrokerage(payload)
+        }
+        this.openConfigSnackBar('record create successfully')
 
-  switch (this.loaderService.getInvoiceData().firmName.isInvoiceTheme) {
-    case 1:
-      this.pdfgenService.generatePDF1Download(this.invoiceData)
-      break;
-  }
+        switch (this.loaderService.getInvoiceData().firmName.isInvoiceTheme) {
+          case 1:
+            this.pdfgenService.generatePDF1Download(this.invoiceData)
+            break;
+        }
 
-  this.router.navigate(['/master/addinvoice'])
-}
-    } , (error) => {
+        this.router.navigate(['/master/addinvoice'])
+      }
+    }, (error) => {
       this.openConfigSnackBar(error.error.error.message)
-      
+
     })
     console.log(this.invoiceData);
-    
+
   }
 
   openConfigSnackBar(snackbarTitle: any) {
@@ -479,5 +553,5 @@ export class PdfviewComponent  implements OnInit{
   }
 
 
- 
+
 }

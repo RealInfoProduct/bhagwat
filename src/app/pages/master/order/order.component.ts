@@ -25,7 +25,7 @@ export class OrderComponent implements OnInit {
   ];
 
   orderList: any[] = []
-  partyList:any[]=[]
+  partyList: any[] = []
 
   orderDataSource = new MatTableDataSource(this.orderList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
@@ -43,7 +43,25 @@ export class OrderComponent implements OnInit {
 
   applyFilter(filterValue: string): void {
     this.orderDataSource.filter = filterValue.trim().toLowerCase();
+    this.SearchFilter()
   }
+
+  SearchFilter() {
+    this.orderDataSource.filterPredicate = (data: any, filter: string) => {
+      const searchText = filter.trim().toLowerCase();
+      const partyOrder = data.partyOrder?.toString().toLowerCase() || '';
+
+      const partyName =
+        this.partyList.find((p: any) => p.id === data.partyName)?.partyName
+          ?.toLowerCase() || '';
+
+      return (
+        partyOrder.includes(searchText) ||
+        partyName.includes(searchText)
+      );
+    };
+  }
+
 
   getOrderList() {
     this.loaderService.setLoader(true)
@@ -70,10 +88,10 @@ export class OrderComponent implements OnInit {
           partyOrder: result.data.partyOrder,
           orderDate: result.data.orderDate,
           deliveryDate: result.data.deliveryDate,
-         products: result.data.products.map((detail: any) => ({
-                  productPrice:detail.productPrice,
-                  productQuantity:detail.productQuantity
-               })),
+          products: result.data.products.map((detail: any) => ({
+            productPrice: detail.productPrice,
+            productQuantity: detail.productQuantity
+          })),
           userId: localStorage.getItem("userId"),
         }
         debugger
@@ -96,10 +114,10 @@ export class OrderComponent implements OnInit {
               partyOrder: result.data.partyOrder,
               orderDate: result.data.orderDate,
               deliveryDate: result.data.deliveryDate,
-               products: result.data.products.map((detail: any) => ({
-                  productPrice:detail.productPrice,
-                  productQuantity:detail.productQuantity
-               })),
+              products: result.data.products.map((detail: any) => ({
+                productPrice: detail.productPrice,
+                productQuantity: detail.productQuantity
+              })),
               userId: localStorage.getItem("userId"),
             }
             this.firebaseService.updateOrder(result.data.id, payload).then((res: any) => {
@@ -132,22 +150,22 @@ export class OrderComponent implements OnInit {
     });
   }
 
-    getPartyList() {
+  getPartyList() {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllParty().subscribe((res: any) => {
       if (res) {
-        this.partyList = res.filter((id:any) => id.userId === localStorage.getItem("userId"))
-       
+        this.partyList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
+
         this.loaderService.setLoader(false)
       }
     })
   }
 
- getPartyName(nameid: any) {
+  getPartyName(nameid: any) {
     return this.partyList.find((id: any) => id.id === nameid)?.partyName
   }
 
-  ViewOrder( obj: any){
+  ViewOrder(obj: any) {
     const dialogRef = this.dialog.open(ViewDialogComponent, {
       data: obj,
     });

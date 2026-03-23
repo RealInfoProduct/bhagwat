@@ -20,6 +20,14 @@
           <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
         </mat-form-field>
       </div>
+       <div class="col-lg-3"></div>
+       <div class="col-lg-1">
+          <div class="m-t20">
+            <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
+              <i-tabler name="file-download" class="icon-25"></i-tabler>
+            </button>
+          </div>
+        </div>
     </div>
   </mat-card-content>
 </mat-card>
@@ -54,7 +62,7 @@
             <div class="d-flex align-items-center">
               <div class="m-l-16">
                 <p class="mat-subtitle-1 f-s-16 m-t-0">
-                  {{getBrokerName( element.broker) }}-{{getBrokerlast( element.broker) }}
+                  {{getBrokerName( element.broker) }}
                 </p>
               </div>
             </div>

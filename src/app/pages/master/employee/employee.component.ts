@@ -7,6 +7,7 @@ import { EmployeeList } from 'src/app/interface/invoice';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import { EmployeeDialogComponent } from './employee-dialog/employee-dialog.component';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-employee',
@@ -131,4 +132,68 @@ export class EmployeeComponent  {
     });
   }
 
+ filedownload() {
+  if (!this.employeeList || this.employeeList.length === 0) {
+    this.openConfigSnackBar('No employee data available to generate PDF.');
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  // Optional: Set a date range if you have a date picker in your form
+  const startDate = new Date(); // You can replace with your form value
+  const endDate = new Date();   // Replace with form value if needed
+  const formattedStart = startDate.toLocaleDateString('en-GB');
+  const formattedEnd = endDate.toLocaleDateString('en-GB');
+
+  // Title
+  doc.setFontSize(12);
+  doc.text(`Salary Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
+
+  // Total salary
+  const totalAmount = this.employeeList.reduce(
+    (sum: number, emp: any) => sum + parseFloat(emp.salary || 0),
+    0
+  );
+  const formattedAmount = totalAmount.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  doc.text(`Total Amount: ${formattedAmount}`, 145, 15);
+
+  // Table headers
+  const headers = [
+    'First Name',
+    'Last Name',
+    'Salary',
+    'Phone',
+    'Bank Name',
+    'Bank IFSC',
+    'Bank Account'
+  ];
+
+  // Table data
+  const data = this.employeeList.map((emp:any) => [
+    emp.firstName,
+    emp.lastName,
+    emp.salary,
+    emp.phoneNo,
+    emp.bankName,
+    emp.bankIFSC,
+    emp.bankAccountNo
+  ]);
+
+  // Generate table
+  (doc as any).autoTable({
+    head: [headers],
+    body: data,
+    startY: 25,
+    theme: 'grid',
+    headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
+    styles: { fontSize: 9, halign: 'center', valign: 'middle' }
+  });
+
+  // Save PDF
+  doc.save(`Salary_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
+}
 }

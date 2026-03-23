@@ -37,7 +37,7 @@ export class InvoiceListComponent implements OnInit {
   invoiceDataSource = new MatTableDataSource(this.invoiceList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
-  @ViewChild(MatSort) sort! :MatSort
+  @ViewChild(MatSort) sort!: MatSort
 
   constructor(private router: Router,
     private fb: FormBuilder,
@@ -73,7 +73,7 @@ export class InvoiceListComponent implements OnInit {
           const dateParts = invoice.date.split('/');
           invoiceDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
         } else {
-          return false; 
+          return false;
         }
         return invoiceDate >= startDate && invoiceDate <= endDate;
       });
@@ -98,6 +98,23 @@ export class InvoiceListComponent implements OnInit {
 
   applyFilter(filterValue: string): void {
     this.invoiceDataSource.filter = filterValue.trim().toLowerCase();
+    this.SearchFilter()
+  }
+
+  SearchFilter() {
+    this.invoiceDataSource.filterPredicate = (data: any, filter: string) => {
+      const searchText = filter.trim().toLowerCase();
+      const invoiceNumber = data.invoiceNumber?.toString().toLowerCase() || '';
+
+      const partyName =
+        this.partyList.find((p: any) => p.id === data.partyId)?.partyName
+          ?.toLowerCase() || '';
+
+      return (
+        invoiceNumber.includes(searchText) ||
+        partyName.includes(searchText)
+      );
+    };
   }
 
   addInvoice() {
@@ -118,7 +135,7 @@ export class InvoiceListComponent implements OnInit {
           id.userId === localStorage.getItem("userId") &&
           id.accountYear === localStorage.getItem("accountYear")
         )
-        
+
         this.invoiceDataSource = new MatTableDataSource(this.invoiceList);
         this.invoiceDataSource.paginator = this.paginator;
         this.invoiceSorting()
@@ -155,19 +172,19 @@ export class InvoiceListComponent implements OnInit {
       case 1:
         this.pdfgenService.generatePDF1Download(invoiceData)
         break;
-        case 2:
-          // this.pdfgenService.generatePDF2Download(invoiceData)
-          break;
-        case 3:
-          // this.pdfgenService.generatePDF3Download(invoiceData)
-          break;
-        case 4:
-          // this.pdfgenService.generatePDF4Download(invoiceData)
-          break;
-        case 5:
-          // this.pdfgenService.generatePDF5Download(invoiceData)
-          break;
-    
+      case 2:
+        // this.pdfgenService.generatePDF2Download(invoiceData)
+        break;
+      case 3:
+        // this.pdfgenService.generatePDF3Download(invoiceData)
+        break;
+      case 4:
+        // this.pdfgenService.generatePDF4Download(invoiceData)
+        break;
+      case 5:
+        // this.pdfgenService.generatePDF5Download(invoiceData)
+        break;
+
       default:
         break;
     }
@@ -193,13 +210,75 @@ export class InvoiceListComponent implements OnInit {
     })
   }
 
-  getPartyName(partyId:string) {
+  getPartyName(partyId: string) {
     return this.partyList.find((obj: any) => obj.id === partyId) ?? ''
   }
 
   getFirmHeader(firmId: string) {
     return this.firmList.find((obj: any) => obj.id === firmId) ?? ''
   }
+
+ filedownload() {
+  if (!this.invoiceDataSource || this.invoiceDataSource.data.length === 0) {
+    this.openConfigSnackBar('No invoice data available to generate PDF.');
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  // Get date range from form
+  const startDate = new Date(this.dateInvoiceListForm.value.start);
+  const endDate = new Date(this.dateInvoiceListForm.value.end);
+
+  const formattedStart = startDate.toLocaleDateString('en-GB');
+  const formattedEnd = endDate.toLocaleDateString('en-GB');
+
+  // PDF Title
+  doc.setFontSize(12);
+  doc.text(`Invoice Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
+
+  // Total finalSubAmount
+  const totalAmount = this.invoiceDataSource.data.reduce(
+    (sum: number, invoice: any) => sum + parseFloat(invoice.finalSubAmount || 0),
+    0
+  );
+  const formattedAmount = totalAmount.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  doc.text(`Total Amount: ${formattedAmount}`, 145, 15);
+
+  // Table headers
+  const headers = ['S.No', 'Party Name', 'Invoice No', 'CGST', 'SGST', 'Discount', 'Final Amount'];
+
+  // Table data
+  const data = this.invoiceDataSource.data.map((inv: any, index: number) => {
+    const firm = this.getPartyName(inv.partyId)?.partyName || '';
+    return [
+      index + 1,
+      firm,
+      inv.invoiceNumber || '',
+      inv.cGST || 0,
+      inv.sGST || 0,
+      inv.discount || 0,
+      inv.finalSubAmount || 0
+    ];
+  });
+
+  // Generate table
+  (doc as any).autoTable({
+    head: [headers],
+    body: data,
+    startY: 25,
+    theme: 'grid',
+    headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
+    styles: { fontSize: 10, halign: 'center', valign: 'middle' }
+  });
+
+  // Save PDF
+  doc.save(`Invoice_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
+}
+
 
 }
 
@@ -235,24 +314,24 @@ export class productdialog implements OnInit {
   styleUrls: ['./invoice-list.component.scss']
 })
 
-export class amountlistdialog  implements OnInit {
-  displayedColumns: string[] = ['srNo', 'productPrice','totalAmount'];
-  amountDataSource :any = [] 
+export class amountlistdialog implements OnInit {
+  displayedColumns: string[] = ['srNo', 'productPrice', 'totalAmount'];
+  amountDataSource: any = []
   amountForm: FormGroup
   constructor(
     public dialogRef: MatDialogRef<amountlistdialog>,
     @Optional() @Inject(MAT_DIALOG_DATA) public amountdata: any,
     private fb: FormBuilder,
-    private firebaseService : FirebaseService,
+    private firebaseService: FirebaseService,
     private _snackBar: MatSnackBar,
     private loaderService: LoaderService,
   ) {
     this.amountDataSource = amountdata.receivePayment
-    amountdata['pendingAmount'] = (amountdata.finalSubAmount) - (amountdata.receivePayment.reduce((total:any, payment :any) => total + payment.paymentAmount, 0))
+    amountdata['pendingAmount'] = (amountdata.finalSubAmount) - (amountdata.receivePayment.reduce((total: any, payment: any) => total + payment.paymentAmount, 0))
   }
   ngOnInit(): void {
     this.buildForm()
-    
+
   }
 
   buildForm() {
@@ -275,21 +354,21 @@ export class amountlistdialog  implements OnInit {
     }
 
     if (pendingTotalAmount >= 0) {
-       this.loaderService.setLoader(false)
-    this.firebaseService.updateInvoice(this.amountdata.id, this.amountdata).then((res: any) => {
-      this.openConfigSnackBar('payment received successfully')
-      this.getInvoiceList()
-      this.amountForm.controls['paymentAmount'].reset()
-      this.amountdata.receivePayment = []
-
-    }, (error) => {
-      this.openConfigSnackBar(error.error.error.message)
       this.loaderService.setLoader(false)
-      this.amountdata.receivePayment = []
+      this.firebaseService.updateInvoice(this.amountdata.id, this.amountdata).then((res: any) => {
+        this.openConfigSnackBar('payment received successfully')
+        this.getInvoiceList()
+        this.amountForm.controls['paymentAmount'].reset()
+        this.amountdata.receivePayment = []
 
-    })
-    
-  } else {
+      }, (error) => {
+        this.openConfigSnackBar(error.error.error.message)
+        this.loaderService.setLoader(false)
+        this.amountdata.receivePayment = []
+
+      })
+
+    } else {
       this.openConfigSnackBar('payments not available')
       this.getInvoiceList()
       this.amountdata.receivePayment = []
@@ -304,19 +383,19 @@ export class amountlistdialog  implements OnInit {
       verticalPosition: 'top',
     });
   }
-  
+
   getInvoiceList() {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllInvoice().subscribe((res: any) => {
       if (res) {
-        this.amountdata = res.find((id:any) => 
+        this.amountdata = res.find((id: any) =>
           id.id === this.amountdata.id
-         )              
+        )
 
-         this.amountDataSource = this.amountdata.receivePayment
-         this.amountdata['pendingAmount'] = (this.amountdata.finalSubAmount) - (this.amountdata.receivePayment.reduce((total:any, payment :any) => total + payment.paymentAmount, 0))
-         this.loaderService.setLoader(false)
-        }
+        this.amountDataSource = this.amountdata.receivePayment
+        this.amountdata['pendingAmount'] = (this.amountdata.finalSubAmount) - (this.amountdata.receivePayment.reduce((total: any, payment: any) => total + payment.paymentAmount, 0))
+        this.loaderService.setLoader(false)
+      }
     })
   }
 }

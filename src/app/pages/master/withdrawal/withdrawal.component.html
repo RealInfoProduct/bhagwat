@@ -23,11 +23,18 @@
         </mat-form-field>
       </div>
 
-      <div class="col-lg-4 d-flex align-items-center justify-content-end">
+      <div class="col-lg-3 d-flex align-items-center justify-content-end">
         <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="openwithdrawal('Add', {})">
            {{'WithdrawalMaster.AddWithdrawal' | translate}}
         </button>
       </div>
+        <div class="col-lg-1">
+          <div class="m-t20">
+            <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
+              <i-tabler name="file-download" class="icon-25"></i-tabler>
+            </button>
+          </div>
+        </div>
 
     </div>
   </mat-card-content>

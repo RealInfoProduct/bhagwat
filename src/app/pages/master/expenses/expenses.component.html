@@ -10,12 +10,20 @@
                     </mat-icon>
                 </mat-form-field>
             </div>
-            <div class="col-4"></div>
-            <div class="col-2">
-                <!-- <button mat-flat-button color="primary" (click)="openExpensesmaster('Add',{})"> {{'ExpensessMaster.ExpensesMaster' | translate}}</button> -->
+            <div class="col-lg-4 m-t-10">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Select Expenses Date</mat-label>
+                    <mat-date-range-input [rangePicker]="picker" [formGroup]="dateExpensesListForm">
+                        <input matStartDate placeholder="Start date" formControlName="start">
+                        <input matEndDate placeholder="End date" formControlName="end">
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
+                </mat-form-field>
             </div>
-
-            <div class="col-2">
+            <div class="col-lg-2"></div>
+            
+            <div class="col-lg-2 d-flex align-items-center justify-content-end">
                 <button mat-flat-button color="primary" (click)="openExpenses('Add',{})">
                     {{'ExpensessMaster.AddExpenses' | translate}}
                 </button>
@@ -27,7 +35,7 @@
 <mat-card class="cardWithShadow">
     <mat-card-content class="p-24">
         <div class="table-responsive">
-            <table mat-table [dataSource]="ExpensesListDataSource" class="w-100">
+            <table mat-table [dataSource]="expensesListDataSource" class="w-100">
 
                 <ng-container matColumnDef="#">
                     <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No</th>
@@ -48,7 +56,7 @@
                         {{'ExpensessMaster.CreditDate' | translate}}
                     </th>
                     <td mat-cell *matCellDef="let element" class="f-s-14">
-                        {{ convertTimestampToDate(element.creditDate) | date : "mediumDate" }}
+                        {{ convertTimestampToDate(element.creditDate) | date:'dd/MM/yyyy'}}
                     </td>
                 </ng-container>
 

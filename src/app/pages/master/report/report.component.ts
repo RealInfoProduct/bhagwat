@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
-import {  MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { combineLatest } from 'rxjs';
@@ -23,10 +23,10 @@ export class ReportComponent implements OnInit {
     'day',
     'absent',
     'upad',
-    'extra',
+    // 'extra',
     'remain',
     'bonus',
-    'finalAMT' 
+    'finalAMT'
   ];
   employeeReportList: any[] = [];
   employeeList: any[] = [];
@@ -39,10 +39,10 @@ export class ReportComponent implements OnInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
   constructor(
-              private fb: FormBuilder,
-              private firebaseService: FirebaseService,
-              private loaderService: LoaderService
-            ) { }
+    private fb: FormBuilder,
+    private firebaseService: FirebaseService,
+    private loaderService: LoaderService
+  ) { }
 
   ngOnInit(): void {
     const today = new Date();
@@ -67,7 +67,7 @@ export class ReportComponent implements OnInit {
       this.firebaseService.getAllBonus(),
       this.firebaseService.getAllWithdrawal(),
       this.firebaseService.getAllMachineSalary()
-    ]).subscribe(([employees, attendance, bonus,withdrawal,machineSalary]: any) => {
+    ]).subscribe(([employees, attendance, bonus, withdrawal, machineSalary]: any) => {
       const userId = localStorage.getItem('userId');
 
       this.employeeList = employees.filter((e: any) => e.userId === userId);
@@ -75,7 +75,7 @@ export class ReportComponent implements OnInit {
       this.bonusList = bonus.filter((b: any) => b.userId === userId);
       this.withdrawalList = withdrawal.filter((b: any) => b.userId === userId);
       this.machineSalaryList = machineSalary.filter((b: any) => b.userId === userId);
-      
+
       this.filterDate();
       this.loaderService.setLoader(false);
     });
@@ -140,7 +140,7 @@ export class ReportComponent implements OnInit {
   isDateInRange(dateObj: any, start: Date, end: Date): boolean {
     if (!dateObj?.seconds) return false;
     const date = new Date(dateObj.seconds * 1000);
-    date.setHours(0,0,0,0);
+    date.setHours(0, 0, 0, 0);
     return date >= start && date <= end;
   }
 
@@ -158,20 +158,20 @@ export class ReportComponent implements OnInit {
 
     doc.setFontSize(12);
     doc.text(`Salary Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
-       const totalAmount = this.employeeReportList.reduce((sum: number, item: any) => sum + parseFloat(item.finalAMT), 0);
+    const totalAmount = this.employeeReportList.reduce((sum: number, item: any) => sum + parseFloat(item.finalAMT), 0);
     const formattedAmount = Math.round(totalAmount).toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
     doc.text(`Total Amount: - ${formattedAmount}`, 145, 15);
-    
+
     const headers = [
       "Name",
       "Salary",
       "Days",
       "Absent",
       "Upad",
-      "Extra",
+      // "Extra",
       "Remain",
       "Bonus",
       "Final AMT",
@@ -184,7 +184,7 @@ export class ReportComponent implements OnInit {
       emp.days,
       emp.abesent,
       emp.upad,
-      emp.extra,
+      // emp.extra,
       emp.remain,
       emp.bonus,
       emp.finalAMT,
@@ -196,10 +196,10 @@ export class ReportComponent implements OnInit {
       body: data,
       startY: 25,
       theme: 'grid',
-      headStyles: { fillColor: [255, 187, 0], textColor: [0,0,0], fontStyle: 'bold' },
+      headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
       styles: { fontSize: 9, halign: 'center', valign: 'middle' }
     });
 
-    doc.save(`Salary_Report_${formattedStart.replace(/\//g,'-')}_to_${formattedEnd.replace(/\//g,'-')}.pdf`);
+    doc.save(`Salary_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
   }
 }

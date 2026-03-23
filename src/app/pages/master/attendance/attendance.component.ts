@@ -8,6 +8,7 @@ import { FirebaseService } from 'src/app/services/firebase.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import { AttendanceDialogComponent } from './attendance-dialog/attendance-dialog.component';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-attendance',
@@ -191,5 +192,49 @@ getemployeeid(nameid: any) {
 getemployeelastid(nameid: any) {
     return this.employeeList.find((id: any) => id.id === nameid)?.lastName
   }
+
+  filedownload() {
+  if (!this.attendanceDataSource || this.attendanceDataSource.data.length === 0) {
+    this.openConfigSnackBar('No attendance data available to generate PDF.');
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  // Get date range from form
+  const startDate = new Date(this.dateAttendanceListForm.value.start);
+  const endDate = new Date(this.dateAttendanceListForm.value.end);
+
+  const formattedStart = startDate.toLocaleDateString('en-GB');
+  const formattedEnd = endDate.toLocaleDateString('en-GB');
+
+  // PDF Title
+  doc.setFontSize(12);
+  doc.text(`Attendance Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
+
+  // Table headers
+  const headers = ['S.No', 'Employee Name', 'Day', 'Date'];
+
+  // Table data
+  const data = this.attendanceDataSource.data.map((att: any, index: number) => [
+    index + 1,
+    att.employeeName || '',
+    att.day || '',
+    att.date?.seconds ? new Date(att.date.seconds * 1000).toLocaleDateString('en-GB') : ''
+  ]);
+
+  // Generate table
+  (doc as any).autoTable({
+    head: [headers],
+    body: data,
+    startY: 25,
+    theme: 'grid',
+    headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
+    styles: { fontSize: 10, halign: 'center', valign: 'middle' }
+  });
+
+  // Save PDF
+  doc.save(`Attendance_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
+}
 }
 

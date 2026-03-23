@@ -9,6 +9,8 @@ import { LoaderService } from 'src/app/services/loader.service';
 import { ExpensesDialogComponent } from './expenses-dialog/expenses-dialog.component';
 import { ExpensesList, ExpensesmasterList } from 'src/app/interface/invoice';
 import { ExpensesmasterDialogComponent } from './expensesmaster-dialog/expensesmaster-dialog.component';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-expenses',
@@ -20,25 +22,60 @@ export class ExpensesComponent implements OnInit {
   expensesDataColumns: string[] = ['#', 'expenses', 'creditDate','description', 'amount', 'action'];
   expensesList: any = [];
   expensesmasterList: any = [];
+   dateExpensesListForm: FormGroup;
 
-  ExpensesListDataSource = new MatTableDataSource(this.expensesList);
+  expensesListDataSource = new MatTableDataSource(this.expensesList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
 
-  constructor(private dialog: MatDialog, private firebaseService: FirebaseService, private _snackBar: MatSnackBar,
-    private loaderService: LoaderService) { }
+  constructor( 
+    private fb: FormBuilder,
+    private dialog: MatDialog,
+     private firebaseService: FirebaseService, 
+     private _snackBar: MatSnackBar,
+    private loaderService: LoaderService
+  ) { }
 
   ngOnInit(): void {
+     const today = new Date();
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    this.dateExpensesListForm = this.fb.group({
+      start: [startDate],
+      end: [endDate]
+    });
     this.getExpensesList()
     this.getExpensesmasterList()
   }
 
+filterDate() {
+  if (!this.expensesList) return;
+
+  const startDate = this.dateExpensesListForm.value.start;
+  const endDate = this.dateExpensesListForm.value.end;
+
+  if (startDate && endDate) {
+    // Convert to timestamps
+    const startTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime();
+    // End time set to 23:59:59.999
+    const endTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999).getTime();
+
+    this.expensesListDataSource.data = this.expensesList.filter((invoice: any) => {
+      if (!invoice.creditDate?.seconds) return false;
+      const invoiceTime = invoice.creditDate.seconds * 1000; // Firestore timestamp to ms
+      return invoiceTime >= startTime && invoiceTime <= endTime;
+    });
+  } else {
+    this.expensesListDataSource.data = this.expensesList;
+  }
+}
+
   ngAfterViewInit() {
-    this.ExpensesListDataSource.paginator = this.paginator;
+    this.expensesListDataSource.paginator = this.paginator;
   }
 
   applyFilter(filterValue: string): void {
-    this.ExpensesListDataSource.filter = filterValue.trim().toLowerCase();
+    this.expensesListDataSource.filter = filterValue.trim().toLowerCase();
   }
 
   convertTimestampToDate(element: any): Date | null {
@@ -127,8 +164,10 @@ export class ExpensesComponent implements OnInit {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllExpenses().subscribe((res: any) => {
       if (res) {
-        this.ExpensesListDataSource = new MatTableDataSource(res);
-        this.ExpensesListDataSource.paginator = this.paginator;
+          this.expensesList = res.filter((id:any) => id.userId === localStorage.getItem("userId"))
+        this.expensesListDataSource = new MatTableDataSource(this.expensesList);
+        this.expensesListDataSource.paginator = this.paginator;
+        this.filterDate()
         this.loaderService.setLoader(false)
       }
     })
@@ -150,5 +189,7 @@ export class ExpensesComponent implements OnInit {
       verticalPosition: 'top',
     });
   }
+
+
 }
 

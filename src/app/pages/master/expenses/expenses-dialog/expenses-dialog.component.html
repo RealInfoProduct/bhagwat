@@ -1,0 +1,50 @@
+<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20"><strong>  {{'actions.' + action | translate}} {{'employeesdialogs.Expenses' | translate}} </strong></h2>
+<mat-dialog-content class="mat-typography" style="max-width: 600px" *ngIf="action !== 'Delete'; else elseTemplate">
+    <form [formGroup]="expensesForm">
+
+        <!-- <mat-form-field appearance="outline" class="w-100 m-t-10">
+            <mat-select #dropdown formControlName="expensesname" placeholder="{{'employeesdialogs.Selectexpenses' | translate}}">
+                <mat-option *ngFor="let item of expensesmasterList" [value]="item.type">{{item.type}}</mat-option>
+            </mat-select>
+        </mat-form-field> -->
+
+        <mat-form-field class="example-full-width" appearance="outline" class="w-100 m-t-10">
+      <mat-label>Expenses Type</mat-label>
+      <input type="text" placeholder="Select expenses" aria-label="Number" (blur)="checkedValue()" matInput formControlName="expensesname"
+        [matAutocomplete]="auto">
+      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+          {{option}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+            <input matInput [matDatepicker]="creditDate" formControlName="creditDate" placeholder="{{'employeesdialogs.Selectcreditdate' | translate}}">
+            <mat-datepicker-toggle matSuffix [for]="creditDate"></mat-datepicker-toggle>
+            <mat-datepicker #creditDate></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+            <input type="text" matInput placeholder=" {{'employeesdialogs.Enterdescription' | translate}}" formControlName="description">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+            <input type="number" matInput placeholder="{{'employeesdialogs.Enteramount' | translate}}" formControlName="amount" min="0">
+        </mat-form-field>
+
+    </form>
+</mat-dialog-content>
+<mat-divider></mat-divider>
+<mat-dialog-actions class="p-24 justify-content-end">
+    <button mat-stroked-button color="warn" mat-dialog-close (click)="closeDialog()">{{'employeesdialogs.Cancel' | translate}}</button>
+    <button mat-flat-button [mat-dialog-close]="true" [disabled]="action !== 'Delete' && !expensesForm.valid"
+        color="primary" (click)="doAction()">
+        {{'actions.' + action | translate}}
+    </button>
+</mat-dialog-actions>
+<ng-template #elseTemplate>
+    <div class="p-x-24">
+        <p>{{'employeesdialogs.Suretodelete' | translate}} <span class="f-w-600">{{local_data.Name}}</span> ?</p>
+    </div>
+</ng-template>

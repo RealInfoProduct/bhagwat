@@ -1,0 +1,89 @@
+<h2 mat-dialog-title class="m-b-24  b-b-1 p-b-20">{{'actions.' + action | translate}} Order</h2>
+<mat-dialog-content class="mat-typography" style="max-width: 700px" *ngIf="action !== 'Delete'; else elseTemplate">
+  <form [formGroup]="orderForm">
+    <div class="row">
+      <div class="col-12 col-md-12">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <mat-select value="no" formControlName="partyName" placeholder="Party Name">
+            <mat-option *ngFor="let item of partyList" [value]="item.id">{{item.partyName}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <mat-label>P-Order</mat-label>
+          <input type="number" min="0" matInput required formControlName="partyOrder" placeholder="Enter party order">
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <mat-label>Select Order Date</mat-label>
+          <input matInput [matDatepicker]="orderDate" formControlName="orderDate" placeholder="Order date">
+          <mat-datepicker-toggle matSuffix [for]="orderDate"></mat-datepicker-toggle>
+          <mat-datepicker #orderDate></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <mat-label>Select Delivery Date</mat-label>
+          <input matInput [matDatepicker]="deliveryDate" formControlName="deliveryDate" placeholder="Delivery date">
+          <mat-datepicker-toggle matSuffix [for]="deliveryDate"></mat-datepicker-toggle>
+          <mat-datepicker #deliveryDate></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+
+      <div class="row">
+        <ng-container formArrayName="products">
+          <ng-container *ngFor="let item of getProductsFormArry().controls; let i = index" [formGroupName]="i">
+
+            <div class="col-12 col-md-5">
+              <mat-form-field appearance="outline" class="w-100 m-t-10">
+                <mat-label>Quantity</mat-label>
+                <input type="number" matInput required formControlName="productQuantity"
+                  onKeyPress="if(this.value.length==5) return false;" placeholder="Enter quantity" min="0">
+              </mat-form-field>
+            </div>
+
+            <div class="col-12 col-md-5">
+              <mat-form-field appearance="outline" class="w-100 m-t-10">
+                <mat-label>Price</mat-label>
+                <input type="number" matInput required formControlName="productPrice"
+                  onKeyPress="if(this.value.length==7) return false;" placeholder="Enter price" min="0">
+              </mat-form-field>
+            </div>
+
+            <div class="col-12 col-md-1" >
+              <a *ngIf="i === 0 && getProductsFormArry().length < 11" class="action-btn"
+                (click)="addProduct()"><i-tabler name="plus" class="icon-18"></i-tabler></a>
+              <a *ngIf="i !== 0" (click)="removeProduct(i)" class="action-btn"><i-tabler name="trash"
+                  class="icon-18"></i-tabler></a>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    <mat-divider></mat-divider>
+    <mat-dialog-actions class="p-24 justify-content-end">
+      <button mat-stroked-button color="warn" mat-dialog-close>Cancel</button>
+      <button mat-flat-button [mat-dialog-close]="true" [disabled]="!orderForm.valid" color="primary"
+        (click)="orderform();">
+        {{'actions.' + action | translate}}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</mat-dialog-content>
+<ng-template #elseTemplate>
+  <div class="p-x-24">
+    <p>Sure to delete <span class="f-w-600">{{local_data.Name}}</span> ?</p>
+  </div>
+  <mat-divider></mat-divider>
+  <div mat-dialog-actions class="p-x-24 p-b-24 m-t-10 justify-content-end">
+    <button mat-button (click)="orderform()" mat-flat-button color="warn">
+      {{'actions.' + action | translate}}
+    </button>
+    <button mat-stroked-button color="warn" (click)="closeDialog()" class="m-l-8">Cancel</button>
+  </div>
+</ng-template>

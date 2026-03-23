@@ -1,0 +1,56 @@
+<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20">{{'actions.' + action | translate}} {{'withdrawalMasterdialog.Withdrawal' | translate}}</h2>
+<mat-dialog-content class="mat-typography" style="max-width: 600px" *ngIf="action !== 'Delete'; else elseTemplate" >
+  <form [formGroup]="withdrawalForm">
+    <div class="row">
+      <div class="col-lg-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-8">
+          <mat-label class="mat-subtitle-2 f-w-600 m-b-1 d-block">{{'withdrawalMasterdialog.SelectDate' | translate}}</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="col-lg-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-8">
+          <mat-label class="mat-subtitle-2 f-w-600 m-b-1">{{'withdrawalMasterdialog.EmployeeList' | translate}}</mat-label>
+          <mat-select value="no" formControlName="employee" placeholder="{{'withdrawalMasterdialog.Enteremployee' | translate}}" required>
+            <mat-option *ngFor="let item of employeeList" [value]="item.id">{{item.firstName}} - {{item.lastName}}</mat-option>
+          </mat-select>
+          <mat-hint *ngIf="withdrawalForm.get('employee')?.hasError('required') && withdrawalForm.get('employee')?.touched"
+            class="error-message error-color">
+            {{'withdrawalMasterdialogerror.employeeisrequired' | translate}}
+          </mat-hint>
+        </mat-form-field>
+      </div>
+      <div class="col-lg-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <mat-label class="mat-subtitle-2 f-w-600 m-b-1">{{'withdrawalMasterdialog.Amount' | translate}}</mat-label>
+          <input type="number" matInput  formControlName="amount" placeholder="{{'withdrawalMasterdialog.EntereAmount' | translate}}" required />
+          <mat-hint *ngIf="withdrawalForm.get('amount')?.hasError('required') && withdrawalForm.get('amount')?.touched"
+            class="error-message error-color">
+            {{'withdrawalMasterdialogerror.amountisrequired' | translate}}
+          </mat-hint>
+        </mat-form-field>
+      </div>
+    </div>
+    <mat-divider></mat-divider>
+    <mat-dialog-actions class="p-24 justify-content-end">
+      <button mat-stroked-button color="warn" mat-dialog-close>{{'withdrawalMasterdialog.Cancel' | translate}}</button>
+      <button mat-flat-button [mat-dialog-close]="true" [disabled]="!withdrawalForm.valid" color="primary" (click)="doAction();">
+        {{'actions.' + action | translate}}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</mat-dialog-content>
+<ng-template #elseTemplate>
+  <div class="p-x-24">
+    <p>{{'withdrawalMasterdialog.Suretodelete' | translate}}<span class="f-w-600">{{local_data.Name}}</span> ?</p>
+  </div>
+  <mat-divider></mat-divider>
+  <div mat-dialog-actions class="p-x-24 p-b-24 m-t-10 justify-content-end">
+    <button mat-button (click)="doAction()" mat-flat-button color="warn">
+      {{'actions.' + action | translate}}
+    </button>
+    <button mat-stroked-button color="warn" (click)="closeDialog()" class="m-l-8">{{'withdrawalMasterdialog.Cancel' | translate}}</button>
+  </div>
+</ng-template>

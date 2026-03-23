@@ -1,0 +1,146 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content class="p-24">
+      <div class="row justify-content-between">
+        <div class="col-lg-4 m-t-10">
+          <mat-form-field appearance="outline" class="w-100 ">
+            <input matInput placeholder="{{'employeeMaster.SearchEmployee' | translate}}" (keyup)="applyFilter($any($event.target).value)" />
+            <mat-icon matSuffix>
+              <i-tabler name="search" class="icon-20"></i-tabler>
+            </mat-icon>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 d-flex align-items-center justify-content-end">
+          <button mat-flat-button color="primary" (click)="addEmployee('Add', {})">
+            {{'employeeMaster.AddEmployee' | translate}}
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="cardWithShadow" >
+    <mat-card-content class="p-24">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="employeeDataSource" class="w-100">
+          <ng-container matColumnDef="srno">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No.</th>
+            <td mat-cell *matCellDef="let element; let i = index">{{i +1 }}</td>
+          </ng-container>
+  
+          <ng-container matColumnDef="FirstName">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'employeeMaster.FirstName' | translate}}</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="d-flex align-items-center">
+                <div class="m-l-16">
+                  <p class="mat-subtitle-1 f-s-16 m-t-0">
+                    {{ element.firstName }}
+                  </p>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="lastName">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'employeeMaster.LastName' | translate}}</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="d-flex align-items-center">
+                <div class="m-l-16">
+                  <p class="mat-subtitle-1 f-s-16 m-t-0">
+                    {{ element.lastName }}
+                  </p>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="salary">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'employeeMaster.Salary' | translate}}</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="d-flex align-items-center">
+                <div class="m-l-16">
+                  <p class="mat-subtitle-1 f-s-16 m-t-0">
+                    {{ element.salary }}
+                  </p>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="phoneNo">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'employeeMaster.PhoneNo' | translate}}</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="d-flex align-items-center">
+                <div class="m-l-16">
+                  <p class="mat-subtitle-1 f-s-16 m-t-0">
+                    {{ element.phoneNo }}
+                  </p>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+  
+  
+          <ng-container matColumnDef="bankName">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'employeeMaster.BankName' | translate}}</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="d-flex align-items-center">
+                <div class="m-l-16">
+                  <p class="mat-subtitle-1 f-s-16 m-t-0">
+                    {{ element.bankName }}
+                  </p>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="bankIFSC">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'employeeMaster.BankIFSC' | translate}}</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="d-flex align-items-center">
+                <div class="m-l-16">
+                  <p class="mat-subtitle-1 f-s-16 m-t-0">
+                    {{ element.bankIFSC }}
+                  </p>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="bankAccountNo">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'employeeMaster.BankAccountNo' | translate}}</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="d-flex align-items-center">
+                <div class="m-l-16">
+                  <p class="mat-subtitle-1 f-s-16 m-t-0">
+                    {{ element.bankAccountNo }}
+                  </p>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+  
+    
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+              {{'employeeMaster.Action' | translate}}
+            </th>
+            <td mat-cell *matCellDef="let element" class="action-link">
+              <a class="m-r-10 cursor-pointer"><i-tabler name="edit" (click)="addEmployee('Edit', element)"
+                  class="icon-18"></i-tabler></a>
+              <a class="m-r-10 cursor-pointer">
+                <i-tabler name="trash" (click)="addEmployee('Delete', element)" class="icon-18"></i-tabler>
+              </a>
+            </td>
+          </ng-container>
+  
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          <tr class="mat-row" style="text-align: center;" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              No record found
+            </td>
+          </tr>
+        </table>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>

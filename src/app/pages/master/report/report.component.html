@@ -1,0 +1,141 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content class="p-24">
+        <div class="row justify-content-between">
+
+            <div class="col-lg-4 m-t-10">
+                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                    <input matInput placeholder="{{'reportMaster.SearchReport' | translate}}" (keyup)="applyFilter($any($event.target).value)">
+                    <mat-icon matSuffix>
+                        <i-tabler name="search" class="icon-20"></i-tabler>
+                    </mat-icon>
+                </mat-form-field>
+            </div>
+           
+            <div class="col-lg-4 m-t-10">
+                <div class="row">
+                    <div class="col-lg-9 m-t-10">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Report Date</mat-label>
+                            <mat-date-range-input [rangePicker]="picker" [formGroup]="dateEmployeeForm">
+                                <input matStartDate placeholder="Start date" formControlName="start">
+                                <input matEndDate placeholder="End date" formControlName="end">
+                            </mat-date-range-input>
+                            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <div class="d-flex m-t-15 hide-hint align-items-center justify-content-end">
+                        <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
+                            <i-tabler name="file-download" class="icon-25"></i-tabler>
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>
+<mat-card class="cardWithShadow">
+    <mat-card-content class="p-24">
+        <div class="table-responsive">
+            <table mat-table [dataSource]="employeeListDataSource" class="w-100">
+
+                <ng-container matColumnDef="#">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No</th>
+                    <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                        {{'reportMaster.Name' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.firstName }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="salary">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                          {{'reportMaster.Salary' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.salary }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="day">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                          {{'reportMaster.Days' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.days || 30}}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="absent">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                          {{'reportMaster.Absent' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.abesent }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="upad">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                          {{'reportMaster.Upad' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.upad }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="extra">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                          {{'reportMaster.Extra' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.extra }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="remain">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                          {{'reportMaster.Remain' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.remain }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="bonus">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                          {{'reportMaster.Bonus' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.bonus }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="finalAMT">
+                    <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                          {{'reportMaster.FinalAMT' | translate}}
+                    </th>
+                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                        {{ element.finalAMT }}
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="employeeMasterColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: employeeMasterColumns"></tr>
+                <tr class="mat-row" style="text-align: center;" *matNoDataRow>
+                    <td class="mat-cell" [attr.colspan]="employeeMasterColumns.length">
+                        No record found
+                    </td>
+                </tr>
+            </table>
+            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+        </div>
+    </mat-card-content>
+</mat-card>

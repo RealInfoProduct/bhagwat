@@ -1,0 +1,121 @@
+<h2 mat-dialog-title class="m-b-24  b-b-1 p-b-20">{{'actions.' + action | translate}} Broker</h2>
+<mat-dialog-content class="mat-typography" style="max-width: 600px" *ngIf="action !== 'Delete'; else elseTemplate">
+  <form [formGroup]="brokerForm">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="text" matInput required formControlName="header" placeholder="Broker First Name" />
+          <mat-hint *ngIf="brokerForm.get('header')?.hasError('required') && brokerForm.get('header')?.touched"
+            class="error-message error-color">
+           First Name is required
+          </mat-hint>
+          <mat-hint *ngIf="brokerForm.get('header')?.hasError('pattern') && brokerForm.get('header')?.touched"
+            class="error-message error-color">
+          Please enter valid first name 
+          </mat-hint>
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="text" matInput required formControlName="subHeader" placeholder="Broker Last Name" />
+           <mat-hint *ngIf="brokerForm.get('subHeader')?.hasError('required') && brokerForm.get('subHeader')?.touched"
+            class="error-message error-color">
+            Last Name is required
+          </mat-hint>
+           <mat-hint *ngIf="brokerForm.get('subHeader')?.hasError('pattern') && brokerForm.get('subHeader')?.touched"
+            class="error-message error-color">
+           Please enter valid  last name
+          </mat-hint>
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="text" matInput required formControlName="address" placeholder="Enter Address" />
+          <mat-hint *ngIf="brokerForm.get('address')?.hasError('required') && brokerForm.get('address')?.touched"
+            class="error-message error-color">
+            Address is required
+          </mat-hint>
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="text" matInput formControlName="GSTNo" placeholder="GST No" />
+          <mat-hint *ngIf="brokerForm.get('GSTNo')?.hasError('pattern') && brokerForm.get('GSTNo')?.touched"
+            class="error-message error-color">
+           Invalid Gst is required
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="text" matInput formControlName="panNo" placeholder="Pan no" />
+          <mat-hint *ngIf="brokerForm.get('panNo')?.hasError('pattern') && brokerForm.get('panNo')?.touched"
+            class="error-message error-color">
+            Invalid panNo is required
+          </mat-hint>
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="number" matInput  required
+            formControlName="mobileNo" placeholder="Mobile no"   min="0"/>
+          <mat-hint *ngIf="brokerForm.get('mobileNo')?.hasError('required') && brokerForm.get('mobileNo')?.touched"
+            class="error-message error-color">
+            Mobileno is required
+          </mat-hint>
+          <mat-hint *ngIf="brokerForm.get('mobileNo')?.hasError('pattern') && brokerForm.get('mobileNo')?.touched"
+            class="error-message error-color">
+            Invalid mobileno is required
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="number" matInput 
+            formControlName="personalMobileNo" placeholder="Personal mobile no"   min="0"/>
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="text" matInput formControlName="bankName" placeholder="Bank name" />
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="text" matInput formControlName="accountholdersname" placeholder="Account holders name" />
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="text" matInput formControlName="ifscCode" placeholder="IFSC code" />
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="number" matInput formControlName="bankAccountNo" placeholder="Bank account no"  />
+        </mat-form-field>
+      </div>
+    </div>
+    <mat-divider></mat-divider>
+    <mat-dialog-actions class="p-24 justify-content-end" >
+      <button mat-stroked-button color="warn" mat-dialog-close>Cancel</button>
+      <button mat-flat-button [mat-dialog-close]="true" [disabled]="!brokerForm.valid" color="primary" (click)="doAction();">
+        {{'actions.' + action | translate}}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</mat-dialog-content>
+<ng-template #elseTemplate>
+  <div class="p-x-24">
+    <p>Sure to delete<span class="f-w-600">{{local_data.Name}}</span> ?</p>
+  </div>
+  <mat-divider></mat-divider>
+  <div mat-dialog-actions class="p-x-24 p-b-24 m-t-10 justify-content-end">
+    <button mat-button (click)="doAction()" mat-flat-button color="warn">
+      {{'actions.' + action | translate}}
+    </button>
+    <button mat-stroked-button color="warn" (click)="closeDialog()" class="m-l-8">Cancel</button>
+  </div>
+</ng-template>

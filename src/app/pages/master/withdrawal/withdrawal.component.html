@@ -1,0 +1,96 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content class="p-24">
+    <div class="row justify-content-between">
+
+      <div class="col-lg-4 m-t-10">
+        <mat-form-field appearance="outline" class="w-100 hide-hint">
+          <input matInput placeholder="{{'WithdrawalMaster.SearchWithdrawal' | translate}}" (keyup)="applyFilter($any($event.target).value)">
+          <mat-icon matSuffix>
+            <i-tabler name="search" class="icon-20"></i-tabler>
+          </mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="col-lg-4 m-t-10">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Select a Withdrawal Date</mat-label>
+          <mat-date-range-input [rangePicker]="picker" [formGroup]="dateWithdrawalForm">
+            <input matStartDate placeholder="Start date" formControlName="start">
+            <input matEndDate placeholder="End date" formControlName="end"> 
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
+        </mat-form-field>
+      </div>
+
+      <div class="col-lg-4 d-flex align-items-center justify-content-end">
+        <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="openwithdrawal('Add', {})">
+           {{'WithdrawalMaster.AddWithdrawal' | translate}}
+        </button>
+      </div>
+
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="cardWithShadow">
+  <mat-card-content class="p-24">
+    <div class="table-responsive">
+      <table mat-table [dataSource]="WithdrawalListDataSource" class="w-100">
+
+        <ng-container matColumnDef="#">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No</th>
+          <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="employee">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+           {{'WithdrawalMaster.Employee' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element" class="f-s-14">
+            {{ getemployeeid(element.employee) }} - {{getemployeelastid(element.employee) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+           {{'WithdrawalMaster.Amount' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element" class="f-s-14">
+            {{ element.amount }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+            {{'WithdrawalMaster.Date' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element" class="f-s-14">
+            {{element.date?.toDate() | date:'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+           {{'WithdrawalMaster.Action' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element" class="action-link">
+            <a class="m-r-10 cursor-pointer"><i-tabler name="edit" (click)="openwithdrawal('Edit', element)"
+                class="icon-18"></i-tabler></a>
+            <a class="m-r-10 cursor-pointer">
+              <i-tabler name="trash" (click)="openwithdrawal('Delete', element)" class="icon-18"></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="withdrawalDataColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: withdrawalDataColumns"></tr>
+        <tr class="mat-row" style="text-align: center;" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="withdrawalDataColumns.length">
+            No record found
+          </td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>

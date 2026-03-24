@@ -96,9 +96,19 @@ export class PdfviewComponent implements OnInit {
       doc.text(phoneNumberMiddle, middleXPosition, verticalCenter, { align: 'center' });
 
       const borderYPosition = yPosition + 1;
-      const topMargin = 4;
+      const topMargin = 0;
       const bottomMargin = 4;
       const logoYPosition = borderYPosition + topMargin;
+
+       const imgData = '../../../../assets/images/logos/Green Orange Renewable Energy Company Logo_20250519_130127_0000.png';
+      const imgWidth = 30;
+      const imgHeight = 30;
+      const xPosition = 7;
+      doc.addImage(imgData, 'JPEG', xPosition, logoYPosition, imgWidth, imgHeight, undefined, 'FAST');
+
+      const borderXPosition = xPosition + imgWidth + 10;
+      const borderYStart = logoYPosition;
+      const borderYEnd = logoYPosition + imgHeight;
 
       doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
@@ -122,20 +132,38 @@ export class PdfviewComponent implements OnInit {
       doc.text(subHeader, subHeaderX, subHeaderY);
 
       // Step 3: Add Address (Centered Below Subheader, supports multiple lines)
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal'); // Reset font to normal
+      // doc.setFontSize(12);
+      // doc.setFont('helvetica', 'normal'); // Reset font to normal
 
+      // const address = invoiceData.firmName.address;
+      // const maxWidth = pageWidth - 20; // Adjust width for better centering
+      // const lineHeight = 5;
+      // const addressLines = doc.splitTextToSize(address, maxWidth);
+      // const addressStartY = subHeaderY + 8; // 8px gap below Subheader
+
+      // addressLines.forEach((line: string, index: number) => {
+      //   const textWidth = doc.getTextWidth(line);
+      //   const centerX = (pageWidth - textWidth) / 2; // Center text horizontally
+      //   const yPosition = addressStartY + (index * lineHeight);
+      //   doc.text(line, centerX, yPosition);
+      // });
+        doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+
+      // 🔹 Define address first
       const address = invoiceData.firmName.address;
-      const maxWidth = pageWidth - 20; // Adjust width for better centering
-      const lineHeight = 5;
-      const addressLines = doc.splitTextToSize(address, maxWidth);
-      const addressStartY = subHeaderY + 8; // 8px gap below Subheader
 
+      const maxWidth = pageWidth - 70;
+      const lineHeight = 5;
+      const addressStartY = 35; 
+
+      const addressLines = doc.splitTextToSize(address, maxWidth);
+
+      // 🔹 Center align properly
       addressLines.forEach((line: string, index: number) => {
-        const textWidth = doc.getTextWidth(line);
-        const centerX = (pageWidth - textWidth) / 2; // Center text horizontally
-        const yPosition = addressStartY + (index * lineHeight);
-        doc.text(line, centerX, yPosition);
+        doc.text(line, pageWidth / 1.8, addressStartY + (index * lineHeight), {
+          align: 'center'
+        });
       });
     };
 
@@ -292,7 +320,7 @@ export class PdfviewComponent implements OnInit {
     const finalAmountInWords = this.toWords.convert(Number(roundedAmount));
     body.push(
       ['', '', '', '', '', { content: 'Gross Total', styles: { halign: 'left' } }, `Rs. ${formattedAmount}`],
-      ['', '', '', '', '', { content: `Discount ${invoiceData.discount}%`, styles: { halign: 'left' } }, `Rs. ${discountAmountFormatted}`],
+      // ['', '', '', '', '', { content: `Discount ${invoiceData.discount}%`, styles: { halign: 'left' } }, `Rs. ${discountAmountFormatted}`],
       ['', '', '', '', '', { content: `CGST ${invoiceData.cGST}%` }, `Rs. ${cGstAmountFormatted}`],
       [{ content: `${finalAmountInWords}`, rowSpan: 3, colSpan: 5, styles: { halign: 'center', fontStyle: 'bold' } }, `SGST ${invoiceData.sGST}%`, `Rs. ${sGstAmountFormatted}`],
       [{ content: 'Total Amount' }, `Rs. ${Amount}`, { styles: { FontFace: 'left' } }],
@@ -361,10 +389,10 @@ export class PdfviewComponent implements OnInit {
         const lastRowIndex = body.length;
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(10, 100, 10, 229);
+        doc.line(10, 100, 10, 221);
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(200, 100, 200, 229);
+        doc.line(200, 100, 200, 221);
         // 👉 PRODUCT ROWS (first 10)
         if (rowIndex < 10) {
 
@@ -512,7 +540,6 @@ export class PdfviewComponent implements OnInit {
       this.openConfigSnackBar(error.error.error.message)
 
     })
-    console.log(this.invoiceData);
 
   }
 

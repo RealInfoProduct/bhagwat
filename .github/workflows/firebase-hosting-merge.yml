@@ -1,17 +1,17 @@
-name: Deploy to Firebase Hosting on merge
+name: Deploy to Firebase Hosting (bhagwat)
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger only on main branch
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # 1️⃣ Checkout code
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # 1️⃣ Checkout repo
+      - uses: actions/checkout@v4
 
       # 2️⃣ Setup Node.js
       - name: Setup Node.js
@@ -21,14 +21,14 @@ jobs:
 
       # 3️⃣ Install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       # 4️⃣ Install Angular CLI globally
       - name: Install Angular CLI
         run: npm install -g @angular/cli
 
       # 5️⃣ Build Angular project
-      - name: Build Angular project
+      - name: Build Angular
         run: ng build
 
       # 6️⃣ Deploy to Firebase Hosting
@@ -39,3 +39,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BHAGWAT_5D4B7 }}
           projectId: bhagwat-5d4b7
           target: bhagwat
+          channelId: live

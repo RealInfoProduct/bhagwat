@@ -30,7 +30,7 @@ export class InvoiceListComponent implements OnInit {
     'invoiceNo',
     'CGST',
     'SGST',
-    'discount',
+    // 'discount',
     'finalSubAmount',
     'action',
   ];

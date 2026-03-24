@@ -48,7 +48,7 @@ export interface InvoiceData {
     'product',
     'TotalItem',
     'Price',
-    'Defectiveitem',
+    // 'Defectiveitem', 
     'FinalAmount',
     'action',
   ];
@@ -113,7 +113,7 @@ export interface InvoiceData {
       cGST: [2.5,[Validators.required,Validators.min(0),Validators.max(100)]],
       date: [new Date()],
       totalitem: ['', [Validators.required,Validators.min(0)]],
-      defectiveitem: [0, [Validators.required,Validators.min(0)]],
+      defectiveitem: [0],
       price: ['',[Validators.required,Validators.min(0)]],
       product: ['', Validators.required],
       poNumber: ['', [Validators.required, Validators.min(0)]],

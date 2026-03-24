@@ -290,7 +290,6 @@ export class PdfviewComponent implements OnInit {
         hasData ? data[i]?.productName?.productName : '',
         hasData ? (data[i]?.poNumber || '') : '',
         hasData ? (data[i]?.qty ? Number(data[i]?.qty).toFixed(2) : '') : '',
-        // hasData ? (data[i]?.defectiveItem ? Number(data[i]?.defectiveItem).toFixed(2) : '') : '',
         hasData ? (data[i]?.price ? Number(data[i]?.price).toFixed(2) : '') : '',
         hasData
           ? `${Number(data[i]?.finalAmount).toLocaleString('en-IN', {

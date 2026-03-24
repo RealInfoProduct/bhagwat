@@ -78,10 +78,6 @@
         <mat-form-field appearance="outline" class="w-100 m-t-10">
           <input type="number" matInput 
             formControlName="personalMobileNo" placeholder="{{'FirmMasterdialog.Personalmobileno' | translate}}"   min="0"/>
-            <mat-hint *ngIf="firmForm.get('personalMobileNo')?.hasError('required') && firmForm.get('personalMobileNo')?.touched"
-            class="error-message error-color">
-            {{'FirmMasterdialogerror.PersonalMobilenoisrequired' | translate}}
-          </mat-hint>
           <mat-hint *ngIf="firmForm.get('personalMobileNo')?.hasError('pattern') && firmForm.get('personalMobileNo')?.touched"
             class="error-message error-color">
             {{'FirmMasterdialogerror.InvalidPersonalMobilenoisrequired' | translate}}

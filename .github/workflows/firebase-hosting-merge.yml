@@ -3,35 +3,29 @@ name: Deploy to Firebase Hosting (bhagwat)
 on:
   push:
     branches:
-      - main  # Trigger only on main branch
+      - main
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
       - uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      # 4️⃣ Install Angular CLI globally
       - name: Install Angular CLI
         run: npm install -g @angular/cli
 
-      # 5️⃣ Build Angular project
       - name: Build Angular
         run: ng build
-
-      # 6️⃣ Deploy to Firebase Hosting
+        
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

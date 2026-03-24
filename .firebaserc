@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "bhagwat-5d4b7"
+  },
+  "targets": {
+    "bhagwat-5d4b7": {
+      "hosting": {
+        "bhagwat": [
+          "bhagwat"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

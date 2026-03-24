@@ -33,4 +33,4 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BHAGWAT_5D4B7 }}
           channelId: live
-          projectId: bhagwat-5d4b7
+          projectId: bhagwat

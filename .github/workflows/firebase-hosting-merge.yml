@@ -34,4 +34,3 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BHAGWAT_5D4B7 }}
           channelId: live
           projectId: bhagwat-5d4b7
-          target: bhagwat

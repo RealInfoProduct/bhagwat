@@ -201,7 +201,7 @@ export class firmMasterDialogComponent implements OnInit {
       // gstPercentage: [''],
       panNo: ['', [Validators.pattern('^[A-Z]{5}[0-9]{4}[A-Z]{1}$')]],
       mobileNo: ['',[Validators.required,Validators.pattern(/^\d{10}$/)]],
-      personalMobileNo: ['',[Validators.required,Validators.pattern(/^\d{10}$/)]],
+      personalMobileNo: ['',[Validators.pattern(/^\d{10}$/)]],
       bankName: [''],
       accountholdersname: [''],
       ifscCode: [''],

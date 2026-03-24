@@ -36,10 +36,20 @@ export class PdfgenService {
       const phoneNumberMiddle = "Jay Shree Ganesh"; const middleXPosition = doc.internal.pageSize.width / 2;
       doc.text(phoneNumberMiddle, middleXPosition, verticalCenter, { align: 'center' });
 
-      const borderYPosition = yPosition + 6;
-      const topMargin = 4;
+      const borderYPosition = yPosition + 1;
+      const topMargin = 0;
       const bottomMargin = 4;
       const logoYPosition = borderYPosition + topMargin;
+
+       const imgData = '../../../../assets/images/logos/Green Orange Renewable Energy Company Logo_20250519_130127_0000.png';
+      const imgWidth = 30;
+      const imgHeight = 30;
+      const xPosition = 7;
+      doc.addImage(imgData, 'JPEG', xPosition, logoYPosition, imgWidth, imgHeight, undefined, 'FAST');
+
+      const borderXPosition = xPosition + imgWidth + 10;
+      const borderYStart = logoYPosition;
+      const borderYEnd = logoYPosition + imgHeight;
 
       // Step 1: Add Firm Name (Bold & Centered)
       doc.setFontSize(22);
@@ -65,19 +75,22 @@ export class PdfgenService {
 
       // Step 3: Add Address (Centered Below Subheader, supports multiple lines)
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal'); // Reset font to normal
+      doc.setFont('helvetica', 'normal');
 
+      // 🔹 Define address first
       const address = invoiceData.firmName.address;
-      const maxWidth = pageWidth - 20; // Adjust width for better centering
-      const lineHeight = 5;
-      const addressLines = doc.splitTextToSize(address, maxWidth);
-      const addressStartY = subHeaderY + 8; // 8px gap below Subheader
 
+      const maxWidth = pageWidth - 70;
+      const lineHeight = 5;
+      const addressStartY = 35; 
+
+      const addressLines = doc.splitTextToSize(address, maxWidth);
+
+      // 🔹 Center align properly
       addressLines.forEach((line: string, index: number) => {
-        const textWidth = doc.getTextWidth(line);
-        const centerX = (pageWidth - textWidth) / 2; // Center text horizontally
-        const yPosition = addressStartY + (index * lineHeight);
-        doc.text(line, centerX, yPosition);
+        doc.text(line, pageWidth / 1.8, addressStartY + (index * lineHeight), {
+          align: 'center'
+        });
       });
     };
 
@@ -233,7 +246,7 @@ export class PdfgenService {
     const finalAmountInWords = this.toWords.convert(Number(roundedAmount));
     body.push(
       ['', '', '', '', '', { content: 'Gross Total', styles: { halign: 'left' } }, `Rs. ${formattedAmount}`],
-      ['', '', '', '', '', { content: `Discount ${invoiceData.discount}%`, styles: { halign: 'left' } }, `Rs. ${discountAmountFormatted}`],
+      // ['', '', '', '', '', { content: `Discount ${invoiceData.discount}%`, styles: { halign: 'left' } }, `Rs. ${discountAmountFormatted}`],
       ['', '', '', '', '', { content: `CGST ${invoiceData.cGST}%` }, `Rs. ${cGstAmountFormatted}`],
       [{ content: `${finalAmountInWords}`, rowSpan: 3, colSpan: 5, styles: { halign: 'center', fontStyle: 'bold' } }, `SGST ${invoiceData.sGST}%`, `Rs. ${sGstAmountFormatted}`],
       [{ content: 'Total Amount' }, `Rs. ${Amount}`, { styles: { FontFace: 'left' } }],
@@ -303,10 +316,10 @@ export class PdfgenService {
         const lastRowIndex = body.length;
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(10, 100, 10, 229);
+        doc.line(10, 100, 10, 221);
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(200, 100, 200, 229);
+        doc.line(200, 100, 200, 221);
         // 👉 PRODUCT ROWS (first 10)
         if (rowIndex < 10) {
 
@@ -382,10 +395,28 @@ export class PdfgenService {
     doc.setLineWidth(0.2);
     doc.line(signatureXPosition, signatureLabelYPosition + 5, signatureXPosition + signatureLineLength, signatureLabelYPosition + 5);
 
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    window.open(url);
-    this.loaderService.setLoader(false)
+    // const blob = doc.output('blob');
+    // const url = URL.createObjectURL(blob);
+    // window.open(url);
+    // this.loaderService.setLoader(false)
+    const invoiceNo = invoiceData.invoiceNumber || 'Invoice';
+const partyName = invoiceData.partyName?.partyName || 'Party';
+const safePartyName = partyName.replace(/[^a-zA-Z0-9]/g, '_');
+const fileName = `${invoiceNo}_${safePartyName}.pdf`;
+
+const blob = doc.output('blob');
+const url = URL.createObjectURL(blob);
+
+// ✅ Preview in new tab
+window.open(url, '_blank');
+
+// ✅ Download with filename
+const link = document.createElement('a');
+link.href = url;
+link.download = fileName;
+link.click();
+
+this.loaderService.setLoader(false);
   }
 
   addTextWithFontSize(doc: any, text: any, x: any, y: any, fontSize: any) {

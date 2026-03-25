@@ -130,17 +130,18 @@ export class PdfgenService {
     doc.setFontSize(11);
     doc.setTextColor(0, 0, 0);
 
-    const fieldsLeft = ["M/s:", "Address:", "GSTIN:"];
+    const fieldsLeft = ["M/s:", "Address:", "GSTIN:","TransPort Id:"];
     const fieldsLeftValues = [
       `${invoiceData.partyName.partyName}`,
       `${invoiceData.partyName.partyAddress}`,
-      `${invoiceData.partyName.partyGstNo}`
+      `${invoiceData.partyName.partyGstNo}`,
+       invoiceData.TransPortName?.transPortId ?? ""
     ];
 
     const leftYPosition = boxYPosition + 5;
-    const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 10;
+    const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 12;
     const labelXPosition = box1XPosition;
-    const valueXPosition = box1XPosition + 18;
+    const valueXPosition = box1XPosition + 24;
 
     fieldsLeft.forEach((field, index) => {
       const yPosition = leftYPosition + (index * 9.5);
@@ -262,7 +263,7 @@ export class PdfgenService {
     autoTable(doc, {
       head: [columns],
       body: body,
-      startY: 90,
+      startY: 100,
       theme: 'plain',
       margin: { top: 0, right: 10, bottom: 0, left: 10 },
       tableWidth: 'auto',
@@ -315,10 +316,10 @@ export class PdfgenService {
         const lastRowIndex = body.length;
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(10, 100, 10, 221);
+        doc.line(10, 100, 10, 231);
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(200, 100, 200, 221);
+        doc.line(200, 100, 200, 231);
         // 👉 PRODUCT ROWS (first 10)
         if (rowIndex < 10) {
 

@@ -12,6 +12,8 @@ import moment from 'moment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PdfgenService } from '../pdfgen.service';
 import { MatSort } from '@angular/material/sort';
+import { take } from 'rxjs';
+import { collection, getDocs, where, writeBatch } from 'firebase/firestore';
 
 @Component({
   selector: 'app-invoice-list',
@@ -23,6 +25,9 @@ export class InvoiceListComponent implements OnInit {
   invoiceList: any = []
   firmList: any = []
   partyList: any = []
+  brokerageList: any = []
+  brokerage:any=[]
+
   displayedColumns: string[] = [
     '#',
     'firmName',
@@ -59,6 +64,7 @@ export class InvoiceListComponent implements OnInit {
     this.getInvoiceList()
     this.getFirmList()
     this.getPartyList()
+     this.getBrokerageList()
   }
 
   filterDate() {
@@ -145,15 +151,59 @@ export class InvoiceListComponent implements OnInit {
     })
   }
 
+  // deleteInvoice(action: string, obj: any) {
+  //   this.firebaseService.deleteInvoice(obj.id).then((res: any) => {
+  //     this.getInvoiceList()
+  //     this.getBrokerageList()
+  //     this.openConfigSnackBar('Record deleted successfully')
+  //   }, (error) => {
+  //     console.log("error => ", error);
+  //     this.openConfigSnackBar('Error deleting record')
+  //   })
+  // }
+
   deleteInvoice(action: string, obj: any) {
-    this.firebaseService.deleteInvoice(obj.id).then((res: any) => {
-      this.getInvoiceList()
-      this.openConfigSnackBar('Record deleted successfully')
-    }, (error) => {
-      console.log("error => ", error);
-      this.openConfigSnackBar('Error deleting record')
+  // 1️⃣ Delete invoice
+  this.firebaseService.deleteInvoice(obj.id).then(() => {
+    // 2️⃣ Get brokerage list
+    this.firebaseService.getAllBrokerage().subscribe(async (brokerageList: any[]) => {
+      // 3️⃣ Filter brokerage records matching deleted invoice
+      const matchingBrokerage = brokerageList.filter(b =>
+        b.party === obj.partyId &&
+        b.invoiceNo === obj.invoiceNumber
+      );
+
+      // 4️⃣ Delete each matching brokerage
+      const deletePromises = matchingBrokerage.map(b => this.firebaseService.deleteBrokerage(b.id));
+      await Promise.all(deletePromises);
+
+      // 5️⃣ Refresh lists
+      this.getInvoiceList();
+      this.getBrokerageList();
+
+      // 6️⃣ Show success
+      this.openConfigSnackBar('Record deleted successfully');
+    }, (err) => {
+      console.log("Error fetching brokerage list => ", err);
+      this.openConfigSnackBar('Error fetching brokerage records');
+    });
+  }).catch((error) => {
+    console.log("Error deleting invoice => ", error);
+    this.openConfigSnackBar('Error deleting invoice');
+  });
+}
+
+
+    getBrokerageList() {
+    this.loaderService.setLoader(true)
+    this.firebaseService.getAllBrokerage().subscribe((res: any) => {
+      if (res) {
+        this.brokerageList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
+        this.loaderService.setLoader(false)
+      }
     })
   }
+
 
   openConfigSnackBar(snackbarTitle: any) {
     this._snackBar.open(snackbarTitle, 'Splash', {

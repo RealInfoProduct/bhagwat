@@ -37,6 +37,8 @@ import { OrderComponent } from './order/order.component';
 import { OrderDialogComponent } from './order/order-dialog/order-dialog.component';
 import { ViewDialogComponent } from './order/view-dialog/view-dialog.component';
 import { BrokerListComponent } from './broker/broker-list/broker-list.component';
+import { TransPortComponent } from './trans-port/trans-port.component';
+import { TransPortDialogComponent } from './trans-port/trans-port-dialog/trans-port-dialog.component';
 
 
 @NgModule({
@@ -71,7 +73,9 @@ import { BrokerListComponent } from './broker/broker-list/broker-list.component'
     OrderComponent,
     OrderDialogComponent,
     ViewDialogComponent,
-    BrokerListComponent
+    BrokerListComponent,
+    TransPortComponent,
+    TransPortDialogComponent
   ],
   imports: [
     CommonModule,

@@ -17,6 +17,7 @@ import { MachineSalaryComponent } from './machine-salary/machine-salary.componen
 import { BrokerComponent } from './broker/broker.component';
 import { OrderComponent } from './order/order.component';
 import { BrokerListComponent } from './broker/broker-list/broker-list.component';
+import { TransPortComponent } from './trans-port/trans-port.component';
 
 
 export const MasterRoutes: Routes = [
@@ -197,6 +198,17 @@ export const MasterRoutes: Routes = [
           urls: [
             { title: 'Master', url: '/master/bonus' },
             { title: 'Bonus' },
+          ],
+        },
+      },
+      {
+        path: 'transPort',
+        component: TransPortComponent,
+        data: {
+          title: 'Trans Port',
+          urls: [
+            { title: 'Master', url: '/master/transPort' },
+            { title: 'Trans Port' },
           ],
         },
       },

@@ -63,6 +63,17 @@ export interface BrokerList {
     userId :any,
 
 }
+export interface TransPortList {
+    id: string,
+    header: string,
+    subHeader: string,
+    address: string,
+    mobileNo: number,
+    transPortCompany:any,
+    transPortId:any,
+    userId :any,
+
+}
 
 export interface BrokerageList {
     id: string,
@@ -152,6 +163,7 @@ export interface InvoiceList {
     sGST: number;
     firmId: any;
     partyId: any;
+    TransPort: any;
     products: any;
     userId :any;
     finalSubAmount:any,

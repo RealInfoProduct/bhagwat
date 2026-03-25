@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { addDoc, collectionData, deleteDoc, doc, Firestore, query, setDoc, updateDoc, where } from '@angular/fire/firestore';
-import { PartyList, FirmList, ProductList, RegisterUser, InvoiceList, IncomeList, ExpensesList, ExpensesmasterList, EmployeeList, AttendanceList, BonusList, WithdrawalList, MachineSalaryList, BrokerList, OrderList, BrokerageList } from '../interface/invoice';
+import { PartyList, FirmList, ProductList, RegisterUser, InvoiceList, IncomeList, ExpensesList, ExpensesmasterList, EmployeeList, AttendanceList, BonusList, WithdrawalList, MachineSalaryList, BrokerList, OrderList, BrokerageList, TransPortList } from '../interface/invoice';
 import { collection } from '@firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Auth } from '@angular/fire/auth';
@@ -95,6 +95,29 @@ export class FirebaseService {
 
   updateBroker(updateId: BrokerList, payload: any) {
     let dataRef = doc(this.fService, `BrokerList/${updateId}`);
+    return updateDoc(dataRef, payload)
+  }
+
+  /////////////////////// TransPort List Data ////////////////////////
+
+
+  addTransPort(payload: TransPortList) {
+    payload.id = doc(collection(this.fService, 'id')).id
+    return addDoc(collection(this.fService, 'TransPortList'), payload)
+  }
+
+  getAllTransPort() {
+    let dataRef = collection(this.fService, 'TransPortList')
+    return collectionData(dataRef, { idField: 'id' })
+  }
+
+  deleteTransPort(deleteId: any) {
+    let docRef = doc(collection(this.fService, 'TransPortList'), deleteId);
+    return deleteDoc(docRef)
+  }
+
+  updateTransPort(updateId: TransPortList, payload: any) {
+    let dataRef = doc(this.fService, `TransPortList/${updateId}`);
     return updateDoc(dataRef, payload)
   }
 

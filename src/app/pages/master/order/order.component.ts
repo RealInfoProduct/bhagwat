@@ -21,6 +21,7 @@ export class OrderComponent implements OnInit {
     'pOrder',
     'orderDate',
     'deliveryDate',
+    'status',
     'action',
   ];
 
@@ -68,6 +69,11 @@ export class OrderComponent implements OnInit {
     this.firebaseService.getAllOrder().subscribe((res: any) => {
       if (res) {
         this.orderList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
+
+          .map((order:any) => ({
+          ...order,
+          status: order.status || 'Pending'  // ✅ Default to Pending if missing
+        }));
         this.orderDataSource = new MatTableDataSource(this.orderList);
         this.orderDataSource.paginator = this.paginator;
         this.loaderService.setLoader(false)
@@ -90,11 +96,10 @@ export class OrderComponent implements OnInit {
           deliveryDate: result.data.deliveryDate,
           products: result.data.products.map((detail: any) => ({
             productPrice: detail.productPrice,
-            productQuantity: detail.productQuantity
+            productQuantity: detail.productQuantity,
           })),
           userId: localStorage.getItem("userId"),
         }
-        debugger
         this.firebaseService.addOrder(payload).then((res) => {
           if (res) {
             this.getOrderList()
@@ -139,6 +144,24 @@ export class OrderComponent implements OnInit {
 
         })
       }
+    });
+  }
+
+
+    updateBrokerage(element: any) {
+    console.log('Updated Status:', element.status);
+
+    const payload = {
+      ...element,    // 👈 important
+      userId: localStorage.getItem("userId")
+    };
+
+    this.firebaseService.updateOrder(element.id, payload).then((res: any) => {
+      this.getOrderList()
+      this.openConfigSnackBar('record update successfully')
+    }, (error) => {
+      console.log("error => ", error);
+
     });
   }
 

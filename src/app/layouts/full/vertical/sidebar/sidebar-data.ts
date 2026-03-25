@@ -65,6 +65,11 @@ export const navItems: NavItem[] = [
     iconName: 'building-store',
     route: '/master/brokermaster',
   },
+  {
+    displayName: 'TransPort',
+    iconName: 'truck-delivery',
+    route: '/master/transPort',
+  },
 
   {
     navCap: 'Employee',

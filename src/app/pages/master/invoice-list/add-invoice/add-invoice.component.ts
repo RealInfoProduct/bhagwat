@@ -66,6 +66,7 @@ export interface InvoiceData {
   addinvoiceDataSource = new MatTableDataSource(this.data);
   selectedIndex: number = 0;
   paymentDays = new Date()
+  transPortList:any[]=[]
   readonly dialog = inject(MatDialog);
  
   constructor(
@@ -81,12 +82,14 @@ export interface InvoiceData {
     this.getPartyList()
     this.getProductList()
     this.getFirmList()
+    this.getTransPortList()
     this.addinvoiceDataSource.paginator = this.paginator;
     if (this.loaderService.getInvoiceData()) {
       const getInvoiceData  = this.loaderService.getInvoiceData()
         this.invoiceForm.setValue({
           firm: '',
           party: '',
+          TransPort: '',
           discount: getInvoiceData.discount || 0,
           sGST: getInvoiceData.sGST || 2.5,
           cGST: getInvoiceData.cGST || 2.5,
@@ -108,6 +111,7 @@ export interface InvoiceData {
     this.invoiceForm = this.fb.group({
       firm: ['', Validators.required],
       party: ['', Validators.required],
+      TransPort: [''],
       discount: [0, [Validators.required,Validators.min(0),Validators.max(100)]],
       sGST: [2.5,[Validators.required,Validators.min(0),Validators.max(100)]],
       cGST: [2.5,[Validators.required,Validators.min(0),Validators.max(100)]],
@@ -160,6 +164,7 @@ export interface InvoiceData {
     this.invoiceForm.patchValue({
       firm: element.firm,
       party: element.party,
+      TransPort: element.TransPort,
       discount: element.discount,
       sGST: element.sGST,
       cGST: element.cGST,
@@ -205,6 +210,16 @@ export interface InvoiceData {
       }
     })
     }
+
+    getTransPortList() {
+    this.loaderService.setLoader(true)
+    this.firebaseService.getAllTransPort().subscribe((res: any) => {
+      if (res) {
+        this.transPortList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
+        this.loaderService.setLoader(false)
+      }
+    })
+  }
     
   getProductList() {
     this.loaderService.setLoader(true)
@@ -251,6 +266,7 @@ export interface InvoiceData {
 
       const partyData = this.getPartyName(invoiceData.partyId);
       const firmData = this.getFirmHeader(invoiceData.firmId);
+      const TransPortData = this.gettransPortid(invoiceData.TransPort) ?? "";
 
    
       const paymentDays = 30;
@@ -270,6 +286,7 @@ export interface InvoiceData {
         sGST: invoiceData.sGST,
         firmId: invoiceData.firmId,
         partyId: invoiceData.partyId,
+        TransPort: invoiceData.TransPort ?? "",
         products: invoiceData.products,
         userId: localStorage.getItem("userId"),
         finalSubAmount: finalSubAmount,
@@ -281,6 +298,7 @@ export interface InvoiceData {
       // this.openPdfViewDialog(payload)  
       payload['firmName'] = firmData;
       payload['partyName'] = partyData;
+       payload['TransPortName'] = TransPortData
 
       this.loaderService.setInvoiceData(payload);
     }
@@ -294,6 +312,9 @@ export interface InvoiceData {
       return this.firmList.find((obj: any) => obj.id === firmId) ?? ''
     }
 
+gettransPortid(TransPort: string) {
+    return this.transPortList.find((obj: any) => obj.id === TransPort) ?? ''
+  }
 
   transformInvoiceList(invoiceList: any[]): any {
     if (!invoiceList.length) return {};
@@ -303,6 +324,7 @@ export interface InvoiceData {
       // firmName: invoiceList[0].firm,
       firmId: invoiceList[0].firm.id,
       partyId: invoiceList[0].party.id,
+      TransPort: invoiceList[0].TransPort.id,
       // partyName: invoiceList[0].party,
       date: invoiceList[0].date,
       discount: invoiceList[0].discount,
@@ -383,6 +405,7 @@ export interface InvoiceData {
       sGST: invoiceData.sGST,
       firmId: invoiceData.firmId,
       partyId: invoiceData.partyId,
+      TransPort: invoiceData.TransPort,
       products: invoiceData.products  ,
       userId : localStorage.getItem("userId"),
       finalSubAmount : finalSubAmount,

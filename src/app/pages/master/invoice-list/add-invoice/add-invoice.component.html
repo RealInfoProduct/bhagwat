@@ -40,6 +40,16 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
+                            <div class="col-4">
+                                <mat-label class="mat-subtitle-2 f-w-600 m-b-1 d-block">Select TransPort <span class="required">*</span></mat-label>
+                                <mat-form-field appearance="outline" class="w-100 m-t-8">
+                                    <mat-select value="no" formControlName="TransPort"
+                                        placeholder="SelectTransPort">
+                                        <mat-option *ngFor="let item of transPortList"
+                                            [value]="item">{{item.header}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
                             <!-- <div class="col-4">
                                 <mat-label class="mat-subtitle-2 f-w-600 m-b-1 d-block">{{'addinvoice.Discount(%)' |
                                     translate}}<span class="required">

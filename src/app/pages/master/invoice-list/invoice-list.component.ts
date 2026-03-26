@@ -341,7 +341,7 @@ export class InvoiceListComponent implements OnInit {
 })
 
 export class productdialog implements OnInit {
-  displayedColumns: string[] = ['productName', 'price', 'qty', 'defectiveItem', 'poNumber', 'finalAmount'];
+  displayedColumns: string[] = ['productName', 'price', 'qty', 'poNumber', 'finalAmount'];
   productDataSource: any = []
   constructor(
     public dialogRef: MatDialogRef<productdialog>,

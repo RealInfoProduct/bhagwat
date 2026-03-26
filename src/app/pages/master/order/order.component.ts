@@ -21,6 +21,8 @@ export class OrderComponent implements OnInit {
     'pOrder',
     'orderDate',
     'deliveryDate',
+    'quantity',
+    'price',
     'status',
     'action',
   ];

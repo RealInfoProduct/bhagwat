@@ -85,8 +85,8 @@ export class PartyMasterComponent implements OnInit {
               partyChalanNoSeries: Number(result.data.partyChalanNoSeries),
               partyPanNo: result.data.partyPanNo,
               partyMobileNo: result.data.partyMobile,
-              isFirm : result.data.isFirm.id || "",
-              isBroker : result.data.isBroker.id ||"",
+              isFirm : result.data.isFirm?.id || '' ,
+              isBroker : result.data.isBroker?.id || '' ,
               broerpercentage : result.data.broerpercentage,
               userId : localStorage.getItem("userId")
             }

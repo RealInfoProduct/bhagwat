@@ -21,10 +21,10 @@ export class BrokerComponent implements OnInit {
     'GSTMo',
     'MobileNo',
     'PersonalMobileNo',
+    'Address',
     'BankName',
     'BankAccountNo',
     'accountholdersname',
-    'Address',
     'action',
   ];
 

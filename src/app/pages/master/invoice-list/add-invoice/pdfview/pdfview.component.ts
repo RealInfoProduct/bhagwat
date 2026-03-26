@@ -206,28 +206,82 @@ export class PdfviewComponent implements OnInit {
     doc.setFontSize(11);
     doc.setTextColor(0, 0, 0);
 
-    const fieldsLeft = ["M/s:", "Address:", "GSTIN:","TransPort Id:"];
-    const fieldsLeftValues = [
-      `${invoiceData.partyName.partyName}`,
-      `${invoiceData.partyName.partyAddress}`,
-      `${invoiceData.partyName.partyGstNo}`,
-       invoiceData.TransPortName?.transPortId ?? ""
-    ];
+    // const fieldsLeft = ["M/s:", "Address:", "GSTIN:","TransPort Id:"];
+    // const fieldsLeftValues = [
+    //   `${invoiceData.partyName.partyName}`,
+    //   `${invoiceData.partyName.partyAddress}`,
+    //   `${invoiceData.partyName.partyGstNo}`,
+    //    invoiceData.TransPortName?.transPortId ?? ""
+    // ];
 
-    const leftYPosition = boxYPosition + 5;
-    const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 12;
-    const labelXPosition = box1XPosition;
-    const valueXPosition = box1XPosition + 24;
+    // const leftYPosition = boxYPosition + 5;
+    // const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 12;
+    // const labelXPosition = box1XPosition;
+    // const valueXPosition = box1XPosition + 24;
 
-    fieldsLeft.forEach((field, index) => {
-      const yPosition = leftYPosition + (index * 9.5);
-      doc.text(field, labelXPosition, yPosition);
-      doc.text(fieldsLeftValues[index], valueXPosition, yPosition);
+    // fieldsLeft.forEach((field, index) => {
+    //   const yPosition = leftYPosition + (index * 9.5);
+    //   doc.text(field, labelXPosition, yPosition);
+    //   doc.text(fieldsLeftValues[index], valueXPosition, yPosition);
 
-      const lineYPosition = yPosition + 1;
-      doc.setLineWidth(0.3);
-      doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
-    });
+    //   const lineYPosition = yPosition + 1;
+    //   doc.setLineWidth(0.3);
+    //   doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+    // });
+
+       const fieldsLeft = ["M/s:", "Address:", "GSTIN:", "TransPort Id:"];
+
+const fieldsLeftValues = [
+  `${invoiceData.partyName.partyName}`,
+  `${invoiceData.partyName.partyAddress}`,
+  `${invoiceData.partyName.partyGstNo}`,
+  invoiceData.TransPortName?.transPortId ?? ""
+];
+
+const leftYPosition = boxYPosition + 5;
+const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 12;
+
+const labelXPosition = box1XPosition;
+const valueXPosition = box1XPosition + 24;
+
+let currentY = leftYPosition;
+
+fieldsLeft.forEach((field, index) => {
+  let value = fieldsLeftValues[index];
+
+  // Print label
+  doc.text(field, labelXPosition, currentY);
+
+  if (field === "Address:") {
+    // Address ne multiple lines ma split karo
+    const splitAddress = doc.splitTextToSize(value, boxWidth);
+
+    // Address print karo
+    doc.text(splitAddress, valueXPosition, currentY);
+
+    // Line count pramane next Y calculate karo
+    const lineHeight = 3;
+    const totalHeight = splitAddress.length * lineHeight;
+
+    // Bottom line draw karo
+    const lineYPosition = currentY + totalHeight;
+    doc.setLineWidth(0.3);
+    doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+
+    // Next field mate Y update karo
+    currentY += totalHeight + 6;
+
+  } else {
+    // Normal fields
+    doc.text(value, valueXPosition, currentY);
+
+    const lineYPosition = currentY + 1;
+    doc.setLineWidth(0.3);
+    doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+
+    currentY += 9.5;
+  }
+});
 
     const box2Width = pageWidth * 0.25;
     const box2XPosition = box1XPosition + box1Width + 5;

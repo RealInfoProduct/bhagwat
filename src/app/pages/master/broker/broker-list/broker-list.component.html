@@ -34,8 +34,8 @@
 
 <mat-card class="cardWithShadow">
   <mat-card-content class="p-24">
-    <div class="table-responsive">
-      <table mat-table [dataSource]="brokerageDataSource" class="w-100">
+    <div class=" p-3 bg-light border">
+      <table mat-table [dataSource]="brokerageDataSource" class="table table-sm table-bordered w-100 mt-2">
 
         <ng-container matColumnDef="#">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No.</th>
@@ -139,8 +139,8 @@
             Status
           </th>
 
-          <td mat-cell *matCellDef="let element">
-            <mat-form-field appearance="outline">
+          <td mat-cell *matCellDef="let element" class="status">
+            <mat-form-field appearance="fill" class="w-100">
               <mat-select [(value)]="element.status" (selectionChange)="updateBrokerage(element)">
 
                 <mat-option value="Pending">Pending</mat-option>

@@ -145,20 +145,8 @@
                             </div>
 
                         </div>
-                        <div class="row">
-                            <div class="col-12 text-end d-flex justify-content-end  goToNextTab">
-                                <button mat-flat-button (click)="goToNextTab()" color="primary">{{'addinvoice.Next' |
-                                    translate}}</button>
-                            </div>
-                        </div>
-                    </mat-card-content>
-                </mat-card>
-            </mat-tab>
-            <mat-tab label="{{'addinvoice.ProductEntry' | translate}}">
-                <mat-card class="cardWithShadow m-15">
-                    <mat-card-content class="p-24">
-                        <div class="row">
-                            <div class="col-2">
+                          <div class="row">
+                            <div class="col-3">
                                 <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">{{'addinvoice.PoNumber' |
                                     translate}}<span class="required">
                                         *</span></mat-label>
@@ -177,7 +165,7 @@
                                     </mat-error>
                                 </mat-form-field>
                             </div>
-                            <div class="col-3">
+                            <div class="col-4">
                                 <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">{{'addinvoice.SelectProduct' |
                                     translate}}<span class="required">
                                         *</span></mat-label>
@@ -257,10 +245,15 @@
                                 </mat-dialog-actions>
                             </div>
                         </div>
+                        <!-- <div class="row">
+                            <div class="col-12 text-end d-flex justify-content-end  goToNextTab">
+                                <button mat-flat-button (click)="goToNextTab()" color="primary">{{'addinvoice.Next' |
+                                    translate}}</button>
+                            </div>
+                        </div> -->
                     </mat-card-content>
                 </mat-card>
-
-                <div class="table-responsive cardWithShadow m-15">
+                  <div class="table-responsive cardWithShadow m-15">
                     <table mat-table [dataSource]="addinvoiceDataSource" class="w-100">
                         <ng-container matColumnDef="#">
                             <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'addinvoice.#' | translate}}
@@ -361,6 +354,7 @@
                     </div>
                 </div>
             </mat-tab>
+           
         </form>
     </mat-tab-group>
 </div>

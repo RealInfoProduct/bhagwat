@@ -13,12 +13,12 @@ export const navItems: NavItem[] = [
   {
     navCap: 'List',
   },
-    {
+  {
     displayName: 'Order',
     iconName: 'truck-delivery',
     route: '/master/ordermaster',
   },
-    {
+  {
     displayName: 'Add Invoice',
     iconName: 'file-invoice',
     route: '/master/addinvoice',
@@ -33,7 +33,7 @@ export const navItems: NavItem[] = [
     iconName: 'list-details',
     route: '/master/broketlist',
   },
-   {
+  {
     displayName: 'Expenses',
     iconName: 'receipt-tax',
     route: '/master/expenses',
@@ -41,10 +41,6 @@ export const navItems: NavItem[] = [
   {
     navCap: 'Master',
   },
-
-
-
- 
   {
     displayName: 'Product Master',
     iconName: 'brand-asana',

@@ -1,43 +1,106 @@
-<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20"><strong>  {{'actions.' + action | translate}} {{'employeesdialogs.Expenses' | translate}} </strong></h2>
+<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20"><strong> {{'actions.' + action | translate}}
+        {{'employeesdialogs.Expenses' | translate}} </strong></h2>
 <mat-dialog-content class="mat-typography" style="max-width: 600px" *ngIf="action !== 'Delete'; else elseTemplate">
     <form [formGroup]="expensesForm">
+        <div *ngIf="action === 'Add'">
+            <div class="row">
+                <div class="col-lg-12">
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <input matInput [matDatepicker]="creditDate" formControlName="creditDate"
+                            placeholder="{{'employeesdialogs.Selectcreditdate' | translate}}">
+                        <mat-datepicker-toggle matSuffix [for]="creditDate"></mat-datepicker-toggle>
+                        <mat-datepicker #creditDate></mat-datepicker>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <ng-container formArrayName="products">
+                    <ng-container *ngFor="let item of getProductsFormArry().controls; let i = index"
+                        [formGroupName]="i">
+                        <div class="col-lg-4">
+                            <mat-form-field class="example-full-width" appearance="outline" class="w-100 m-t-10">
+                                <mat-label>Expenses Type</mat-label>
+                                <input type="text" placeholder="Select expenses" aria-label="Number"
+                                    (blur)="checkedValue(i)" matInput formControlName="expensesname"
+                                    [matAutocomplete]="auto">
+                                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                                    <mat-option *ngFor="let option of filteredOptions[i] | async" [value]="option">
+                                        {{option}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-lg-4">
 
-        <!-- <mat-form-field appearance="outline" class="w-100 m-t-10">
-            <mat-select #dropdown formControlName="expensesname" placeholder="{{'employeesdialogs.Selectexpenses' | translate}}">
-                <mat-option *ngFor="let item of expensesmasterList" [value]="item.type">{{item.type}}</mat-option>
-            </mat-select>
-        </mat-form-field> -->
+                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                <input type="text" matInput
+                                    placeholder=" {{'employeesdialogs.Enterdescription' | translate}}"
+                                    formControlName="description">
+                            </mat-form-field>
+                        </div>
+                        <div class="col-lg-3">
 
-        <mat-form-field class="example-full-width" appearance="outline" class="w-100 m-t-10">
-      <mat-label>Expenses Type</mat-label>
-      <input type="text" placeholder="Select expenses" aria-label="Number" (blur)="checkedValue()" matInput formControlName="expensesname"
-        [matAutocomplete]="auto">
-      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
-          {{option}}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
+                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                <input type="number" matInput
+                                    placeholder="{{'employeesdialogs.Enteramount' | translate}}"
+                                    formControlName="amount" min="0">
+                            </mat-form-field>
+                        </div>
+                        <div class="col-lg-1">
+                            <a *ngIf="i === 0 && getProductsFormArry().length" class="action-btn"
+                                (click)="addProduct()"><i-tabler name="plus" class="icon-18"></i-tabler></a>
+                            <a *ngIf="i !== 0" (click)="removeProduct(i)" class="action-btn"><i-tabler name="trash"
+                                    class="icon-18"></i-tabler></a>
+                        </div>
+                    </ng-container>
+                </ng-container>
+            </div>
+        </div>
 
-        <mat-form-field appearance="outline" class="w-100 m-t-10">
-            <input matInput [matDatepicker]="creditDate" formControlName="creditDate" placeholder="{{'employeesdialogs.Selectcreditdate' | translate}}">
-            <mat-datepicker-toggle matSuffix [for]="creditDate"></mat-datepicker-toggle>
-            <mat-datepicker #creditDate></mat-datepicker>
-        </mat-form-field>
+        <div *ngIf="action === 'Edit'">
+            <div formArrayName="products">
+                <div *ngFor="let product of getProductsFormArry().controls; let i = index" [formGroupName]="i">
 
-        <mat-form-field appearance="outline" class="w-100 m-t-10">
-            <input type="text" matInput placeholder=" {{'employeesdialogs.Enterdescription' | translate}}" formControlName="description">
-        </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <mat-label>Expenses Type</mat-label>
+                        <input matInput placeholder="Select expenses" (blur)="checkedValue(i)"
+                            formControlName="expensesname" [matAutocomplete]="auto">
+                        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredOptions[i] | async" [value]="option">
+                                {{option}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="w-100 m-t-10">
-            <input type="number" matInput placeholder="{{'employeesdialogs.Enteramount' | translate}}" formControlName="amount" min="0">
-        </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <mat-label>Description</mat-label>
+                        <input matInput placeholder="Description" formControlName="description">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <mat-label>Amount</mat-label>
+                        <input type="number" matInput placeholder="Amount" formControlName="amount" min="0">
+                    </mat-form-field>
+
+                </div>
+            </div>
+
+            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                <input matInput [matDatepicker]="creditDate" formControlName="creditDate"
+                    placeholder="Select credit date">
+                <mat-datepicker-toggle matSuffix [for]="creditDate"></mat-datepicker-toggle>
+                <mat-datepicker #creditDate></mat-datepicker>
+            </mat-form-field>
+
+        </div>
+
 
     </form>
 </mat-dialog-content>
 <mat-divider></mat-divider>
 <mat-dialog-actions class="p-24 justify-content-end">
-    <button mat-stroked-button color="warn" mat-dialog-close (click)="closeDialog()">{{'employeesdialogs.Cancel' | translate}}</button>
+    <button mat-stroked-button color="warn" mat-dialog-close (click)="closeDialog()">{{'employeesdialogs.Cancel' |
+        translate}}</button>
     <button mat-flat-button [mat-dialog-close]="true" [disabled]="action !== 'Delete' && !expensesForm.valid"
         color="primary" (click)="doAction()">
         {{'actions.' + action | translate}}

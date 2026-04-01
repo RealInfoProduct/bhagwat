@@ -19,7 +19,6 @@ import { HttpLoaderFactory } from 'src/app/app.module';
 import { HttpClient } from '@angular/common/http';
 import { ExpensesDialogComponent } from './expenses/expenses-dialog/expenses-dialog.component';
 import { ExpensesComponent } from './expenses/expenses.component';
-import { ExpensesmasterDialogComponent } from './expenses/expensesmaster-dialog/expensesmaster-dialog.component';
 import { EmployeeComponent } from './employee/employee.component';
 import { AttendanceComponent } from './attendance/attendance.component';
 import { EmployeeDialogComponent } from './employee/employee-dialog/employee-dialog.component';
@@ -56,7 +55,6 @@ import { TransPortDialogComponent } from './trans-port/trans-port-dialog/trans-p
     amountlistdialog,
     ExpensesComponent,
     ExpensesDialogComponent,
-    ExpensesmasterDialogComponent,
     EmployeeComponent,
     AttendanceComponent,
     EmployeeDialogComponent,
@@ -75,7 +73,7 @@ import { TransPortDialogComponent } from './trans-port/trans-port-dialog/trans-p
     ViewDialogComponent,
     BrokerListComponent,
     TransPortComponent,
-    TransPortDialogComponent
+    TransPortDialogComponent,
   ],
   imports: [
     CommonModule,

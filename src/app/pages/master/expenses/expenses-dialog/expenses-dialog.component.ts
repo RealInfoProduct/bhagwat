@@ -1,5 +1,6 @@
-import { Component, Inject, OnInit, Optional } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, Inject, OnInit, Optional, QueryList, ViewChildren } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatAutocomplete } from '@angular/material/autocomplete';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Timestamp } from 'firebase/firestore';
 import { map, Observable, startWith } from 'rxjs';
@@ -18,7 +19,7 @@ export class ExpensesDialogComponent implements OnInit {
   local_data: any;
   expensesmasterList: any = [];
   options: string[] = [];
-  filteredOptions: Observable<string[]>;
+  filteredOptions: Observable<string[]>[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -29,27 +30,49 @@ export class ExpensesDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.incomegroup()
-    this.getExpensesList()
-    this.getExpensesmasterList() 
+    this.incomegroup();
+    this.getExpensesList();
+    this.getExpensesmasterList();
+    this.addProduct();
     if (this.action === 'Edit') {
-      this.expensesForm.controls['expensesname'].setValue(this.local_data.expensesname)
-      this.expensesForm.controls['creditDate'].setValue(this.convertTimestampToDate(this.local_data.creditDate))
-      this.expensesForm.controls['description'].setValue(this.local_data.description)
-      this.expensesForm.controls['amount'].setValue(this.local_data.amount)
+      if (this.getProductsFormArry().length === 0) {
+        this.addProduct(); // add first row
+      }
+
+      const firstProductGroup = this.getProductsFormArry().at(0);
+
+      firstProductGroup.patchValue({
+        expensesname: this.local_data.expensesname,
+        description: this.local_data.description,
+        amount: this.local_data.amount
+      });
+
+      // set creditDate at top-level
+      this.expensesForm.controls['creditDate'].setValue(
+        this.convertTimestampToDate(this.local_data.creditDate)
+      );
     }
   }
 
-  checkedValue() {
-  const selectedValue = this.expensesForm.controls['expensesname'].value?.trim();
-  if (selectedValue && !this.options.includes(selectedValue)) {
-    this.options.push(selectedValue);
-    this.initializeAutocomplete(); // refresh autocomplete with new value
-  }
-}
+  checkedValue(index: number) {
 
-   initializeAutocomplete() {
-    this.filteredOptions = this.expensesForm.controls['expensesname'].valueChanges.pipe(
+    const productsArray = this.getProductsFormArry();
+
+    const selectedValue = productsArray
+      .at(index)
+      ?.get('expensesname')
+      ?.value
+      ?.trim();
+
+    if (selectedValue && !this.options.includes(selectedValue)) {
+      this.options.push(selectedValue);
+    }
+  }
+
+  initializeAutocomplete(index: number) {
+    const control = this.getProductsFormArry().at(index).get('expensesname') as FormControl;
+
+    this.filteredOptions[index] = control.valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value || ''))
     );
@@ -65,11 +88,29 @@ export class ExpensesDialogComponent implements OnInit {
 
   incomegroup() {
     this.expensesForm = this.fb.group({
-      expensesname: ['',[Validators.required, Validators.pattern('^[a-zA-Z]+(?: [a-zA-Z]+)*$')]],
       creditDate: [new Date()],
+      products: this.fb.array([])
+    })
+  }
+
+
+  getProductsFormArry(): FormArray {
+    return this.expensesForm.get('products') as FormArray
+  }
+
+  addProduct() {
+    const index = this.getProductsFormArry().length;
+    const group = this.fb.group({
+      expensesname: ['', [Validators.required, Validators.pattern('^[a-zA-Z]+(?: [a-zA-Z]+)*$')]],
       description: ['', Validators.required],
       amount: ['', Validators.required]
     })
+    this.getProductsFormArry().push(group);
+    this.initializeAutocomplete(index);
+  }
+
+  removeProduct(index: any) {
+    this.getProductsFormArry().removeAt(index)
   }
 
   convertTimestampToDate(element: any): Date | null {
@@ -82,10 +123,8 @@ export class ExpensesDialogComponent implements OnInit {
   doAction() {
     const payload = {
       id: this.local_data.id ? this.local_data.id : '',
-      expensesname: this.expensesForm.value.expensesname,
       creditDate: this.expensesForm.value.creditDate,
-      description: this.expensesForm.value.description,
-      amount: this.expensesForm.value.amount
+      products: this.expensesForm.value.products,
     }
     this.dialogRef.close({ event: this.action, data: payload })
   }
@@ -98,21 +137,23 @@ export class ExpensesDialogComponent implements OnInit {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllExpensesmaster().subscribe((res: any) => {
       if (res) {
-            this.expensesmasterList = res;  
+        this.expensesmasterList = res;
         this.loaderService.setLoader(false)
       }
     })
   }
 
- getExpensesList() {
-  this.loaderService.setLoader(true);
-  this.firebaseService.getAllExpenses().subscribe((res: any) => {
-    if (res) {
-      this.options = res.map((expense: any) => expense.expensesname);
-      this.initializeAutocomplete();  // <-- important!
-      this.loaderService.setLoader(false);
-    }
-  });
-}
+  getExpensesList() {
+    this.loaderService.setLoader(true);
+    this.firebaseService.getAllExpenses().subscribe((res: any) => {
+      if (res) {
+        this.options = res.map((expense: any) => expense.expensesname);
+        this.getProductsFormArry().controls.forEach((_, index) => {
+          this.initializeAutocomplete(index);
+        });// <-- important!
+        this.loaderService.setLoader(false);
+      }
+    });
+  }
 
 }

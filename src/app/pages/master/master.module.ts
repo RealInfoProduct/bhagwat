@@ -38,6 +38,9 @@ import { ViewDialogComponent } from './order/view-dialog/view-dialog.component';
 import { BrokerListComponent } from './broker/broker-list/broker-list.component';
 import { TransPortComponent } from './trans-port/trans-port.component';
 import { TransPortDialogComponent } from './trans-port/trans-port-dialog/trans-port-dialog.component';
+import { RawMaterialComponent } from './raw-material/raw-material.component';
+import { RawMaterialDialogComponent } from './raw-material/raw-material-dialog/raw-material-dialog.component';
+import { AmountDialogComponent } from './raw-material/amount-dialog/amount-dialog.component';
 
 
 @NgModule({
@@ -74,6 +77,9 @@ import { TransPortDialogComponent } from './trans-port/trans-port-dialog/trans-p
     BrokerListComponent,
     TransPortComponent,
     TransPortDialogComponent,
+    RawMaterialComponent,
+    RawMaterialDialogComponent,
+    AmountDialogComponent,
   ],
   imports: [
     CommonModule,

@@ -43,7 +43,7 @@ export class PdfgenService {
       const bottomMargin = 4;
       const logoYPosition = borderYPosition + topMargin;
 
-       const imgData = '../../../../assets/images/logos/Green Orange Renewable Energy Company Logo_20250519_130127_0000.png';
+      const imgData = '../../../../assets/images/logos/Green Orange Renewable Energy Company Logo_20250519_130127_0000.png';
       const imgWidth = 30;
       const imgHeight = 30;
       const xPosition = 7;
@@ -84,7 +84,7 @@ export class PdfgenService {
 
       const maxWidth = pageWidth - 70;
       const lineHeight = 5;
-      const addressStartY = 35; 
+      const addressStartY = 35;
 
       const addressLines = doc.splitTextToSize(address, maxWidth);
 
@@ -155,76 +155,88 @@ export class PdfgenService {
     //   doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
     // });
 
-    const fieldsLeft = ["M/s:", "Address:", "GSTIN:", "TransPort Id:"];
+       doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text('GSTIN:', 10, 85);
+    doc.text(invoiceData.partyName.partyGstNo, 33, 85);
+     doc.setLineWidth(0.3);
+      doc.line(100,87,33,87);
 
-const fieldsLeftValues = [
-  `${invoiceData.partyName.partyName}`,
-  `${invoiceData.partyName.partyAddress}`,
-  `${invoiceData.partyName.partyGstNo}`,
-  invoiceData.TransPortName?.transPortId ?? ""
-];
+    const fieldsLeft = ["M/s:", "Address:"];
 
-const leftYPosition = boxYPosition + 5;
-const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 12;
+    const fieldsLeftValues = [
+      `${invoiceData.partyName.partyName}`,
+      `${invoiceData.partyName.partyAddress}`
+    ];
 
-const labelXPosition = box1XPosition;
-const valueXPosition = box1XPosition + 24;
+    const leftYPosition = boxYPosition + 5;
+    const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 12;
 
-let currentY = leftYPosition;
+    const labelXPosition = box1XPosition;
+    const valueXPosition = box1XPosition + 24;
 
-fieldsLeft.forEach((field, index) => {
-  let value = fieldsLeftValues[index];
+    let currentY = leftYPosition;
 
-  // Print label
-  doc.text(field, labelXPosition, currentY);
+    fieldsLeft.forEach((field, index) => {
+      let value = fieldsLeftValues[index];
 
-  if (field === "Address:") {
-    // Address ne multiple lines ma split karo
-    const splitAddress = doc.splitTextToSize(value, boxWidth);
+      // Print label
+      doc.text(field, labelXPosition, currentY);
 
-    // Address print karo
-    doc.text(splitAddress, valueXPosition, currentY);
+      if (field === "Address:") {
+        // Address ne multiple lines ma split karo
+        const splitAddress = doc.splitTextToSize(value, boxWidth);
 
-    // Line count pramane next Y calculate karo
-    const lineHeight = 3;
-    const totalHeight = splitAddress.length * lineHeight;
+        // Address print karo
+        doc.text(splitAddress, valueXPosition, currentY);
 
-    // Bottom line draw karo
-    const lineYPosition = currentY + totalHeight;
-    doc.setLineWidth(0.3);
-    doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+        // Line count pramane next Y calculate karo
+        const lineHeight = 3;
+        const totalHeight = splitAddress.length * lineHeight;
 
-    // Next field mate Y update karo
-    currentY += totalHeight + 6;
+        // Bottom line draw karo
+        const lineYPosition = currentY + totalHeight;
+        doc.setLineWidth(0.3);
+        doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
 
-  } else {
-    // Normal fields
-    doc.text(value, valueXPosition, currentY);
+        // Next field mate Y update karo
+        currentY += totalHeight + 6;
 
-    const lineYPosition = currentY + 1;
-    doc.setLineWidth(0.3);
-    doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+      } else {
+        // Normal fields
+        doc.text(value, valueXPosition, currentY);
 
-    currentY += 9.5;
-  }
-});
+        const lineYPosition = currentY + 1;
+        doc.setLineWidth(0.3);
+        doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+
+        currentY += 9.5;
+      }
+    });
 
     const box2Width = pageWidth * 0.25;
     const box2XPosition = box1XPosition + box1Width + 5;
     doc.setFillColor('#fff');
     doc.rect(box2XPosition - 25, boxYPosition, box2Width, boxHeight, 'F');
 
-    const formatDate = (date:any) => {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
+    const formatDate = (date: any) => {
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
 
-  return `${day}/${month}/${year}`;
-};
+      return `${day}/${month}/${year}`;
+    };
+
+      doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text('TransPort Id:', 110, 85);
+    doc.text(invoiceData.TransPortName?.transPortId ?? "", 135, 85);
+      doc.setLineWidth(0.3);
+      doc.line(135,87,200,87);
 
     const fieldsRight = ["Invoice: ", "Date: ", "PAN: "];
-    const fieldsRightValues = [ `${invoiceData.invoiceNumber} - ${this.accountYear}`, formatDate(invoiceData.date), `${invoiceData.partyName.partyPanNo}`]; // Corresponding values
+    const fieldsRightValues = [`${invoiceData.invoiceNumber} - ${this.accountYear}`, formatDate(invoiceData.date), `${invoiceData.partyName.partyPanNo}`]; // Corresponding values
     const rightYPosition = boxYPosition + 5;
 
     fieldsRight.forEach((field, index) => {
@@ -328,7 +340,7 @@ fieldsLeft.forEach((field, index) => {
     autoTable(doc, {
       head: [columns],
       body: body,
-      startY: 100,
+      startY: 95,
       theme: 'plain',
       margin: { top: 0, right: 10, bottom: 0, left: 10 },
       tableWidth: 'auto',
@@ -381,10 +393,10 @@ fieldsLeft.forEach((field, index) => {
         const lastRowIndex = body.length;
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(10, 100, 10, 231);
+        doc.line(10, 100, 10, 226);
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(200, 100, 200, 231);
+        doc.line(200, 100, 200, 226);
         // 👉 PRODUCT ROWS (first 10)
         if (rowIndex < 10) {
 
@@ -465,23 +477,23 @@ fieldsLeft.forEach((field, index) => {
     // window.open(url);
     // this.loaderService.setLoader(false)
     const invoiceNo = invoiceData.invoiceNumber || 'Invoice';
-const partyName = invoiceData.partyName?.partyName || 'Party';
-const safePartyName = partyName.replace(/[^a-zA-Z0-9]/g, '_');
-const fileName = `${invoiceNo}_${safePartyName}.pdf`;
+    const partyName = invoiceData.partyName?.partyName || 'Party';
+    const safePartyName = partyName.replace(/[^a-zA-Z0-9]/g, '_');
+    const fileName = `${invoiceNo}_${safePartyName}.pdf`;
 
-const blob = doc.output('blob');
-const url = URL.createObjectURL(blob);
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
 
-// ✅ Preview in new tab
-window.open(url, '_blank');
+    // ✅ Preview in new tab
+    window.open(url, '_blank');
 
-// ✅ Download with filename
-const link = document.createElement('a');
-link.href = url;
-link.download = fileName;
-link.click();
+    // ✅ Download with filename
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
 
-this.loaderService.setLoader(false);
+    this.loaderService.setLoader(false);
   }
 
   addTextWithFontSize(doc: any, text: any, x: any, y: any, fontSize: any) {

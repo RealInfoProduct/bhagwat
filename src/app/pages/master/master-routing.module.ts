@@ -18,6 +18,7 @@ import { BrokerComponent } from './broker/broker.component';
 import { OrderComponent } from './order/order.component';
 import { BrokerListComponent } from './broker/broker-list/broker-list.component';
 import { TransPortComponent } from './trans-port/trans-port.component';
+import { RawMaterialComponent } from './raw-material/raw-material.component';
 
 
 export const MasterRoutes: Routes = [
@@ -44,6 +45,17 @@ export const MasterRoutes: Routes = [
           urls: [
             { title: 'Master', url: '/master/firmmaster' },
             { title: 'Firm Master' },
+          ],
+        },
+      },
+      {
+        path: 'rawmaster',
+        component: RawMaterialComponent,
+        data: {
+          title: 'Raw Material',
+          urls: [
+            { title: 'Master', url: '/master/rawmaster' },
+            { title: 'Raw Material' },
           ],
         },
       },

@@ -143,17 +143,26 @@ export class ExpensesDialogComponent implements OnInit {
     })
   }
 
-  getExpensesList() {
-    this.loaderService.setLoader(true);
-    this.firebaseService.getAllExpenses().subscribe((res: any) => {
-      if (res) {
-        this.options = res.map((expense: any) => expense.expensesname);
-        this.getProductsFormArry().controls.forEach((_, index) => {
-          this.initializeAutocomplete(index);
-        });// <-- important!
-        this.loaderService.setLoader(false);
-      }
-    });
-  }
+
+ getExpensesList() {
+  this.loaderService.setLoader(true);
+  this.firebaseService.getAllExpenses().subscribe((res: any[]) => {
+    if (res && res.length > 0) {
+      const userWiseExpenses = res.filter(
+        (expense: any) => expense.userId === localStorage.getItem("userId")
+      );
+      this.options = userWiseExpenses.map(
+        (expense: any) => expense.expensesname
+      );
+      this.getProductsFormArry().controls.forEach((_, index) => {
+        this.initializeAutocomplete(index);
+      });
+      this.loaderService.setLoader(false);
+    } else {
+      this.options = [];
+      this.loaderService.setLoader(false);
+    }
+  });
+}
 
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { addDoc, collectionData, deleteDoc, doc, Firestore, query, setDoc, updateDoc, where } from '@angular/fire/firestore';
-import { PartyList, FirmList, ProductList, RegisterUser, InvoiceList, IncomeList, ExpensesList, ExpensesmasterList, EmployeeList, AttendanceList, BonusList, WithdrawalList, MachineSalaryList, BrokerList, OrderList, BrokerageList, TransPortList } from '../interface/invoice';
+import { PartyList, FirmList, ProductList, RegisterUser, InvoiceList, IncomeList, ExpensesList, ExpensesmasterList, EmployeeList, AttendanceList, BonusList, WithdrawalList, MachineSalaryList, BrokerList, OrderList, BrokerageList, TransPortList, RawList } from '../interface/invoice';
 import { collection } from '@firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Auth } from '@angular/fire/auth';
@@ -188,6 +188,29 @@ export class FirebaseService {
 
   updateProduct(updateId: ProductList, payload: any) {
     let dataRef = doc(this.fService, `ProductList/${updateId}`);
+    return updateDoc(dataRef, payload)
+  }
+
+  /////////////////////// Raw List Data ////////////////////////
+
+
+  addRaw(payload: RawList) {
+    payload.id = doc(collection(this.fService, 'id')).id
+    return addDoc(collection(this.fService, 'RawList'), payload)
+  }
+
+  getAllRaw() {
+    let dataRef = collection(this.fService, 'RawList')
+    return collectionData(dataRef, { idField: 'id' })
+  }
+
+  deleteRaw(deleteId: any) {
+    let docRef = doc(collection(this.fService, 'RawList'), deleteId);
+    return deleteDoc(docRef)
+  }
+
+  updateRaw(updateId: RawList, payload: any) {
+    let dataRef = doc(this.fService, `RawList/${updateId}`);
     return updateDoc(dataRef, payload)
   }
 

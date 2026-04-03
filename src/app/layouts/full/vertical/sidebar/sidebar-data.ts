@@ -39,6 +39,11 @@ export const navItems: NavItem[] = [
     route: '/master/expenses',
   },
   {
+    displayName: 'Raw Material',
+    iconName: 'receipt-tax',
+    route: '/master/rawmaster',
+  },
+  {
     navCap: 'Master',
   },
   {

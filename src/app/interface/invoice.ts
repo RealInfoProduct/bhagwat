@@ -116,6 +116,16 @@ export interface BonusList {
     date: string,
     userId :any
 }
+export interface RawList {
+    id: string,
+    name:string,
+    quantity:number,
+    price:number
+    creditDate:any,
+    totalAmount:any,
+    userId :any,
+    receivePayment : any
+}
 
 export interface MachineSalaryList {
     id: string,

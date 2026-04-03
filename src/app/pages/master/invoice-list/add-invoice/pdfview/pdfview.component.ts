@@ -40,14 +40,14 @@ export class PdfviewComponent implements OnInit {
     private _snackBar: MatSnackBar,
     private pdfgenService: PdfgenService
   ) {
-  
+
   }
 
   ngOnInit(): void {
     this.getFirmList()
     this.getPartyList()
     this.getTransPortList()
-      if (this.loaderService.getInvoiceData()) {
+    if (this.loaderService.getInvoiceData()) {
       this.invoiceData = this.loaderService.getInvoiceData()
       switch (this.loaderService.getInvoiceData().firmName.isInvoiceTheme) {
         case 1:
@@ -104,7 +104,7 @@ export class PdfviewComponent implements OnInit {
       const bottomMargin = 4;
       const logoYPosition = borderYPosition + topMargin;
 
-       const imgData = '../../../../assets/images/logos/Green Orange Renewable Energy Company Logo_20250519_130127_0000.png';
+      const imgData = '../../../../assets/images/logos/Green Orange Renewable Energy Company Logo_20250519_130127_0000.png';
       const imgWidth = 30;
       const imgHeight = 30;
       const xPosition = 7;
@@ -151,7 +151,7 @@ export class PdfviewComponent implements OnInit {
       //   const yPosition = addressStartY + (index * lineHeight);
       //   doc.text(line, centerX, yPosition);
       // });
-        doc.setFontSize(12);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
 
       // 🔹 Define address first
@@ -159,7 +159,7 @@ export class PdfviewComponent implements OnInit {
 
       const maxWidth = pageWidth - 70;
       const lineHeight = 5;
-      const addressStartY = 35; 
+      const addressStartY = 35;
 
       const addressLines = doc.splitTextToSize(address, maxWidth);
 
@@ -230,75 +230,89 @@ export class PdfviewComponent implements OnInit {
     //   doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
     // });
 
-       const fieldsLeft = ["M/s:", "Address:", "GSTIN:", "TransPort Id:"];
-
-const fieldsLeftValues = [
-  `${invoiceData.partyName.partyName}`,
-  `${invoiceData.partyName.partyAddress}`,
-  `${invoiceData.partyName.partyGstNo}`,
-  invoiceData.TransPortName?.transPortId ?? ""
-];
-
-const leftYPosition = boxYPosition + 5;
-const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 12;
-
-const labelXPosition = box1XPosition;
-const valueXPosition = box1XPosition + 24;
-
-let currentY = leftYPosition;
-
-fieldsLeft.forEach((field, index) => {
-  let value = fieldsLeftValues[index];
-
-  // Print label
-  doc.text(field, labelXPosition, currentY);
-
-  if (field === "Address:") {
-    // Address ne multiple lines ma split karo
-    const splitAddress = doc.splitTextToSize(value, boxWidth);
-
-    // Address print karo
-    doc.text(splitAddress, valueXPosition, currentY);
-
-    // Line count pramane next Y calculate karo
-    const lineHeight = 3;
-    const totalHeight = splitAddress.length * lineHeight;
-
-    // Bottom line draw karo
-    const lineYPosition = currentY + totalHeight;
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text('GSTIN:', 10, 85);
+    doc.text(invoiceData.partyName.partyGstNo, 33, 85);
     doc.setLineWidth(0.3);
-    doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+    doc.line(100, 87, 33, 87);
 
-    // Next field mate Y update karo
-    currentY += totalHeight + 6;
+    const fieldsLeft = ["M/s:", "Address:"];
 
-  } else {
-    // Normal fields
-    doc.text(value, valueXPosition, currentY);
+    const fieldsLeftValues = [
+      `${invoiceData.partyName.partyName}`,
+      `${invoiceData.partyName.partyAddress}`,
+      // `${invoiceData.partyName.partyGstNo}`,
+      // invoiceData.TransPortName?.transPortId ?? ""
+    ];
 
-    const lineYPosition = currentY + 1;
-    doc.setLineWidth(0.3);
-    doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+    const leftYPosition = boxYPosition + 5;
+    const boxWidth = doc.internal.pageSize.width * 0.63 - box1XPosition - 12;
 
-    currentY += 9.5;
-  }
-});
+    const labelXPosition = box1XPosition;
+    const valueXPosition = box1XPosition + 24;
+
+    let currentY = leftYPosition;
+
+    fieldsLeft.forEach((field, index) => {
+      let value = fieldsLeftValues[index];
+
+      // Print label
+      doc.text(field, labelXPosition, currentY);
+
+      if (field === "Address:") {
+        // Address ne multiple lines ma split karo
+        const splitAddress = doc.splitTextToSize(value, boxWidth);
+
+        // Address print karo
+        doc.text(splitAddress, valueXPosition, currentY);
+
+        // Line count pramane next Y calculate karo
+        const lineHeight = 3;
+        const totalHeight = splitAddress.length * lineHeight;
+
+        // Bottom line draw karo
+        const lineYPosition = currentY + totalHeight;
+        doc.setLineWidth(0.3);
+        doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+
+        // Next field mate Y update karo
+        currentY += totalHeight + 6;
+
+      } else {
+        // Normal fields
+        doc.text(value, valueXPosition, currentY);
+
+        const lineYPosition = currentY + 1;
+        doc.setLineWidth(0.3);
+        doc.line(valueXPosition, lineYPosition, valueXPosition + boxWidth, lineYPosition);
+
+        currentY += 9.5;
+      }
+    });
 
     const box2Width = pageWidth * 0.25;
     const box2XPosition = box1XPosition + box1Width + 5;
     doc.setFillColor('#fff');
     doc.rect(box2XPosition - 25, boxYPosition, box2Width, boxHeight, 'F');
-        const formatDate = (date:any) => {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
+    const formatDate = (date: any) => {
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
 
-  return `${day}/${month}/${year}`;
-};
+      return `${day}/${month}/${year}`;
+    };
+
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text('TransPort Id:', 110, 85);
+    doc.text(invoiceData.TransPortName?.transPortId ?? "", 135, 85);
+    doc.setLineWidth(0.3);
+    doc.line(135, 87, 200, 87);
 
     const fieldsRight = ["Invoice:", "Date:", "PAN:"];
-    const fieldsRightValues = [ `${invoiceData.invoiceNumber}-${this.accountYear}`,formatDate(invoiceData.date), `${invoiceData.partyName.partyPanNo}`]; // Corresponding values
+    const fieldsRightValues = [`${invoiceData.invoiceNumber}-${this.accountYear}`, formatDate(invoiceData.date), `${invoiceData.partyName.partyPanNo}`]; // Corresponding values
     const rightYPosition = boxYPosition + 5;
 
     fieldsRight.forEach((field, index) => {
@@ -385,9 +399,9 @@ fieldsLeft.forEach((field, index) => {
     const formattedRoundedAmount = new Intl.NumberFormat('en-IN').format(roundedAmount);
     const finalAmountInWords = this.toWords.convert(Number(roundedAmount));
     body.push(
-      ['', '', '', '',  { content: 'Gross Total', styles: { halign: 'left' } }, `Rs. ${formattedAmount}`],
+      ['', '', '', '', { content: 'Gross Total', styles: { halign: 'left' } }, `Rs. ${formattedAmount}`],
       // ['', '', '', '', '', { content: `Discount ${invoiceData.discount}%`, styles: { halign: 'left' } }, `Rs. ${discountAmountFormatted}`],
-      ['', '', '', '',  { content: `CGST ${invoiceData.cGST}%` }, `Rs. ${cGstAmountFormatted}`],
+      ['', '', '', '', { content: `CGST ${invoiceData.cGST}%` }, `Rs. ${cGstAmountFormatted}`],
       [{ content: `${finalAmountInWords}`, rowSpan: 3, colSpan: 4, styles: { halign: 'center', fontStyle: 'bold' } }, `SGST ${invoiceData.sGST}%`, `Rs. ${sGstAmountFormatted}`],
       [{ content: 'Total Amount' }, `Rs. ${Amount}`, { styles: { FontFace: 'left' } }],
       [{ content: 'Final Amount' }, `Rs. ${formattedRoundedAmount}.00`, { styles: { FontFace: 'left' } }],
@@ -403,7 +417,7 @@ fieldsLeft.forEach((field, index) => {
     autoTable(doc, {
       head: [columns],
       body: body,
-      startY: 100,
+      startY: 95,
       theme: 'plain',
       margin: { top: 0, right: 10, bottom: 0, left: 10 },
       tableWidth: 'auto',
@@ -455,10 +469,10 @@ fieldsLeft.forEach((field, index) => {
         const lastRowIndex = body.length;
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(10, 100, 10, 231);
+        doc.line(10, 100, 10, 226);
         doc.setLineWidth(0.1);
         data.cell.styles.lineColor = [0, 0, 0];
-        doc.line(200, 100, 200, 231);
+        doc.line(200, 100, 200, 226);
         // 👉 PRODUCT ROWS (first 10)
         if (rowIndex < 10) {
 
@@ -629,16 +643,16 @@ fieldsLeft.forEach((field, index) => {
     })
   }
 
-   getTransPortList() {
-      this.loaderService.setLoader(true)
-      this.firebaseService.getAllTransPort().subscribe((res: any) => {
-        if (res) {
-          this.transPortList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
-          this.loaderService.setLoader(false)
-        }
-      })
-    }
-  
+  getTransPortList() {
+    this.loaderService.setLoader(true)
+    this.firebaseService.getAllTransPort().subscribe((res: any) => {
+      if (res) {
+        this.transPortList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
+        this.loaderService.setLoader(false)
+      }
+    })
+  }
+
 
   getPartyList() {
     this.loaderService.setLoader(true)

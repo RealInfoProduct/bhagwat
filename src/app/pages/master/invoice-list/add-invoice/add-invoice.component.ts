@@ -67,6 +67,7 @@ export interface InvoiceData {
   selectedIndex: number = 0;
   paymentDays = new Date()
   transPortList:any[]=[]
+  accountYear = localStorage.getItem("accountYear");
   readonly dialog = inject(MatDialog);
  
   constructor(
@@ -367,7 +368,7 @@ gettransPortid(TransPort: string) {
       if (res) {
         this.invoiceList = res.filter((id:any) => 
           id.userId === localStorage.getItem("userId") && 
-          // id.accountYear === localStorage.getItem("accountYear") &&
+          id.accountYear === localStorage.getItem("accountYear") &&
           id.firmId === firmId
          )     
         this.maxInvoiceNumber = this.invoiceList.length > 0 

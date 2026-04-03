@@ -30,6 +30,7 @@ export class PdfviewComponent implements OnInit {
       ignoreZeroCurrency: false,
     },
   });
+  accountYear = localStorage.getItem("accountYear");
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -287,9 +288,17 @@ fieldsLeft.forEach((field, index) => {
     const box2XPosition = box1XPosition + box1Width + 5;
     doc.setFillColor('#fff');
     doc.rect(box2XPosition - 25, boxYPosition, box2Width, boxHeight, 'F');
+        const formatDate = (date:any) => {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
+};
 
     const fieldsRight = ["Invoice:", "Date:", "PAN:"];
-    const fieldsRightValues = [`${invoiceData.invoiceNumber}`, `${invoiceData.date}`, `${invoiceData.partyName.partyPanNo}`]; // Corresponding values
+    const fieldsRightValues = [ `${invoiceData.invoiceNumber}-${this.accountYear}`,formatDate(invoiceData.date), `${invoiceData.partyName.partyPanNo}`]; // Corresponding values
     const rightYPosition = boxYPosition + 5;
 
     fieldsRight.forEach((field, index) => {

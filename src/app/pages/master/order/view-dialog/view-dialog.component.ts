@@ -47,4 +47,8 @@ export class ViewDialogComponent implements OnInit {
 ngAfterViewInit() {
   this.viewDataSource.paginator = this.paginator;
 }
+
+closeDialog() {
+    this.dialogRef.close({ event: 'Cancel' });
+  }
 }

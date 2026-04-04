@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, OnInit } from '@angular/core';
 import {
   ApexAxisChartSeries,
   ApexChart,
@@ -36,7 +36,7 @@ export interface ticketstatus {
 @Component({
   templateUrl: './ticketdetails.component.html',
 })
-export class AppTicketdetailsComponent {
+export class AppTicketdetailsComponent implements OnInit{
 
   form: UntypedFormGroup;
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { LoaderService } from '../services/loader.service';
 
 @Component({
@@ -6,7 +6,7 @@ import { LoaderService } from '../services/loader.service';
   templateUrl: './loader-page.component.html',
   styleUrls: ['./loader-page.component.scss']
 })
-export class LoaderPageComponent {
+export class LoaderPageComponent implements OnInit{
 
   constructor(private loaderService :LoaderService) { }
 

@@ -13,7 +13,7 @@ import { LoaderService } from 'src/app/services/loader.service';
   templateUrl: './product-master.component.html',
   styleUrls: ['./product-master.component.scss']
 })
-export class ProductMasterComponent {
+export class ProductMasterComponent implements OnInit{
 
   displayedColumns: string[] = [
     'srno',

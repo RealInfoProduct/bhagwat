@@ -21,7 +21,7 @@ import {
   selector: 'app-dialog-data-example-dialog',
   templateUrl: 'compose-dialog-content.html',
 })
-export class ListingDialogDataExampleDialogComponent {
+export class ListingDialogDataExampleDialogComponent  implements OnInit{
   form: UntypedFormGroup;
 
   htmlContent1 = '';

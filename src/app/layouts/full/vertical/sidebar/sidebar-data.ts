@@ -25,7 +25,7 @@ export const navItems: NavItem[] = [
   },
   {
     displayName: 'Invoice List',
-    iconName: 'list-details',
+    iconName: 'checkup-list',
     route: '/master/invoicelist',
   },
   {
@@ -40,7 +40,7 @@ export const navItems: NavItem[] = [
   },
   {
     displayName: 'Raw Material',
-    iconName: 'receipt-tax',
+    iconName: 'list',
     route: '/master/rawmaster',
   },
   {

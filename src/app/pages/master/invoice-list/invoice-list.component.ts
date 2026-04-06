@@ -299,7 +299,7 @@ export class InvoiceListComponent implements OnInit {
   doc.text(`Total Amount: ${formattedAmount}`, 145, 15);
 
   // Table headers
-  const headers = ['S.No', 'Party Name', 'Invoice No', 'CGST', 'SGST', 'Discount', 'Final Amount'];
+  const headers = ['S.No', 'Party Name', 'Invoice No', 'CGST', 'SGST',  'Final Amount'];
 
   // Table data
   const data = this.invoiceDataSource.data.map((inv: any, index: number) => {
@@ -310,7 +310,6 @@ export class InvoiceListComponent implements OnInit {
       inv.invoiceNumber || '',
       inv.cGST || 0,
       inv.sGST || 0,
-      inv.discount || 0,
       inv.finalSubAmount || 0
     ];
   });

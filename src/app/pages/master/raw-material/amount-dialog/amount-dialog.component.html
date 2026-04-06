@@ -1,23 +1,23 @@
-<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20">Invoice Amount List </h2>
+<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20">Raw Amount List </h2>
 <mat-dialog-content class="mat-typography" style="max-width: 750px">
   <form [formGroup]="amountForm">
     <div class="row align-items-baseline">
 
-      <div class="col-12 col-sm-12 col-md-4">
+      <div class="col-12 col-sm-12 col-md-6">
         <div>
           <mat-label class="f-s-13 f-w-600">
-            Final Total : <span class="f-s-13 f-w-600">{{amountdata.totalAmount | number:'1.0-2'}}</span>
+            Final Total : <span class="f-s-13 f-w-800">{{amountdata.totalAmount | number:'1.0-2'}}</span>
           </mat-label>
         </div>
       </div>
 
-      <div class="col-12 col-sm-12 col-md-5">
-        <div *ngIf="!amountdata.isPayment">
+      <div class="col-12 col-sm-12 col-md-6">
+        <div *ngIf="amountdata.pendingAmount > 0">
           <mat-label class="f-s-13 f-w-600">
             Pending Payment : {{amountdata.pendingAmount | number:'1.0-2'}}
           </mat-label>
         </div>
-        <div class="d-flex" style="color:green;"  *ngIf="amountdata.isPayment">
+        <div class="d-flex" style="color:green;" *ngIf="amountdata.pendingAmount === 0">
           <div>
             <span class="f-w-600 f-s-15">Payment Recived</span>
           </div>
@@ -30,14 +30,14 @@
 
     <div class="row align-items-baseline m-t-15">
 
-      <div class="col-12 col-sm-12 col-md-4" *ngIf="!amountdata.isPayment">
+      <div class="col-12 col-sm-12 col-md-4" *ngIf="amountdata.pendingAmount > 0">
         <mat-form-field appearance="outline" class="w-100 m-t-10 hide-hint">
           <mat-label>Payment Receive</mat-label>
           <input type="number" formControlName="paymentAmount" matInput placeholder="Payment receive" min="0">
         </mat-form-field>
       </div>
 
-      <div class="col-12 col-sm-12 col-md-4" *ngIf="!amountdata.isPayment">
+      <div class="col-12 col-sm-12 col-md-4" *ngIf="amountdata.pendingAmount > 0">
         <mat-form-field appearance="outline" class="w-100 m-t-10">
           <mat-label>Payment Date</mat-label>
           <input matInput formControlName="paymentDate" [matDatepicker]="Date" placeholder="Enter payment date">
@@ -46,7 +46,7 @@
         </mat-form-field>
       </div>
 
-      <div class="col-12 col-sm-12 col-md-4" *ngIf="!amountdata.isPayment">
+      <div class="col-12 col-sm-12 col-md-4" *ngIf="amountdata.pendingAmount > 0">
         <button mat-flat-button 
          color="primary" (click)="addPayment()">
           Add Payment

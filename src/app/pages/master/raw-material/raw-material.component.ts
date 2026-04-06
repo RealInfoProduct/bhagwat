@@ -132,7 +132,7 @@ export class RawMaterialComponent implements OnInit {
               price: result.data.price,
               creditDate: result.data.creditDate,
               totalAmount: quantity * price,
-               receivePayment:[],
+               receivePayment:element.receivePayment || [],
               userId: localStorage.getItem("userId")
             }
             this.firebaseService.updateRaw(result.data.id, payload).then((res: any) => {

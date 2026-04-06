@@ -35,7 +35,7 @@ export class AmountDialogComponent  implements OnInit {
   buildForm() {
     this.amountForm = this.fb.group({
       paymentDate: [new Date(), Validators.required],
-      paymentAmount: [0, Validators.required],
+      paymentAmount: [0],
     })
   }
 
@@ -48,9 +48,9 @@ export class AmountDialogComponent  implements OnInit {
     this.amountdata.receivePayment.push(paymentData)
     const pendingTotalAmount = (this.amountdata.totalAmount) - (this.amountdata.receivePayment.reduce((total: any, payment: any) => total + payment.paymentAmount, 0))
 
-    if (pendingTotalAmount === 0) {
-      this.amountdata.isPayment = true
-    }
+    // if (pendingTotalAmount === 0) {
+    //   this.amountdata.isPayment = true
+    // }
 
     if (pendingTotalAmount >= 0) {
       this.loaderService.setLoader(false)

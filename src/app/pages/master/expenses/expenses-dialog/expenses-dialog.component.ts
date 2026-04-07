@@ -1,6 +1,5 @@
-import { Component, Inject, OnInit, Optional, QueryList, ViewChildren } from '@angular/core';
+import { Component, Inject, OnInit, Optional } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatAutocomplete } from '@angular/material/autocomplete';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Timestamp } from 'firebase/firestore';
 import { map, Observable, startWith } from 'rxjs';

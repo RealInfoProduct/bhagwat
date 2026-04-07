@@ -95,11 +95,11 @@ export const navItems: NavItem[] = [
     iconName: 'clipboard-list',
     route: '/master/bonus',
   },
-  {
-    displayName: 'Ex.Machine Salary List',
-    iconName: 'coin-rupee',
-    route: '/master/machineSalary',
-  },
+  // {
+  //   displayName: 'Ex.Machine Salary List',
+  //   iconName: 'coin-rupee',
+  //   route: '/master/machineSalary',
+  // },
   {
     displayName: 'Report',
     iconName: 'report',

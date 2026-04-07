@@ -7,9 +7,8 @@ import { Timestamp } from 'firebase/firestore';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import { ExpensesDialogComponent } from './expenses-dialog/expenses-dialog.component';
-import { ExpensesList, ExpensesmasterList } from 'src/app/interface/invoice';
+import { ExpensesList } from 'src/app/interface/invoice';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-expenses',

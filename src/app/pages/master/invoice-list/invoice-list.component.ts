@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, Optional, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import jsPDF from 'jspdf';
@@ -12,8 +12,6 @@ import moment from 'moment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PdfgenService } from '../pdfgen.service';
 import { MatSort } from '@angular/material/sort';
-import { take } from 'rxjs';
-import { collection, getDocs, where, writeBatch } from 'firebase/firestore';
 
 @Component({
   selector: 'app-invoice-list',

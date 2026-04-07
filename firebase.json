@@ -1,22 +1,6 @@
 {
-  "hosting": [
-    {
-    "target": "dev",
-    "public": "dist/gadicure",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  },
-    {
-    "target": "prod",
+  "hosting": {
+    "target": "bhagwat",
     "public": "dist/gadicure",
     "ignore": [
       "firebase.json",
@@ -30,5 +14,4 @@
       }
     ]
   }
-]
 }

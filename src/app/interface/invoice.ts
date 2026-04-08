@@ -106,6 +106,8 @@ export interface OrderList {
 export interface ProductList {
     id: string,
     productName: string,
+    measurementUnits: string,
+    hsnCode: any,
     userId :any
 }
 

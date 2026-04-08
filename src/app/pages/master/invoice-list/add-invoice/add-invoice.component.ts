@@ -1,4 +1,4 @@
-import { Component,  OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -29,30 +29,58 @@ export interface InvoiceData {
   poNumber: number;
   finalSubAmount: number;
 
-  }
-  
-  @Component({
-    selector: 'app-add-invoice',
-    templateUrl: './add-invoice.component.html',
-    styleUrls: ['./add-invoice.component.scss']
-    })
-    export class AddInvoiceComponent implements OnInit {
-      @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
-      @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
+}
+
+@Component({
+  selector: 'app-add-invoice',
+  templateUrl: './add-invoice.component.html',
+  styleUrls: ['./add-invoice.component.scss']
+})
+export class AddInvoiceComponent implements OnInit {
+  @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
   data: InvoiceData[] = [];
   displayedColumns: string[] = [
     '#',
-    'firm',
-    'Party',
+    // 'firm',
+    // 'Party',
+    // 'Defectiveitem', 
     'PoNumber',
     'product',
-    'TotalItem',
+    'HSNCode',
+    'measurementUnits',
+    'qty',
     'Price',
-    // 'Defectiveitem', 
     'FinalAmount',
     'action',
   ];
-  partyList: any =[];
+
+  measurementUnits: any = [
+    { code: "PCS", label: "Pieces" },
+    { code: "nos", label: "Numbers" },
+    { code: "unit", label: "Units" },
+    { code: "dozen", label: "Dozen" },
+    { code: "pair", label: "Pair" },
+    { code: "kg", label: "Kilogram" },
+    { code: "g", label: "Gram" },
+    { code: "mg", label: "Milligram" },
+    { code: "Ton", label: "Ton" },
+    { code: "L", label: "Liter" },
+    { code: "ml", label: "Milliliter" },
+    { code: "M", label: "Meter" },
+    { code: "cm", label: "Centimeter" },
+    { code: "ft", label: "Foot" },
+    { code: "sq ft", label: "Square foot" },
+    { code: "sq m", label: "Square meter" },
+    { code: "Hour", label: "Hour" },
+    { code: "Day", label: "Day" },
+    { code: "Month", label: "Month" },
+    { code: "Box", label: "Box" },
+    { code: "Pack", label: "Pack" },
+    { code: "Bundle", label: "Bundle" },
+    { code: "Carton", label: "Carton" },
+  ]
+  partyList: any = [];
   invoiceForm: FormGroup
   editMode = false;
   nextId: number = 1;
@@ -62,22 +90,22 @@ export interface InvoiceData {
   firmList: any = []
   invoiceList: any = []
   maxInvoiceNumber: number = 0
-  blobUrl :any
+  blobUrl: any
   addinvoiceDataSource = new MatTableDataSource(this.data);
   selectedIndex: number = 0;
   paymentDays = new Date()
-  transPortList:any[]=[]
+  transPortList: any[] = []
   accountYear = localStorage.getItem("accountYear");
   readonly dialog = inject(MatDialog);
- 
+
   constructor(
     private fb: FormBuilder,
     private firebaseService: FirebaseService,
     private loaderService: LoaderService,
     private sanitizer: DomSanitizer,
     private _snackBar: MatSnackBar,
-    ) { }
-    
+  ) { }
+
   ngOnInit(): void {
     this.buildForm()
     this.getPartyList()
@@ -86,26 +114,47 @@ export interface InvoiceData {
     this.getTransPortList()
     this.addinvoiceDataSource.paginator = this.paginator;
     if (this.loaderService.getInvoiceData()) {
-      const getInvoiceData  = this.loaderService.getInvoiceData()
-        this.invoiceForm.setValue({
-          firm: '',
-          party: '',
-          TransPort: '',
-          discount: getInvoiceData.discount || 0,
-          sGST: getInvoiceData.sGST || 2.5,
-          cGST: getInvoiceData.cGST || 2.5,
-          date: new Date(getInvoiceData.date) || new Date(),
-          totalitem: getInvoiceData.products[0].qty || 0,
-          defectiveitem: getInvoiceData.products[0].defectiveItem || 0,
-          price: getInvoiceData.products[0].price || 0,
-          product: getInvoiceData.products[0].productName || '',
-          poNumber: getInvoiceData.products[0].poNumber || 0,
-          paymentDays:getInvoiceData.paymentDays || 30
-        });
-      ['firm', 'party','product', 'defectiveitem', 'poNumber', 'price', 'totalitem'].forEach(control => {
+      const getInvoiceData = this.loaderService.getInvoiceData()
+      this.invoiceForm.setValue({
+        firm: '',
+        party: '',
+        TransPort: '',
+        discount: getInvoiceData.discount || 0,
+        sGST: getInvoiceData.sGST || 2.5,
+        cGST: getInvoiceData.cGST || 2.5,
+        date: new Date(getInvoiceData.date) || new Date(),
+        totalitem: getInvoiceData.products[0].qty || 0,
+        defectiveitem: getInvoiceData.products[0].defectiveItem || 0,
+        price: getInvoiceData.products[0].price || 0,
+        product: getInvoiceData.products[0].productName || '',
+        measurementUnits: getInvoiceData.products[0].measurementUnits || '',
+        HSNCode: getInvoiceData.products[0].HSNCode || '',
+        poNumber: getInvoiceData.products[0].poNumber || 0,
+        paymentDays: getInvoiceData.paymentDays || 30
+      });
+      ['firm', 'party', 'product', 'defectiveitem','measurementUnits', 'HSNCode','poNumber', 'price', 'totalitem'].forEach(control => {
         this.invoiceForm.controls[control].reset();
       })
-      } 
+    }
+  this.invoiceForm.get('product')?.valueChanges.subscribe(selectedProduct => {
+  if (selectedProduct) {
+    // Find the selected product object from the list
+    const productObj = this.productList.find((p: any) => p.productName === selectedProduct.productName);
+    if (productObj) {
+      // Automatically set the measurement unit for this product
+      this.invoiceForm.get('measurementUnits')?.setValue(productObj.measurementUnits);
+      this.invoiceForm.get('HSNCode')?.setValue(productObj.hsnCode);
+    } else {
+      // If product not found, reset the measurement unit
+      this.invoiceForm.get('measurementUnits')?.reset();
+      this.invoiceForm.get('HSNCode')?.reset();
+    }
+  } else {
+    // If product is cleared, reset the measurement unit
+    this.invoiceForm.get('measurementUnits')?.reset();
+    this.invoiceForm.get('HSNCode')?.reset();
+  }
+});
   }
 
   buildForm() {
@@ -113,22 +162,24 @@ export interface InvoiceData {
       firm: ['', Validators.required],
       party: ['', Validators.required],
       TransPort: [''],
-      discount: [0, [Validators.required,Validators.min(0),Validators.max(100)]],
-      sGST: [2.5,[Validators.required,Validators.min(0),Validators.max(100)]],
-      cGST: [2.5,[Validators.required,Validators.min(0),Validators.max(100)]],
+      discount: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      sGST: [2.5, [Validators.required, Validators.min(0), Validators.max(100)]],
+      cGST: [2.5, [Validators.required, Validators.min(0), Validators.max(100)]],
       date: [new Date()],
-      totalitem: ['', [Validators.required,Validators.min(0)]],
+      totalitem: ['', [Validators.required, Validators.min(0)]],
       defectiveitem: [0],
-      price: ['',[Validators.required,Validators.min(0)]],
+      price: ['', [Validators.required, Validators.min(0)]],
       product: ['', Validators.required],
+      measurementUnits: ['', Validators.required],
+      HSNCode: [0, Validators.required],
       poNumber: ['', [Validators.required, Validators.min(0)]],
       paymentDays: [30]
     })
     this.paymentDaysChange(30)
-    }
-    
+  }
+
   addData(): void {
-   
+
     if (this.invoiceForm.valid) {
       const addtoData: InvoiceData = {
         id: this.nextId++,
@@ -139,69 +190,119 @@ export interface InvoiceData {
       addtoData.date = moment(this.invoiceForm.value.date).format('L');
       this.data.push(addtoData);
       this.addinvoiceDataSource.data = [...this.data];
-      ['product', 'defectiveitem', 'poNumber', 'price', 'totalitem'].forEach(control => {
+      ['product','measurementUnits', 'HSNCode', 'defectiveitem', 'poNumber', 'price', 'totalitem'].forEach(control => {
         this.invoiceForm.controls[control].reset();
       })
       this.editMode = false;
     }
-      
+
   }
 
   openPdfViewDialog(pdfViewData?: any) {
-    const dialogRef = this.dialog.open(PdfviewComponent , {
+    const dialogRef = this.dialog.open(PdfviewComponent, {
       width: '100%',
-      height : '100%',
+      height: '100%',
       data: pdfViewData
     });
     dialogRef.afterClosed().subscribe(result => {
-     
+
     });
-    
+
   }
 
-  edit(element: any) {
-    this.editMode = true;
-    this.currentEditId = element.id;
-    this.invoiceForm.patchValue({
-      firm: element.firm,
-      party: element.party,
-      TransPort: element.TransPort,
-      discount: element.discount,
-      sGST: element.sGST,
-      cGST: element.cGST,
-      date: new Date(element.date),
-      totalitem: element.totalitem,
-      product: element.product,
-      defectiveitem: element.defectiveitem,
-      price: element.price,
-      poNumber: element.poNumber
-    });
-    this.data = this.data.filter(item => item.id !== element.id);
+  // edit(element: any) {
+  //   this.editMode = true;
+  //   this.currentEditId = element.id;
+  //   this.invoiceForm.patchValue({
+  //     firm: element.firm,
+  //     party: element.party,
+  //     TransPort: element.TransPort,
+  //     discount: element.discount,
+  //     sGST: element.sGST,
+  //     cGST: element.cGST,
+  //     date: new Date(element.date),
+  //     totalitem: element.totalitem,
+  //     product: element.product,
+  //     measurementUnits: element.measurementUnits,
+  //     HSNCode: element.HSNCode,
+  //     defectiveitem: element.defectiveitem,
+  //     price: element.price,
+  //     poNumber: element.poNumber
+  //   });
+  //   this.data = this.data.filter(item => item.id !== element.id);
+  //   this.addinvoiceDataSource.data = [...this.data];
+  // }
+  currentEditIndex: number;
+edit(element: any) {
+  this.editMode = true;
+  this.currentEditId = element.id;
+  this.currentEditIndex = this.data.findIndex(item => item.id === element.id);
+
+  this.invoiceForm.patchValue({
+    firm: element.firm,
+    party: element.party,
+    TransPort: element.TransPort,
+    discount: element.discount,
+    sGST: element.sGST,
+    cGST: element.cGST,
+    date: new Date(element.date),
+    totalitem: element.totalitem,
+    product: element.product,
+    measurementUnits: element.measurementUnits,
+    HSNCode: element.HSNCode,
+    defectiveitem: element.defectiveitem,
+    price: element.price,
+    poNumber: element.poNumber
+  });
+}
+  // updateData() {
+  //   if (this.invoiceForm.valid) {
+  //     const updatedData = { id: this.currentEditId, ...this.invoiceForm.value };
+  //     updatedData.finalAmount = this.calculateProductTotal(updatedData)
+  //     // updatedData.finalSubAmount = this.calculateSubTotal(updatedData)
+  //     updatedData.date = moment(this.invoiceForm.value.date).format('L');
+  //     this.data.push(updatedData);
+  //     this.addinvoiceDataSource.data = [...this.data];
+  //     this.invoiceForm.controls['product'].reset()
+  //     this.invoiceForm.controls['defectiveitem'].reset()
+  //     this.invoiceForm.controls['poNumber'].reset()
+  //     this.invoiceForm.controls['price'].reset()
+  //     this.invoiceForm.controls['measurementUnits'].reset()
+  //     this.invoiceForm.controls['HSNCode'].reset()
+  //     this.invoiceForm.controls['totalitem'].reset()
+  //     this.editMode = false;
+  //   }
+  // }
+updateData() {
+  if (this.invoiceForm.valid) {
+    const updatedData = {
+      id: this.currentEditId,
+      ...this.invoiceForm.value
+    };
+
+    updatedData.finalAmount = this.calculateProductTotal(updatedData);
+    updatedData.date = moment(this.invoiceForm.value.date).format('L');
+
+    // 👉 Replace instead of push
+    this.data[this.currentEditIndex] = updatedData;
+
     this.addinvoiceDataSource.data = [...this.data];
-    }
-    
-  updateData() {
-    if (this.invoiceForm.valid) {
-      const updatedData = { id: this.currentEditId, ...this.invoiceForm.value };
-      updatedData.finalAmount = this.calculateProductTotal(updatedData)
-      // updatedData.finalSubAmount = this.calculateSubTotal(updatedData)
-      updatedData.date = moment(this.invoiceForm.value.date).format('L');
-      this.data.push(updatedData);
-      this.addinvoiceDataSource.data = [...this.data];
-      this.invoiceForm.controls['product'].reset()
+
+    this.invoiceForm.controls['product'].reset()
       this.invoiceForm.controls['defectiveitem'].reset()
       this.invoiceForm.controls['poNumber'].reset()
       this.invoiceForm.controls['price'].reset()
+      this.invoiceForm.controls['measurementUnits'].reset()
+      this.invoiceForm.controls['HSNCode'].reset()
       this.invoiceForm.controls['totalitem'].reset()
-      this.editMode = false;
-    }
-    }
-    
+    this.editMode = false;
+  }
+}
   deletedata(id: number) {
     this.data = this.data.filter(item => item.id !== id);
     this.addinvoiceDataSource.data = [...this.data];
-    }
-    
+  }
+
   getPartyList() {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllParty().subscribe((res: any) => {
@@ -210,9 +311,9 @@ export interface InvoiceData {
         this.loaderService.setLoader(false)
       }
     })
-    }
+  }
 
-    getTransPortList() {
+  getTransPortList() {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllTransPort().subscribe((res: any) => {
       if (res) {
@@ -221,7 +322,7 @@ export interface InvoiceData {
       }
     })
   }
-    
+
   getProductList() {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllProduct().subscribe((res: any) => {
@@ -230,22 +331,22 @@ export interface InvoiceData {
         this.loaderService.setLoader(false)
       }
     })
-    }
-    
-    getFirmList() {
-      this.loaderService.setLoader(true)
-      this.firebaseService.getAllFirm().subscribe((res: any) => {
-        if (res) {
-          this.firmList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
-          this.loaderService.setLoader(false)
-        }
-      })
+  }
+
+  getFirmList() {
+    this.loaderService.setLoader(true)
+    this.firebaseService.getAllFirm().subscribe((res: any) => {
+      if (res) {
+        this.firmList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
+        this.loaderService.setLoader(false)
       }
-    
+    })
+  }
+
   calculateProductTotal(productData: any): number {
     return (productData.totalitem - productData.defectiveitem) * (productData.price)
-    }
-    
+  }
+
   calculateSubTotal(productData: any): number {
     const netItems = productData.products.reduce((acc: number, product: any) => acc + product.qty - product.defectiveItem, 0);
     const baseAmount = productData.products.reduce((acc: number, product: any) => acc + (product.qty - product.defectiveItem) * product.price, 0);
@@ -255,65 +356,65 @@ export interface InvoiceData {
     const cGSTAmount = (productData.cGST / 100) * discountedAmount;
     const finalSubAmount = discountedAmount + sGSTAmount + cGSTAmount;
     return Math.round(finalSubAmount);
-}
+  }
 
   goToNextTab(): void {
     this.selectedIndex = (this.selectedIndex + 1) % 3; // Assuming there are 3 tabs
   }
-  
-    generateInvoice() {
-      const invoiceData = this.transformInvoiceList(this.data);
-      const finalSubAmount = this.calculateSubTotal(invoiceData);
 
-      const partyData = this.getPartyName(invoiceData.partyId);
-      const firmData = this.getFirmHeader(invoiceData.firmId);
-      const TransPortData = this.gettransPortid(invoiceData.TransPort) ?? "";
+  generateInvoice() {
+    const invoiceData = this.transformInvoiceList(this.data);
+    const finalSubAmount = this.calculateSubTotal(invoiceData);
 
-   
-      const paymentDays = 30;
+    const partyData = this.getPartyName(invoiceData.partyId);
+    const firmData = this.getFirmHeader(invoiceData.firmId);
+    const TransPortData = this.gettransPortid(invoiceData.TransPort) ?? "";
 
-      
-      const invoiceDate = new Date(invoiceData.date);
-      const dueDate = new Date(invoiceDate);
-      dueDate.setDate(invoiceDate.getDate() + paymentDays);
 
-      const payload: any = {
-        id: '',
-        accountYear: invoiceData.accountYear,
-        cGST: invoiceData.cGST,
-        date: invoiceData.date,
-        discount: invoiceData.discount,
-        invoiceNumber: invoiceData.invoiceNumber,
-        sGST: invoiceData.sGST,
-        firmId: invoiceData.firmId,
-        partyId: invoiceData.partyId,
-        TransPort: invoiceData.TransPort ?? "",
-        products: invoiceData.products,
-        userId: localStorage.getItem("userId"),
-        finalSubAmount: finalSubAmount,
-        isPayment: false,
-        receivePayment: [],
-        dueDate: dueDate.toISOString().split('T')[0] 
-      };
+    const paymentDays = 30;
 
-      // this.openPdfViewDialog(payload)  
-      payload['firmName'] = firmData;
-      payload['partyName'] = partyData;
-       payload['TransPortName'] = TransPortData
 
-      this.loaderService.setInvoiceData(payload);
-    }
+    const invoiceDate = new Date(invoiceData.date);
+    const dueDate = new Date(invoiceDate);
+    dueDate.setDate(invoiceDate.getDate() + paymentDays);
 
-    
-    getPartyName(partyId: string) {
-      return this.partyList.find((obj: any) => obj.id === partyId) ?? ''
-    }
+    const payload: any = {
+      id: '',
+      accountYear: invoiceData.accountYear,
+      cGST: invoiceData.cGST,
+      date: invoiceData.date,
+      discount: invoiceData.discount,
+      invoiceNumber: invoiceData.invoiceNumber,
+      sGST: invoiceData.sGST,
+      firmId: invoiceData.firmId,
+      partyId: invoiceData.partyId,
+      TransPort: invoiceData.TransPort ?? "",
+      products: invoiceData.products,
+      userId: localStorage.getItem("userId"),
+      finalSubAmount: finalSubAmount,
+      isPayment: false,
+      receivePayment: [],
+      dueDate: dueDate.toISOString().split('T')[0]
+    };
 
-    getFirmHeader(firmId: string) {
-      return this.firmList.find((obj: any) => obj.id === firmId) ?? ''
-    }
+    // this.openPdfViewDialog(payload)  
+    payload['firmName'] = firmData;
+    payload['partyName'] = partyData;
+    payload['TransPortName'] = TransPortData
 
-gettransPortid(TransPort: string) {
+    this.loaderService.setInvoiceData(payload);
+  }
+
+
+  getPartyName(partyId: string) {
+    return this.partyList.find((obj: any) => obj.id === partyId) ?? ''
+  }
+
+  getFirmHeader(firmId: string) {
+    return this.firmList.find((obj: any) => obj.id === firmId) ?? ''
+  }
+
+  gettransPortid(TransPort: string) {
     return this.transPortList.find((obj: any) => obj.id === TransPort) ?? ''
   }
 
@@ -321,7 +422,7 @@ gettransPortid(TransPort: string) {
     if (!invoiceList.length) return {};
 
     // Initialize the single object with common fields from the first invoice
-    const transformedObject :any = {
+    const transformedObject: any = {
       // firmName: invoiceList[0].firm,
       firmId: invoiceList[0].firm.id,
       partyId: invoiceList[0].party.id,
@@ -338,9 +439,11 @@ gettransPortid(TransPort: string) {
     };
 
     // Loop through the invoices to accumulate all products
-    invoiceList.forEach((item :any) => {
+    invoiceList.forEach((item: any) => {
       const product = {
         productName: item.product,
+        measurementUnits: item.measurementUnits,
+        HSNCode: item.HSNCode,
         price: item.price,
         qty: item.totalitem,
         defectiveItem: item.defectiveitem,
@@ -362,27 +465,27 @@ gettransPortid(TransPort: string) {
     });
   }
 
-  getInvoiceList(firmId:any) {
+  getInvoiceList(firmId: any) {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllInvoice().subscribe((res: any) => {
       if (res) {
-        this.invoiceList = res.filter((id:any) => 
-          id.userId === localStorage.getItem("userId") && 
+        this.invoiceList = res.filter((id: any) =>
+          id.userId === localStorage.getItem("userId") &&
           id.accountYear === localStorage.getItem("accountYear") &&
           id.firmId === firmId
-         )     
-        this.maxInvoiceNumber = this.invoiceList.length > 0 
-        ? Math.max(...this.invoiceList.map((invoice: any) => invoice.invoiceNumber)) + 1 
-        : 1;
+        )
+        this.maxInvoiceNumber = this.invoiceList.length > 0
+          ? Math.max(...this.invoiceList.map((invoice: any) => invoice.invoiceNumber)) + 1
+          : 1;
         this.loaderService.setLoader(false)
       }
     })
-    }
-    
-  seletedFirm(event :any){
-    this.getInvoiceList(event.value.id)    
-    }
-    
+  }
+
+  seletedFirm(event: any) {
+    this.getInvoiceList(event.value.id)
+  }
+
   seletedParty(event: any) {
     if (event.value.isFirm) {
       this.invoiceForm.controls['firm'].setValue(this.firmList.find((id: any) => id.id === event.value.isFirm))
@@ -392,12 +495,12 @@ gettransPortid(TransPort: string) {
       this.maxInvoiceNumber = 0
     }
   }
-  
-  submitInvoice(){
-    const invoiceData = this.transformInvoiceList(this.data)  
+
+  submitInvoice() {
+    const invoiceData = this.transformInvoiceList(this.data)
     const finalSubAmount = this.calculateSubTotal(invoiceData)
     const payload: InvoiceList = {
-      id : '',
+      id: '',
       accountYear: invoiceData.accountYear,
       cGST: invoiceData.cGST,
       date: invoiceData.date,
@@ -407,24 +510,24 @@ gettransPortid(TransPort: string) {
       firmId: invoiceData.firmId,
       partyId: invoiceData.partyId,
       TransPort: invoiceData.TransPort,
-      products: invoiceData.products  ,
-      userId : localStorage.getItem("userId"),
-      finalSubAmount : finalSubAmount,
-      paymentDays : invoiceData.paymentDays,
-      isPayment : false,
-      receivePayment : []
+      products: invoiceData.products,
+      userId: localStorage.getItem("userId"),
+      finalSubAmount: finalSubAmount,
+      paymentDays: invoiceData.paymentDays,
+      isPayment: false,
+      receivePayment: []
     }
-    
+
     this.firebaseService.addInvoice(payload).then((res) => {
       if (res) {
-          this.openConfigSnackBar('record create successfully')
-          this.generatePDF(payload)
-          this.invoiceForm.reset()
-          this.data = []
-        }
-    } , (error) => {
+        this.openConfigSnackBar('record create successfully')
+        this.generatePDF(payload)
+        this.invoiceForm.reset()
+        this.data = []
+      }
+    }, (error) => {
       this.openConfigSnackBar(error.error.error.message)
-      
+
     })
 
   }
@@ -499,7 +602,7 @@ gettransPortid(TransPort: string) {
 
       const productsSubTotal = invoiceData.products.reduce((acc: any, product: any) => acc + product.finalAmount, 0);
       const productsQty = invoiceData.products.reduce((acc: any, product: any) => acc + product.qty, 0);
-      const productsdefectiveItem= invoiceData.products.reduce((acc: any, product: any) => acc + product.defectiveItem, 0);
+      const productsdefectiveItem = invoiceData.products.reduce((acc: any, product: any) => acc + product.defectiveItem, 0);
 
       const bodyRows = invoiceData.products.map((product: any, index: any) => [
         index + 1,
@@ -524,7 +627,7 @@ gettransPortid(TransPort: string) {
         ]);
       }
       (doc as any).autoTable({
-        head: [['Sr.','Po Number' , ' Product', 'Qty', 'Defective Item', 'Price', 'Final Amount']],
+        head: [['Sr.', 'Po Number', ' Product', 'Qty', 'Defective Item', 'Price', 'Final Amount']],
         body: bodyRows,
         startY: 95,
         theme: 'plain',
@@ -569,23 +672,23 @@ gettransPortid(TransPort: string) {
       doc.line(89, 236, 196, 236);
       doc.text(String(productsQty), 90, 207);
       doc.text(String(productsdefectiveItem), 103, 207);
-    // doc.text('Total : ', 165, 240);
-    doc.text(String("Rs"+' ' + productsSubTotal.toFixed(2)), 160, 207);
-    doc.text('Disc % :', 124, 215);
-    doc.text(String(invoiceData.discount), 145, 215);
-    doc.text(String("Rs"+' ' + discountAmount.toFixed(2)) , 160, 215);
-    doc.text('S.GST % :', 120, 224);
-    doc.text(String(invoiceData.sGST), 145, 224);
-    doc.text(String("Rs"+' ' + sGstAmount.toFixed(2)) , 160, 224);
-    doc.text('C.GST % :', 120, 234);
-    doc.text(String(invoiceData.cGST), 145, 234);
-    doc.text(String("Rs"+' ' + cGstAmount.toFixed(2)) , 160, 234);
-    doc.setFillColor(245, 245, 245);
-    doc.rect(117, 238, 100, 10, 'F');
-    doc.setTextColor(0, 0, 0);
-    doc.text("Final Amount : ", 120, 244);
-    // doc.text(String(invoiceData.finalSubAmount)+ "Rs", 160, 244);
-    doc.text(String("Rs"+' ' + finalAmount.toFixed(2)), 160, 244);
+      // doc.text('Total : ', 165, 240);
+      doc.text(String("Rs" + ' ' + productsSubTotal.toFixed(2)), 160, 207);
+      doc.text('Disc % :', 124, 215);
+      doc.text(String(invoiceData.discount), 145, 215);
+      doc.text(String("Rs" + ' ' + discountAmount.toFixed(2)), 160, 215);
+      doc.text('S.GST % :', 120, 224);
+      doc.text(String(invoiceData.sGST), 145, 224);
+      doc.text(String("Rs" + ' ' + sGstAmount.toFixed(2)), 160, 224);
+      doc.text('C.GST % :', 120, 234);
+      doc.text(String(invoiceData.cGST), 145, 234);
+      doc.text(String("Rs" + ' ' + cGstAmount.toFixed(2)), 160, 234);
+      doc.setFillColor(245, 245, 245);
+      doc.rect(117, 238, 100, 10, 'F');
+      doc.setTextColor(0, 0, 0);
+      doc.text("Final Amount : ", 120, 244);
+      // doc.text(String(invoiceData.finalSubAmount)+ "Rs", 160, 244);
+      doc.text(String("Rs" + ' ' + finalAmount.toFixed(2)), 160, 244);
 
 
       // PAN NO
@@ -597,17 +700,17 @@ gettransPortid(TransPort: string) {
       // open PDF
       window.open(doc.output('bloburl'))
     }
-    }
-    
-    paymentDaysChange(value: any) {
-      let date = this.invoiceForm.get('date')?.value;
-      if (date) {
-        const dateValue = new Date(date);
-        dateValue.setDate(dateValue.getDate() + (value ?? this.invoiceForm.get('paymentDays')?.value ?? 30));
+  }
 
-        this.paymentDays = dateValue;
-      }
+  paymentDaysChange(value: any) {
+    let date = this.invoiceForm.get('date')?.value;
+    if (date) {
+      const dateValue = new Date(date);
+      dateValue.setDate(dateValue.getDate() + (value ?? this.invoiceForm.get('paymentDays')?.value ?? 30));
+
+      this.paymentDays = dateValue;
     }
+  }
 
 }
 

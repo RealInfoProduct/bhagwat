@@ -9,6 +9,7 @@ import { LoaderService } from 'src/app/services/loader.service';
 import { ExpensesDialogComponent } from './expenses-dialog/expenses-dialog.component';
 import { ExpensesList } from 'src/app/interface/invoice';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-expenses',
@@ -174,6 +175,87 @@ export class ExpensesComponent implements OnInit {
       verticalPosition: 'top',
     });
   }
+
+  filedownload() {
+  if (!this.expensesListDataSource.data || this.expensesListDataSource.data.length === 0) {
+    this.openConfigSnackBar('No expenses data available to generate PDF.');
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  const startDate = this.dateExpensesListForm.value.start;
+  const endDate = this.dateExpensesListForm.value.end;
+
+  const formattedStart = startDate
+    ? new Date(startDate).toLocaleDateString('en-GB')
+    : '';
+  const formattedEnd = endDate
+    ? new Date(endDate).toLocaleDateString('en-GB')
+    : '';
+
+  // Title
+  doc.setFontSize(12);
+  doc.text(`Expenses Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
+
+  // Total Amount
+  const totalAmount = this.expensesListDataSource.data.reduce(
+    (sum: number, item: any) => sum + Number(item.amount || 0),
+    0
+  );
+
+  const formattedAmount = totalAmount.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  doc.text(`Total Amount: ${formattedAmount}`, 140, 15);
+
+  // Table headers
+  const headers = [
+    '#',
+    'Expenses Type',
+    'Date',
+    'Description',
+    'Amount'
+  ];
+
+  // Table data
+  const data = this.expensesListDataSource.data.map((item: any, index: number) => {
+    return [
+      index + 1,
+      item.expensesname,
+      item.creditDate?.seconds
+        ? new Date(item.creditDate.seconds * 1000).toLocaleDateString('en-GB')
+        : '',
+      item.description || '',
+      item.amount
+    ];
+  });
+
+  // Table
+  (doc as any).autoTable({
+    head: [headers],
+    body: data,
+    startY: 25,
+    theme: 'grid',
+    headStyles: {
+      fillColor: [255, 187, 0],
+      textColor: [0, 0, 0],
+      fontStyle: 'bold'
+    },
+    styles: {
+      fontSize: 9,
+      halign: 'center',
+      valign: 'middle'
+    }
+  });
+
+  // Save
+  doc.save(
+    `Expenses_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`
+  );
+}
 
 
 }

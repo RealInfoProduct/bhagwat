@@ -403,7 +403,7 @@ export class InvoiceListComponent implements OnInit {
 })
 
 export class productdialog implements OnInit {
-  displayedColumns: string[] = ['productName', 'price', 'qty', 'poNumber', 'finalAmount'];
+  displayedColumns: string[] = ['poNumber','productName','HSNCode', 'price', 'qty', 'finalAmount'];
   productDataSource: any = []
   constructor(
     public dialogRef: MatDialogRef<productdialog>,

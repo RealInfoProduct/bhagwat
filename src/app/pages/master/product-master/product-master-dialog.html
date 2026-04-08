@@ -1,21 +1,41 @@
-<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20">{{'actions.' + action | translate}} {{'productMasterdialog.Product' | translate}}</h2>
-<mat-dialog-content class="mat-typography" style="max-width: 600px" *ngIf="action !== 'Delete'; else elseTemplate" >
+<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20">{{'actions.' + action | translate}} {{'productMasterdialog.Product' |
+  translate}}</h2>
+<mat-dialog-content class="mat-typography" style="max-width: 600px" *ngIf="action !== 'Delete'; else elseTemplate">
   <form [formGroup]="productForm">
     <div class="row">
-      <div class="col-lg-12">
+      <div class="col-12 col-md-6">
+        <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">Product Name</mat-label>
         <mat-form-field appearance="outline" class="w-100 m-t-10">
-          <input type="text" matInput required formControlName="productName" placeholder="{{'productMasterdialog.PartyName' | translate}}" />
-          <mat-hint *ngIf="productForm.get('productName')?.hasError('required') && productForm.get('productName')?.touched"
+          <input type="text" matInput required formControlName="productName" placeholder="Enter Product Name" />
+          <mat-hint
+            *ngIf="productForm.get('productName')?.hasError('required') && productForm.get('productName')?.touched"
             class="error-message error-color">
             {{'productMasterdialogerror.Productnameisrequired' | translate}}
           </mat-hint>
+        </mat-form-field>
+      </div>
+      <div class="col-12 col-md-6">
+        <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">Measurement Units</mat-label>
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <mat-select value="code" formControlName="measurementUnits" placeholder="Selecta Measurement">
+            <mat-option *ngFor="let item of measurementUnits" [value]="item.code">{{item.label}}
+              ({{item.code}})</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">HSN Code</mat-label>
+        <mat-form-field appearance="outline" class="w-100 m-t-10">
+          <input type="number" matInput required formControlName="hsnCode" placeholder="Enter HSN Code" />
         </mat-form-field>
       </div>
     </div>
     <mat-divider></mat-divider>
     <mat-dialog-actions class="p-24 justify-content-end">
       <button mat-stroked-button color="warn" mat-dialog-close>{{'productMasterdialog.Cancel' | translate}}</button>
-      <button mat-flat-button [mat-dialog-close]="true" [disabled]="!productForm.valid" color="primary" (click)="doAction();">
+      <button mat-flat-button [mat-dialog-close]="true" [disabled]="!productForm.valid" color="primary"
+        (click)="doAction();">
         {{'actions.' + action | translate}}
       </button>
     </mat-dialog-actions>
@@ -30,6 +50,7 @@
     <button mat-button (click)="doAction()" mat-flat-button color="warn">
       {{'actions.' + action | translate}}
     </button>
-    <button mat-stroked-button color="warn" (click)="closeDialog()" class="m-l-8">{{'productMasterdialog.Cancel' | translate}}</button>
+    <button mat-stroked-button color="warn" (click)="closeDialog()" class="m-l-8">{{'productMasterdialog.Cancel' |
+      translate}}</button>
   </div>
 </ng-template>

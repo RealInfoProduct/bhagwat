@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RawList } from 'src/app/interface/invoice';
 import { AmountDialogComponent } from './amount-dialog/amount-dialog.component';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-raw-material',
@@ -173,6 +174,97 @@ export class RawMaterialComponent implements OnInit {
     if (!receivePayment) return 0;
     return receivePayment.reduce((total, payment) => total + payment.paymentAmount, 0);
   }
+
+
+  filedownload() {
+  if (!this.rowDataSource.data || this.rowDataSource.data.length === 0) {
+    this.openConfigSnackBar('No raw material data available to generate PDF.');
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  const startDate = this.dateRawListForm.value.start;
+  const endDate = this.dateRawListForm.value.end;
+
+  const formattedStart = startDate
+    ? new Date(startDate).toLocaleDateString('en-GB')
+    : '';
+  const formattedEnd = endDate
+    ? new Date(endDate).toLocaleDateString('en-GB')
+    : '';
+
+  // Title
+  doc.setFontSize(12);
+  doc.text(`Raw Material Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
+
+  // Total Amount
+  const totalAmount = this.rowDataSource.data.reduce(
+    (sum: number, item: any) => sum + Number(item.totalAmount || 0),
+    0
+  );
+
+  const formattedAmount = totalAmount.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  doc.text(`Total Amount: ${formattedAmount}`, 140, 15);
+
+  // Table headers
+  const headers = [
+    '#',
+    'Name',
+    'Quantity',
+    'Price',
+    'Date',
+    'Total Amount',
+    'Received',
+    'Balance'
+  ];
+
+  // Table data
+  const data = this.rowDataSource.data.map((item: any, index: number) => {
+    const received = this.calculateTotalReceivedPayment(item.receivePayment);
+    const balance = Number(item.totalAmount || 0) - received;
+
+    return [
+      index + 1,
+      item.name,
+      item.quantity,
+      item.price,
+      item.creditDate?.seconds
+        ? new Date(item.creditDate.seconds * 1000).toLocaleDateString('en-GB')
+        : '',
+      item.totalAmount,
+      received,
+      balance
+    ];
+  });
+
+  // Generate table
+  (doc as any).autoTable({
+    head: [headers],
+    body: data,
+    startY: 25,
+    theme: 'grid',
+    headStyles: {
+      fillColor: [255, 187, 0],
+      textColor: [0, 0, 0],
+      fontStyle: 'bold'
+    },
+    styles: {
+      fontSize: 9,
+      halign: 'center',
+      valign: 'middle'
+    }
+  });
+
+  // Save PDF
+  doc.save(
+    `Raw_Material_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`
+  );
+}
 
 
 

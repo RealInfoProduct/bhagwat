@@ -18,6 +18,8 @@ export class ProductMasterComponent implements OnInit{
   displayedColumns: string[] = [
     'srno',
     'ProductName',
+    'measurementUnit',
+    'hsnCode',
     'action',
   ];
   productList :any = []
@@ -50,6 +52,8 @@ export class ProductMasterComponent implements OnInit{
         const payload: ProductList = {
           id: '',
           productName: result.data.productName,
+          measurementUnits: result.data.measurementUnits,
+          hsnCode: result.data.hsnCode,
           userId : localStorage.getItem("userId")
         }
 
@@ -69,6 +73,8 @@ export class ProductMasterComponent implements OnInit{
             const payload: ProductList = {
               id: result.data.id,
               productName: result.data.productName,
+              measurementUnits: result.data.measurementUnits,
+              hsnCode: result.data.hsnCode,
               userId : localStorage.getItem("userId")
             }
               this.firebaseService.updateProduct(result.data.id , payload).then((res:any) => {
@@ -127,6 +133,31 @@ export class productMasterDialogComponent implements OnInit {
   productForm: FormGroup;
   action: string;
   local_data: any;
+  measurementUnits:any = [
+    { code: "PCS", label: "Pieces"},
+    { code: "nos", label: "Numbers"},
+    { code: "unit", label: "Units"},
+    { code: "dozen", label: "Dozen"},
+    { code: "pair", label: "Pair"},
+    { code: "kg", label: "Kilogram"},
+    { code: "g", label: "Gram"},
+    { code: "mg", label: "Milligram"},
+    { code: "Ton", label: "Ton"},
+    { code: "L", label: "Liter"},
+    { code: "ml", label: "Milliliter"},
+    { code: "M", label: "Meter"},
+    { code: "cm", label: "Centimeter"},
+    { code: "ft", label: "Foot"},
+    { code: "sq ft", label: "Square foot"},
+    { code: "sq m", label: "Square meter"},
+    { code: "Hour", label: "Hour"},
+    { code: "Day", label: "Day"},
+    { code: "Month", label: "Month"},
+    { code: "Box", label: "Box"},
+    { code: "Pack", label: "Pack"},
+    { code: "Bundle", label: "Bundle"},
+    { code: "Carton", label: "Carton"},
+  ] 
 
   constructor(
     private fb: FormBuilder,
@@ -141,12 +172,16 @@ export class productMasterDialogComponent implements OnInit {
     this.buildForm()
     if (this.action === 'Edit') {
       this.productForm.controls['productName'].setValue(this.local_data.productName)
+      this.productForm.controls['measurementUnits'].setValue(this.local_data.measurementUnits)
+      this.productForm.controls['hsnCode'].setValue(this.local_data.hsnCode)
     }
   }
 
   buildForm() {
     this.productForm = this.fb.group({
       productName: ['',Validators.required],
+      measurementUnits:['',Validators.required],
+      hsnCode:[0 , Validators.required],
     })
   }
 
@@ -154,6 +189,8 @@ export class productMasterDialogComponent implements OnInit {
     const payload = {
       id: this.local_data.id ? this.local_data.id : '',
       productName: this.productForm.value.productName,
+      measurementUnits: this.productForm.value.measurementUnits,
+      hsnCode: this.productForm.value.hsnCode,
     }
     this.dialogRef.close({ event: this.action, data: payload });
   }

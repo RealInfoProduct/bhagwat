@@ -24,16 +24,18 @@ export class InvoiceListComponent implements OnInit {
   firmList: any = []
   partyList: any = []
   brokerageList: any = []
-  brokerage:any=[]
+  brokerage: any = []
 
   displayedColumns: string[] = [
     '#',
     'firmName',
     // 'partyName',
     'invoiceNo',
+    'productName',
+    'qty',
+    'price',
     'CGST',
     'SGST',
-    // 'discount',
     'finalSubAmount',
     'action',
   ];
@@ -62,29 +64,59 @@ export class InvoiceListComponent implements OnInit {
     this.getInvoiceList()
     this.getFirmList()
     this.getPartyList()
-     this.getBrokerageList()
+    this.getBrokerageList()
   }
 
+  // filterDate() {
+  //   if (!this.invoiceList) return;
+  //   const startDate = this.dateInvoiceListForm.value.start ? new Date(this.dateInvoiceListForm.value.start) : null;
+  //   const endDate = this.dateInvoiceListForm.value.end ? new Date(this.dateInvoiceListForm.value.end) : null;
+  //   if (startDate && endDate) {
+  //     this.invoiceDataSource.data = this.invoiceList.filter((invoice: any) => {
+  //       if (!invoice.date) return false;
+  //       let invoiceDate;
+  //       if (typeof invoice.date === 'string') {
+  //         const dateParts = invoice.date.split('/');
+  //         invoiceDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+  //       } else {
+  //         return false;
+  //       }
+  //       return invoiceDate >= startDate && invoiceDate <= endDate;
+  //     });
+  //   } else {
+  //     this.invoiceDataSource.data = this.invoiceList;
+  //   }
+  // }
   filterDate() {
-    if (!this.invoiceList) return;
-    const startDate = this.dateInvoiceListForm.value.start ? new Date(this.dateInvoiceListForm.value.start) : null;
-    const endDate = this.dateInvoiceListForm.value.end ? new Date(this.dateInvoiceListForm.value.end) : null;
-    if (startDate && endDate) {
-      this.invoiceDataSource.data = this.invoiceList.filter((invoice: any) => {
-        if (!invoice.date) return false;
-        let invoiceDate;
-        if (typeof invoice.date === 'string') {
-          const dateParts = invoice.date.split('/');
-          invoiceDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
-        } else {
-          return false;
-        }
-        return invoiceDate >= startDate && invoiceDate <= endDate;
-      });
-    } else {
-      this.invoiceDataSource.data = this.invoiceList;
-    }
+  if (!this.invoiceList) return;
+
+  const selectedStart = this.dateInvoiceListForm.value.start
+    ? new Date(this.dateInvoiceListForm.value.start)
+    : null;
+
+  if (!selectedStart) {
+    this.invoiceDataSource.data = this.invoiceList;
+    return;
   }
+
+  const selectedMonth = selectedStart.getMonth(); // 0-indexed
+  const selectedYear = selectedStart.getFullYear();
+
+  this.invoiceDataSource.data = this.invoiceList.filter((invoice: any) => {
+    if (!invoice.date) return false;
+
+    let invoiceDate: Date;
+
+    if (typeof invoice.date === 'string') {
+      const dateParts = invoice.date.split('/'); // assuming MM/DD/YYYY
+      invoiceDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+    } else {
+      return false;
+    }
+
+    return invoiceDate.getMonth() === selectedMonth && invoiceDate.getFullYear() === selectedYear;
+  });
+}
 
 
   calculateTotalReceivedPayment(receivePayment: any[]): number {
@@ -161,38 +193,38 @@ export class InvoiceListComponent implements OnInit {
   // }
 
   deleteInvoice(action: string, obj: any) {
-  // 1️⃣ Delete invoice
-  this.firebaseService.deleteInvoice(obj.id).then(() => {
-    // 2️⃣ Get brokerage list
-    this.firebaseService.getAllBrokerage().subscribe(async (brokerageList: any[]) => {
-      // 3️⃣ Filter brokerage records matching deleted invoice
-      const matchingBrokerage = brokerageList.filter(b =>
-        b.party === obj.partyId &&
-        b.invoiceNo === obj.invoiceNumber
-      );
+    // 1️⃣ Delete invoice
+    this.firebaseService.deleteInvoice(obj.id).then(() => {
+      // 2️⃣ Get brokerage list
+      this.firebaseService.getAllBrokerage().subscribe(async (brokerageList: any[]) => {
+        // 3️⃣ Filter brokerage records matching deleted invoice
+        const matchingBrokerage = brokerageList.filter(b =>
+          b.party === obj.partyId &&
+          b.invoiceNo === obj.invoiceNumber
+        );
 
-      // 4️⃣ Delete each matching brokerage
-      const deletePromises = matchingBrokerage.map(b => this.firebaseService.deleteBrokerage(b.id));
-      await Promise.all(deletePromises);
+        // 4️⃣ Delete each matching brokerage
+        const deletePromises = matchingBrokerage.map(b => this.firebaseService.deleteBrokerage(b.id));
+        await Promise.all(deletePromises);
 
-      // 5️⃣ Refresh lists
-      this.getInvoiceList();
-      this.getBrokerageList();
+        // 5️⃣ Refresh lists
+        this.getInvoiceList();
+        this.getBrokerageList();
 
-      // 6️⃣ Show success
-      this.openConfigSnackBar('Record deleted successfully');
-    }, (err) => {
-      console.log("Error fetching brokerage list => ", err);
-      this.openConfigSnackBar('Error fetching brokerage records');
+        // 6️⃣ Show success
+        this.openConfigSnackBar('Record deleted successfully');
+      }, (err) => {
+        console.log("Error fetching brokerage list => ", err);
+        this.openConfigSnackBar('Error fetching brokerage records');
+      });
+    }).catch((error) => {
+      console.log("Error deleting invoice => ", error);
+      this.openConfigSnackBar('Error deleting invoice');
     });
-  }).catch((error) => {
-    console.log("Error deleting invoice => ", error);
-    this.openConfigSnackBar('Error deleting invoice');
-  });
-}
+  }
 
 
-    getBrokerageList() {
+  getBrokerageList() {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllBrokerage().subscribe((res: any) => {
       if (res) {
@@ -266,65 +298,98 @@ export class InvoiceListComponent implements OnInit {
     return this.firmList.find((obj: any) => obj.id === firmId) ?? ''
   }
 
- filedownload() {
-  if (!this.invoiceDataSource || this.invoiceDataSource.data.length === 0) {
-    this.openConfigSnackBar('No invoice data available to generate PDF.');
-    return;
+  filedownload() {
+    if (!this.invoiceDataSource || this.invoiceDataSource.data.length === 0) {
+      this.openConfigSnackBar('No invoice data available to generate PDF.');
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    // Get date range from form
+    const startDate = new Date(this.dateInvoiceListForm.value.start);
+    const endDate = new Date(this.dateInvoiceListForm.value.end);
+
+    const formattedStart = startDate.toLocaleDateString('en-GB');
+    const formattedEnd = endDate.toLocaleDateString('en-GB');
+
+    // PDF Title
+    doc.setFontSize(12);
+    doc.text(`Invoice Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
+
+    // Total finalSubAmount
+    const totalAmount = this.invoiceDataSource.data.reduce(
+      (sum: number, invoice: any) => sum + parseFloat(invoice.finalSubAmount || 0),
+      0
+    );
+    const formattedAmount = totalAmount.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    doc.text(`Total Amount: ${formattedAmount}`, 145, 15);
+
+    // Total Pending Amount
+    const totalPendingAmount = this.invoiceDataSource.data.reduce((total: number, inv: any) => {
+
+      const receivedAmount = Array.isArray(inv.receivePayment)
+        ? inv.receivePayment.reduce((sum: number, payment: any) => {
+          return sum + Number(payment?.paymentAmount || 0);
+        }, 0)
+        : 0;
+
+      const finalAmount = Number(inv.finalSubAmount || 0);
+      const pendingAmount = finalAmount - receivedAmount;
+
+      return total + pendingAmount;
+
+    }, 0);
+    const formattedPendingAmount = totalPendingAmount.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+
+    doc.text(`Pending Amount: ${formattedPendingAmount}`, 140, 20);
+
+    // Table headers
+    const headers = ['S.No', 'Party Name', 'Invoice No', 'CGST', 'SGST', 'Final Amount', 'Received', 'Pending Amount'];
+
+    // Table data
+    const data = this.invoiceDataSource.data.map((inv: any, index: number) => {
+      const firm = this.getPartyName(inv.partyId)?.partyName || '';
+      const receivedAmount = Array.isArray(inv.receivePayment)
+        ? inv.receivePayment.reduce((total: number, payment: any) => {
+          return total + Number(payment?.paymentAmount || 0);
+        }, 0)
+        : 0;
+
+      const finalAmount = Number(inv.finalSubAmount || 0);
+      const pendingAmount = finalAmount - receivedAmount;
+      return [
+        index + 1,
+        firm,
+        inv.invoiceNumber || '',
+        inv.cGST || 0,
+        inv.sGST || 0,
+        finalAmount,
+        receivedAmount,
+        pendingAmount
+      ];
+    });
+
+    // Generate table
+    (doc as any).autoTable({
+      head: [headers],
+      body: data,
+      startY: 25,
+      theme: 'grid',
+      headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
+      styles: { fontSize: 10, halign: 'center', valign: 'middle' }
+    });
+
+    // Save PDF
+    doc.save(`Invoice_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
   }
-
-  const doc = new jsPDF();
-
-  // Get date range from form
-  const startDate = new Date(this.dateInvoiceListForm.value.start);
-  const endDate = new Date(this.dateInvoiceListForm.value.end);
-
-  const formattedStart = startDate.toLocaleDateString('en-GB');
-  const formattedEnd = endDate.toLocaleDateString('en-GB');
-
-  // PDF Title
-  doc.setFontSize(12);
-  doc.text(`Invoice Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
-
-  // Total finalSubAmount
-  const totalAmount = this.invoiceDataSource.data.reduce(
-    (sum: number, invoice: any) => sum + parseFloat(invoice.finalSubAmount || 0),
-    0
-  );
-  const formattedAmount = totalAmount.toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-  doc.text(`Total Amount: ${formattedAmount}`, 145, 15);
-
-  // Table headers
-  const headers = ['S.No', 'Party Name', 'Invoice No', 'CGST', 'SGST',  'Final Amount'];
-
-  // Table data
-  const data = this.invoiceDataSource.data.map((inv: any, index: number) => {
-    const firm = this.getPartyName(inv.partyId)?.partyName || '';
-    return [
-      index + 1,
-      firm,
-      inv.invoiceNumber || '',
-      inv.cGST || 0,
-      inv.sGST || 0,
-      inv.finalSubAmount || 0
-    ];
-  });
-
-  // Generate table
-  (doc as any).autoTable({
-    head: [headers],
-    body: data,
-    startY: 25,
-    theme: 'grid',
-    headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
-    styles: { fontSize: 10, halign: 'center', valign: 'middle' }
-  });
-
-  // Save PDF
-  doc.save(`Invoice_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
-}
 
 
 }

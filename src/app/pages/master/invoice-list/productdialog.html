@@ -21,6 +21,12 @@
             <th mat-header-cell *matHeaderCellDef>{{'productdialog.ProductName' | translate}}</th>
             <td mat-cell *matCellDef="let element"> {{element.productName.productName}} </td>
           </ng-container>
+
+          <!-- HSN Code  Column -->
+          <ng-container matColumnDef="HSNCode">
+            <th mat-header-cell *matHeaderCellDef>HSN Code</th>
+            <td mat-cell *matCellDef="let element"> {{element.HSNCode}} </td>
+          </ng-container>
       
           <!-- PO Number Column -->
           <ng-container matColumnDef="poNumber">
@@ -37,7 +43,7 @@
           <!-- Quantity Column -->
           <ng-container matColumnDef="qty">
             <th mat-header-cell *matHeaderCellDef>{{'productdialog.Quantity' | translate}}</th>
-            <td mat-cell *matCellDef="let element"> {{element.qty}} </td>
+            <td mat-cell *matCellDef="let element">  {{ element.qty }}{{ element.measurementUnits ? ' (' + element.measurementUnits + ')' : '' }}</td>
           </ng-container>
       
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

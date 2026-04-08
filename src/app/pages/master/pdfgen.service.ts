@@ -269,7 +269,7 @@ export class PdfgenService {
       doc.line((box2XPosition - 25) + textWidth + 2, lineYPosition, (box2XPosition - 25) + box2Width, lineYPosition);
     });
 
-    const columns = ["Sr", "Product", "Chalan No", "Qty", "Rate", "Amount"];
+    const columns = ["Sr", "Product","HSNCode",  "Chalan No", "Qty", "Rate", "Amount"];
     const data: any = invoiceData.products;
     data.forEach((ele: any) => { ele.total = Number(ele.qty) * Number(ele.price) })
     const body: any = [];
@@ -292,8 +292,17 @@ export class PdfgenService {
       const row = [
         hasData ? i + 1 : '', // ✅ Only show number if data exists
         hasData ? data[i]?.productName?.productName : '',
+        hasData ? data[i]?.HSNCode : '',
         hasData ? (data[i]?.poNumber || '') : '',
-        hasData ? (data[i]?.qty ? Number(data[i]?.qty).toFixed(2) : '') : '',
+         hasData
+                ? (data[i]?.qty
+                    ? `${Number(data[i]?.qty)}${
+                        data[i]?.measurementUnits
+                          ? ` (${data[i].measurementUnits})`
+                          : ''
+                      }`
+                    : '')
+                : '',
         hasData ? (data[i]?.price ? Number(data[i]?.price).toFixed(2) : '') : '',
         hasData
           ? `${Number(data[i]?.finalAmount).toLocaleString('en-IN', {
@@ -323,9 +332,9 @@ export class PdfgenService {
     const finalAmountInWords = this.toWords.convert(Number(roundedAmount));
     // ['', '', '', '', '', { content: `Discount ${invoiceData.discount}%`, styles: { halign: 'left' } }, `Rs. ${discountAmountFormatted}`],
     body.push(
-      ['', '', '', '', { content: 'Gross Total', styles: { halign: 'left' } }, `Rs. ${formattedAmount}`],
-      ['', '', '', '', { content: `CGST ${invoiceData.cGST}%` }, `Rs. ${cGstAmountFormatted}`],
-      [{ content: `${finalAmountInWords}`, rowSpan: 3, colSpan: 4, styles: { halign: 'center', fontStyle: 'bold' } }, `SGST ${invoiceData.sGST}%`, `Rs. ${sGstAmountFormatted}`],
+      ['', '', '', '', '',{ content: 'Gross Total', styles: { halign: 'left' } }, `Rs. ${formattedAmount}`],
+      ['', '', '', '', '',{ content: `CGST ${invoiceData.cGST}%` }, `Rs. ${cGstAmountFormatted}`],
+      [{ content: `${finalAmountInWords}`, rowSpan: 3, colSpan: 5, styles: { halign: 'center', fontStyle: 'bold' } }, `SGST ${invoiceData.sGST}%`, `Rs. ${sGstAmountFormatted}`],
       [{ content: 'Total Amount' }, `Rs. ${Amount}`, { styles: { FontFace: 'left' } }],
       [{ content: 'Final Amount' }, `Rs. ${formattedRoundedAmount}.00`, { styles: { FontFace: 'left' } }],
     );

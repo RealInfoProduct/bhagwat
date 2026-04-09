@@ -153,6 +153,7 @@ export class WithdrawalComponent implements OnInit {
         this.WithdrawalList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
         this.WithdrawalListDataSource = new MatTableDataSource(this.WithdrawalList);
         this.WithdrawalListDataSource.paginator = this.paginator;
+        this.filterDate()
         this.loaderService.setLoader(false)
       }
     })

@@ -162,6 +162,7 @@ export interface EmployeeList {
     bankName: string,
     bankIFSC: string,
     bankAccountNo: number,
+    date:any,
     userId :any
 }
 

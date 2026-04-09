@@ -25,6 +25,7 @@ export class EmployeeComponent  implements OnInit{
     'bankName',
     'bankIFSC',
     'bankAccountNo',
+    'date',
     'action',
   ];
   employeeList :any = []
@@ -63,6 +64,7 @@ export class EmployeeComponent  implements OnInit{
           bankName: result.data.bankName,
           bankIFSC: result.data.bankIFSC,
           bankAccountNo: result.data.bankAccountNo,
+          date: result.data.date,
           userId : localStorage.getItem("userId")
         }
 
@@ -88,6 +90,7 @@ export class EmployeeComponent  implements OnInit{
               bankName: result.data.bankName,
               bankIFSC: result.data.bankIFSC,
               bankAccountNo: result.data.bankAccountNo,
+              date: result.data.date,
               userId: localStorage.getItem("userId")
             }
               this.firebaseService.updateEmployee(result.data.id , payload).then((res:any) => {
@@ -169,7 +172,8 @@ export class EmployeeComponent  implements OnInit{
     'Phone',
     'Bank Name',
     'Bank IFSC',
-    'Bank Account'
+    'Bank Account',
+    'Joining Date'
   ];
 
   // Table data
@@ -180,7 +184,8 @@ export class EmployeeComponent  implements OnInit{
     emp.phoneNo,
     emp.bankName,
     emp.bankIFSC,
-    emp.bankAccountNo
+    emp.bankAccountNo,
+    emp.date?.seconds ? new Date(emp.date.seconds * 1000).toLocaleDateString('en-GB') : ''
   ]);
 
   // Generate table

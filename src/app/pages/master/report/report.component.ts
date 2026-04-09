@@ -85,49 +85,105 @@ export class ReportComponent implements OnInit {
     const startDate = new Date(this.dateEmployeeForm.value.start);
     const endDate = new Date(this.dateEmployeeForm.value.end);
 
-    this.employeeReportList = this.employeeList.map(emp => {
-      const empAttendance = this.attendanceList.filter(
-        a => a.employee === emp.id && this.isDateInRange(a.date, startDate, endDate)
-      );
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
 
-      const empBonus = this.bonusList.filter(
-        b => b.employee === emp.id && this.isDateInRange(b.date, startDate, endDate)
-      );
+    this.employeeReportList = this.employeeList
+      .filter(emp => {
 
-      const empwithdrawal = this.withdrawalList.filter(
-        b => b.employee === emp.id && this.isDateInRange(b.date, startDate, endDate)
-      );
+        const jd = emp.date || emp.date;
 
-      const empmachineSalary = this.machineSalaryList.filter(
-        b => b.employee === emp.id && this.isDateInRange(b.date, startDate, endDate)
-      );
+        if (!jd || !jd.seconds) return true;
 
-      const absentDays = empAttendance.reduce((sum, a) => sum + (a.day || 0), 0);
-      const totalBonus = empBonus.reduce((sum, b) => sum + (b.amount || 0), 0);
-      const totalwithdrawal = empwithdrawal.reduce((sum, b) => sum + (b.amount || 0), 0);
-      const totalmachineSalaryList = empmachineSalary.reduce((sum, b) => sum + (b.amount || 0), 0);
+        const joiningDate = new Date(jd.seconds * 1000);
+        joiningDate.setHours(0, 0, 0, 0);
 
-      const daysInMonth = 30;
+        return joiningDate <= endDate;
+      })
+      .map(emp => {
 
-      const perDaySalary = emp.salary / daysInMonth;
-      const absentCut = perDaySalary * absentDays;
-      const totalSalary = emp.salary - absentCut;
-      const total = totalSalary - totalwithdrawal;
-      const totalRemain = total + totalmachineSalaryList;
-      const finalAMT = totalRemain + totalBonus;
+        const jd = emp.date || emp.date;
 
-      return {
-        firstName: emp.firstName,
-        salary: emp.salary,
-        days: daysInMonth,
-        abesent: absentDays,
-        upad: totalwithdrawal,
-        extra: totalmachineSalaryList,
-        bonus: totalBonus,
-        remain: Math.round(totalRemain),
-        finalAMT: Math.round(finalAMT)
-      };
-    });
+        let actualStartDate = startDate;
+
+        if (jd?.seconds) {
+          const joiningDate = new Date(jd.seconds * 1000);
+          joiningDate.setHours(0, 0, 0, 0);
+
+          if (joiningDate > startDate) {
+            actualStartDate = joiningDate;
+          }
+        }
+
+        const empAttendance = this.attendanceList.filter(
+          a =>
+            a.employee === emp.id &&
+            this.isDateInRange(a.date, actualStartDate, endDate)
+        );
+
+        const empBonus = this.bonusList.filter(
+          b =>
+            b.employee === emp.id &&
+            this.isDateInRange(b.date, actualStartDate, endDate)
+        );
+
+        const empwithdrawal = this.withdrawalList.filter(
+          b =>
+            b.employee === emp.id &&
+            this.isDateInRange(b.date, actualStartDate, endDate)
+        );
+
+        const empmachineSalary = this.machineSalaryList.filter(
+          b =>
+            b.employee === emp.id &&
+            this.isDateInRange(b.date, actualStartDate, endDate)
+        );
+
+        const absentDays = empAttendance.reduce((sum, a) => sum + (a.day || 0), 0);
+        const totalBonus = empBonus.reduce((sum, b) => sum + (b.amount || 0), 0);
+        const totalwithdrawal = empwithdrawal.reduce((sum, b) => sum + (b.amount || 0), 0);
+        const totalmachineSalaryList = empmachineSalary.reduce((sum, b) => sum + (b.amount || 0), 0);
+
+        const totalDaysInMonth = 30
+
+        const perDaySalary = emp.salary / totalDaysInMonth;
+
+        let workedDays = totalDaysInMonth;
+
+        if (jd?.seconds) {
+          const joiningDate = new Date(jd.seconds * 1000);
+          joiningDate.setHours(0, 0, 0, 0);
+
+          if (joiningDate > startDate) {
+
+            const diffTime = joiningDate.getTime() - startDate.getTime();
+            const daysBeforeJoining = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            workedDays = totalDaysInMonth - daysBeforeJoining;
+          }
+        }
+
+        const earnedSalary = perDaySalary * workedDays;
+
+        const absentCut = perDaySalary * absentDays;
+
+        const totalSalary = earnedSalary - absentCut;
+        const total = totalSalary - totalwithdrawal;
+        const totalRemain = total + totalmachineSalaryList;
+        const finalAMT = totalRemain + totalBonus;
+
+        return {
+          firstName: emp.firstName,
+          salary: emp.salary,
+          days: workedDays,
+          abesent: absentDays,
+          upad: totalwithdrawal,
+          extra: totalmachineSalaryList,
+          bonus: totalBonus,
+          remain: Math.round(totalRemain),
+          finalAMT: Math.round(finalAMT)
+        };
+      });
 
     this.employeeListDataSource = new MatTableDataSource(this.employeeReportList);
     this.employeeListDataSource.paginator = this.paginator;

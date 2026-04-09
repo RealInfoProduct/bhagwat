@@ -57,6 +57,14 @@
           <input type="number" matInput  formControlName="bankAccountNo" placeholder="{{'employeedialog.BankAccountNo' | translate}}" />
         </mat-form-field>
       </div>
+      <div class="col-lg-6">
+         <mat-form-field appearance="outline" class="w-100 m-t-8">
+          <mat-label class="mat-subtitle-2 f-w-600 m-b-1 d-block">Joining Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
     </div>
     <mat-divider></mat-divider>
     <mat-dialog-actions class="p-24 justify-content-end">

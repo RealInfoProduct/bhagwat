@@ -31,6 +31,7 @@ export class EmployeeDialogComponent  implements OnInit {
       this.employeeForm.controls['bankName'].setValue(this.local_data.bankName)
       this.employeeForm.controls['bankIFSC'].setValue(this.local_data.bankIFSC)
       this.employeeForm.controls['bankAccountNo'].setValue(this.local_data.bankAccountNo)
+      this.employeeForm.controls['date'].setValue(new Date(this.local_data.date.seconds * 1000))
     }
   }
 
@@ -43,6 +44,7 @@ export class EmployeeDialogComponent  implements OnInit {
       bankName: [''],
       bankIFSC: [''],
       bankAccountNo: [''],
+      date: [new Date()],
     })
   }
 
@@ -56,6 +58,7 @@ export class EmployeeDialogComponent  implements OnInit {
       bankName: this.employeeForm.value.bankName,
       bankIFSC: this.employeeForm.value.bankIFSC,
       bankAccountNo: this.employeeForm.value.bankAccountNo,
+      date: this.employeeForm.value.date,
     }
     this.dialogRef.close({ event: this.action, data: payload });
   }

@@ -1,8 +1,149 @@
+<!-- <mat-card class="cardWithShadow">
+    <mat-card-content class="p-24">
+        <form [formGroup]="expensesForm">
+            <div style="align-items: baseline;" class="row">
+
+                <div class="col-lg-5">
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <mat-label>Credit Date</mat-label>
+                        <input matInput [matDatepicker]="creditDate" formControlName="creditDate"
+                            placeholder="{{'employeesdialogs.Selectcreditdate' | translate}}">
+                        <mat-datepicker-toggle matSuffix [for]="creditDate"></mat-datepicker-toggle>
+                        <mat-datepicker #creditDate></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <ng-container formArrayName="products">
+                    <ng-container *ngFor="let item of getProductsFormArry().controls; let i = index"
+                        [formGroupName]="i">
+
+                        <div class="col-lg-4">
+                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                <mat-label>Expenses Type</mat-label>
+                                <input type="text" placeholder="Select expenses" aria-label="Number"
+                                    (blur)="checkedValue(i)" matInput formControlName="expensesname"
+                                    [matAutocomplete]="auto">
+                                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
+                                    (optionSelected)="checkedValue(i)">
+                                    <mat-option *ngFor="let option of filteredOptions[i] | async" [value]="option">
+                                        {{option}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                <mat-label>Description</mat-label>
+                                <input type="text" matInput
+                                    placeholder="{{'employeesdialogs.Enterdescription' | translate}}"
+                                    formControlName="description">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                <mat-label>Amount</mat-label>
+                                <input type="number" matInput
+                                    placeholder="{{'employeesdialogs.Enteramount' | translate}}"
+                                    formControlName="amount" min="0">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-1 d-flex align-items-center">
+                            <a *ngIf="i === 0" class="action-btn" (click)="addProduct()">
+                                <i-tabler name="plus" class="icon-18"></i-tabler>
+                            </a>
+                            <a *ngIf="i !== 0" (click)="removeProduct(i)" class="action-btn">
+                                <i-tabler name="trash" class="icon-18"></i-tabler>
+                            </a>
+                        </div>
+
+                    </ng-container>
+                </ng-container>
+
+                <div class="col-lg-1 d-flex align-items-center justify-content-end">
+                    <button mat-flat-button color="primary" (click)="openExpenses('Add',{})">
+                        Add
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card> -->
+
 <mat-card class="cardWithShadow">
     <mat-card-content class="p-24">
-        <div style="align-items: baseline;" class="row">
+        <form [formGroup]="expensesForm">
+            <div style="align-items: baseline;" class="row">
 
-            <div class="col-lg-4 m-t-10">
+                <div class="col-lg-3">
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <mat-label>Date</mat-label>
+                        <input matInput [matDatepicker]="creditDate" formControlName="creditDate"
+                            placeholder="{{'employeesdialogs.Selectcreditdate' | translate}}">
+                        <mat-datepicker-toggle matSuffix [for]="creditDate"></mat-datepicker-toggle>
+                        <mat-datepicker #creditDate></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-3">
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <mat-label>Expenses Type</mat-label>
+                
+                        <input type="text" placeholder="Select expenses" matInput formControlName="expensesname"
+                            [matAutocomplete]="auto" />
+                
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="checkedValue($event.option.value)">
+                            <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="expensesForm.get('expensesname')?.touched && expensesForm.get('expensesname')?.invalid">
+                            <span *ngIf="expensesForm.get('expensesname')?.errors?.['required']">
+                                Expenses type is required
+                            </span>
+                            <span *ngIf="expensesForm.get('expensesname')?.errors?.['pattern']">
+                                Only alphabets allowed
+                            </span>
+                        </mat-error>
+                        </mat-form-field>
+                </div>
+                
+                <div class="col-lg-3">
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <mat-label>Description</mat-label>
+                        <input type="text" matInput placeholder="{{'employeesdialogs.Enterdescription' | translate}}"
+                            formControlName="description">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-2">
+                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                        <mat-label>Amount</mat-label>
+                        <input type="number" matInput placeholder="{{'employeesdialogs.Enteramount' | translate}}"
+                            formControlName="amount" min="0">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-1 d-flex align-items-center justify-content-end">
+                    <button mat-flat-button color="primary" (click)="ADDExpenses()" [disabled]="expensesForm.invalid ">
+                      {{ selectedExpensesId ? 'Edit ' : 'Add ' }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card>
+
+<mat-card class="cardWithShadow">
+    <mat-card-content class="p-24">
+        <div class="row">
+              <div class="col-lg-4 m-t-10">
                 <mat-form-field appearance="outline" class="w-100 hide-hint">
                     <input matInput placeholder="{{'ExpensessMaster.Searchexpenses' | translate}}"
                         (keyup)="applyFilter($any($event.target).value)">
@@ -22,26 +163,14 @@
                     <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
                 </mat-form-field>
             </div>
-            <div class="col-lg-1"></div>
-
-            <div class="col-lg-2 d-flex align-items-center justify-content-end">
-                <button mat-flat-button color="primary" (click)="openExpenses('Add',{})" >
-                    {{'ExpensessMaster.AddExpenses' | translate}}
-                </button>
-            </div>
-
-             <div class="col-lg-1">
+             <div class="col-lg-3"></div>
+             <div class="col-lg-1 m-t-10">
             <button mat-flat-button color="primary"  (click)="filedownload()">
               <i-tabler name="file-download" class="icon-25"></i-tabler>
             </button>
         </div>
 
         </div>
-    </mat-card-content>
-</mat-card>
-
-<mat-card class="cardWithShadow">
-    <mat-card-content class="p-24">
         <div class="table-responsive">
             <table mat-table [dataSource]="expensesListDataSource" class="w-100">
 
@@ -61,7 +190,7 @@
 
                 <ng-container matColumnDef="creditDate">
                     <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
-                        {{'ExpensessMaster.CreditDate' | translate}}
+                        Date
                     </th>
                     <td mat-cell *matCellDef="let element" class="f-s-14">
                         {{ convertTimestampToDate(element.creditDate) | date:'dd/MM/yyyy'}}
@@ -92,10 +221,10 @@
                     </th>
                     <td mat-cell *matCellDef="let element" class="action-link">
                         <a class="m-r-10 cursor-pointer">
-                            <i-tabler name="edit" class="icon-18" (click)="openExpenses('Edit', element)"></i-tabler>
+                            <i-tabler name="edit" class="icon-18" (click)="EditExpenses(element)"></i-tabler>
                         </a>
                         <a class="m-r-10 cursor-pointer">
-                            <i-tabler name="trash" class="icon-18" (click)="openExpenses('Delete', element)"></i-tabler>
+                            <i-tabler name="trash" class="icon-18" (click)="DeleteExpenses(element)"></i-tabler>
                         </a>
                     </td>
                 </ng-container>

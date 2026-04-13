@@ -151,7 +151,7 @@ export class FirmMasterComponent implements OnInit {
   let line = '';
 
   words.forEach(word => {
-    if ((line + word).length > 50) {
+    if ((line + word).length > 80) {
       result += line + '<br>';
       line = '';
     }

@@ -41,7 +41,7 @@
                                 </mat-form-field>
                             </div>
                             <div class="col-4">
-                                <mat-label class="mat-subtitle-2 f-w-600 m-b-1 d-block">Select TransPort <span class="required">*</span></mat-label>
+                                <mat-label class="mat-subtitle-2 f-w-600 m-b-1 d-block">Select TransPort </mat-label>
                                 <mat-form-field appearance="outline" class="w-100 m-t-8">
                                     <mat-select value="no" formControlName="TransPort"
                                         placeholder="SelectTransPort">
@@ -137,7 +137,7 @@
                                 <mat-form-field appearance="outline" class="w-100 m-t-10">
                                     <mat-label>Payment Day's</mat-label>
                                     <input type="number" matInput required (ngModelChange)="paymentDaysChange($event)"
-                                        formControlName="paymentDays" placeholder="Enter discount ratio (%)" min="0">
+                                        formControlName="paymentDays" placeholder="Enter Day`s" min="0">
                                 </mat-form-field>
                             </div>
                             <div class="col-4 payment-date">
@@ -178,13 +178,32 @@
                             </div>
                             <div class="col-2">
                                 <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">Measurement Unit<span class="required">*</span></mat-label>
-                                <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                <!-- <mat-form-field appearance="outline" class="w-100 m-t-10">
                                     <mat-select value="code" formControlName="measurementUnits" placeholder="Selecta Measurement">
                                         <mat-option *ngFor="let item of measurementUnits" [value]="item.code">{{item.label}}
                                             ({{item.code}})</mat-option>
                                     </mat-select>
+                                </mat-form-field> -->
+                                <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                    <mat-select formControlName="measurementUnits" placeholder="Select Measurement" 
+                                         (openedChange)="onSelectOpen($event, searchInput)" (selectionChange)="onUnitSelected(searchInput)">
+                                
+                                        <!-- Search Box -->
+                                        <mat-option>
+                                             <div class="search-container">
+                                            <input  #searchInput  matInput type="text"  placeholder="Search..." (click)="$event.stopPropagation()"
+                                                 (keydown)="$event.stopPropagation()" (keyup)="filterUnits($event)"  />
+                                                 </div>
+                                        </mat-option>
+                                
+                                        <!-- Options -->
+                                        <mat-option *ngFor="let item of filteredUnits" [value]="item.code">
+                                            {{item.label}} ({{item.code}})
+                                        </mat-option>
+                                
+                                    </mat-select>
                                 </mat-form-field>
-                            </div>
+                                </div>
                             <div class="col-2">
                                 <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">HSN Code<span class="required">
                                         *</span></mat-label>

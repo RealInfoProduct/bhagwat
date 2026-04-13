@@ -1,4 +1,4 @@
-<h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20">{{'actions.' + action | translate}} {{'productMasterdialog.Product' |
+<!-- <h2 mat-dialog-title class="m-b-24 b-b-1 p-b-20">{{'actions.' + action | translate}} {{'productMasterdialog.Product' |
   translate}}</h2>
 <mat-dialog-content class="mat-typography" style="max-width: 600px" *ngIf="action !== 'Delete'; else elseTemplate">
   <form [formGroup]="productForm">
@@ -14,16 +14,31 @@
           </mat-hint>
         </mat-form-field>
       </div>
+      
       <div class="col-12 col-md-6">
-        <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">Measurement Units</mat-label>
+        <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">
+          Measurement Units
+        </mat-label>
+      
         <mat-form-field appearance="outline" class="w-100 m-t-10">
-          <mat-select value="code" formControlName="measurementUnits" placeholder="Selecta Measurement">
-            <mat-option *ngFor="let item of measurementUnits" [value]="item.code">{{item.label}}
-              ({{item.code}})</mat-option>
+          <mat-select formControlName="measurementUnits" placeholder="Select Measurement"
+            (openedChange)="onSelectOpen($event, searchInput)" (selectionChange)="onUnitSelected(searchInput)">
+      
+            <mat-option class="search-option">
+               <div class="search-container">
+              <input #searchInput matInput   type="text" placeholder="Search..." (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()" (keyup)="filterUnits($event)" />
+                </div>
+            </mat-option>
+      
+            <mat-option *ngFor="let item of filteredUnits" [value]="item.code">
+              {{ item.label }} ({{ item.code }})
+            </mat-option>
+      
           </mat-select>
         </mat-form-field>
       </div>
-
+      
       <div class="col-12 col-md-6">
         <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">HSN Code</mat-label>
         <mat-form-field appearance="outline" class="w-100 m-t-10">
@@ -53,4 +68,4 @@
     <button mat-stroked-button color="warn" (click)="closeDialog()" class="m-l-8">{{'productMasterdialog.Cancel' |
       translate}}</button>
   </div>
-</ng-template>
+</ng-template> -->

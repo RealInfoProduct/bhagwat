@@ -140,7 +140,7 @@
           </th>
 
           <td mat-cell *matCellDef="let element" class="status">
-            <mat-form-field appearance="fill" class="w-100">
+            <mat-form-field appearance="outline" class="w-100">
               <mat-select [(value)]="element.status" (selectionChange)="updateBrokerage(element)">
 
                 <mat-option value="Pending">Pending</mat-option>

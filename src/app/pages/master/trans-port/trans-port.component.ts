@@ -128,4 +128,22 @@ export class TransPortComponent implements OnInit {
     });
   }
 
+   formatAddress(address: string): string {
+  if (!address) return '';
+
+  const words = address.split(' ');
+  let result = '';
+  let line = '';
+
+  words.forEach(word => {
+    if ((line + word).length > 80) {
+      result += line + '<br>';
+      line = '';
+    }
+    line += word + ' ';
+  });
+
+  return result + line;
+}
+
 }

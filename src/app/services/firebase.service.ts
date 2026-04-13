@@ -186,7 +186,7 @@ export class FirebaseService {
     return deleteDoc(docRef)
   }
 
-  updateProduct(updateId: ProductList, payload: any) {
+  updateProduct(updateId: string, payload: any) {
     let dataRef = doc(this.fService, `ProductList/${updateId}`);
     return updateDoc(dataRef, payload)
   }
@@ -387,7 +387,7 @@ export class FirebaseService {
     return collectionData(dataRef, { idField: 'id' })
   }
   
-  updateExpenses(updateId: number, payload: any) {
+  updateExpenses(updateId: string, payload: any) {
     let dataRef = doc(this.fService, `expensesList/${updateId}`);
     return updateDoc(dataRef, payload)
   }

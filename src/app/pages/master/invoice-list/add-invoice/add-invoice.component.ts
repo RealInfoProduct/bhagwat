@@ -28,6 +28,7 @@ export interface InvoiceData {
   finalAmount: number;
   poNumber: number;
   finalSubAmount: number;
+  paymentDays: number;
 
 }
 
@@ -98,6 +99,9 @@ export class AddInvoiceComponent implements OnInit {
   accountYear = localStorage.getItem("accountYear");
   readonly dialog = inject(MatDialog);
 
+  filteredUnits: any[] = [];
+  searchText: string = '';
+
   constructor(
     private fb: FormBuilder,
     private firebaseService: FirebaseService,
@@ -112,6 +116,9 @@ export class AddInvoiceComponent implements OnInit {
     this.getProductList()
     this.getFirmList()
     this.getTransPortList()
+
+    this.filteredUnits = this.measurementUnits;
+
     this.addinvoiceDataSource.paginator = this.paginator;
     if (this.loaderService.getInvoiceData()) {
       const getInvoiceData = this.loaderService.getInvoiceData()
@@ -132,29 +139,32 @@ export class AddInvoiceComponent implements OnInit {
         poNumber: getInvoiceData.products[0].poNumber || 0,
         paymentDays: getInvoiceData.paymentDays || 30
       });
-      ['firm', 'party', 'product', 'defectiveitem','measurementUnits', 'HSNCode','poNumber', 'price', 'totalitem'].forEach(control => {
+      ['firm', 'party', 'product', 'defectiveitem', 'measurementUnits', 'HSNCode', 'poNumber', 'price', 'totalitem'].forEach(control => {
         this.invoiceForm.controls[control].reset();
       })
     }
-  this.invoiceForm.get('product')?.valueChanges.subscribe(selectedProduct => {
-  if (selectedProduct) {
-    // Find the selected product object from the list
-    const productObj = this.productList.find((p: any) => p.productName === selectedProduct.productName);
-    if (productObj) {
-      // Automatically set the measurement unit for this product
-      this.invoiceForm.get('measurementUnits')?.setValue(productObj.measurementUnits);
-      this.invoiceForm.get('HSNCode')?.setValue(productObj.hsnCode);
-    } else {
-      // If product not found, reset the measurement unit
-      this.invoiceForm.get('measurementUnits')?.reset();
-      this.invoiceForm.get('HSNCode')?.reset();
-    }
-  } else {
-    // If product is cleared, reset the measurement unit
-    this.invoiceForm.get('measurementUnits')?.reset();
-    this.invoiceForm.get('HSNCode')?.reset();
-  }
-});
+    this.invoiceForm.get('product')?.valueChanges.subscribe(selectedProduct => {
+
+      this.searchText = '';
+      this.filteredUnits = this.measurementUnits;
+      if (selectedProduct) {
+        // Find the selected product object from the list
+        const productObj = this.productList.find((p: any) => p.productName === selectedProduct.productName);
+        if (productObj) {
+          // Automatically set the measurement unit for this product
+          this.invoiceForm.get('measurementUnits')?.setValue(productObj.measurementUnits);
+          this.invoiceForm.get('HSNCode')?.setValue(productObj.hsnCode);
+        } else {
+          // If product not found, reset the measurement unit
+          this.invoiceForm.get('measurementUnits')?.reset();
+          this.invoiceForm.get('HSNCode')?.reset();
+        }
+      } else {
+        // If product is cleared, reset the measurement unit
+        this.invoiceForm.get('measurementUnits')?.reset();
+        this.invoiceForm.get('HSNCode')?.reset();
+      }
+    });
   }
 
   buildForm() {
@@ -185,12 +195,13 @@ export class AddInvoiceComponent implements OnInit {
         id: this.nextId++,
         ...this.invoiceForm.value
       };
+
       addtoData.finalAmount = this.calculateProductTotal(addtoData)
       // addtoData.finalSubAmount = this.calculateSubTotal(addtoData)
       addtoData.date = moment(this.invoiceForm.value.date).format('L');
       this.data.push(addtoData);
       this.addinvoiceDataSource.data = [...this.data];
-      ['product','measurementUnits', 'HSNCode', 'defectiveitem', 'poNumber', 'price', 'totalitem'].forEach(control => {
+      ['product', 'measurementUnits', 'HSNCode', 'defectiveitem', 'poNumber', 'price', 'totalitem'].forEach(control => {
         this.invoiceForm.controls[control].reset();
       })
       this.editMode = false;
@@ -233,28 +244,28 @@ export class AddInvoiceComponent implements OnInit {
   //   this.addinvoiceDataSource.data = [...this.data];
   // }
   currentEditIndex: number;
-edit(element: any) {
-  this.editMode = true;
-  this.currentEditId = element.id;
-  this.currentEditIndex = this.data.findIndex(item => item.id === element.id);
+  edit(element: any) {
+    this.editMode = true;
+    this.currentEditId = element.id;
+    this.currentEditIndex = this.data.findIndex(item => item.id === element.id);
 
-  this.invoiceForm.patchValue({
-    firm: element.firm,
-    party: element.party,
-    TransPort: element.TransPort,
-    discount: element.discount,
-    sGST: element.sGST,
-    cGST: element.cGST,
-    date: new Date(element.date),
-    totalitem: element.totalitem,
-    product: element.product,
-    measurementUnits: element.measurementUnits,
-    HSNCode: element.HSNCode,
-    defectiveitem: element.defectiveitem,
-    price: element.price,
-    poNumber: element.poNumber
-  });
-}
+    this.invoiceForm.patchValue({
+      firm: element.firm,
+      party: element.party,
+      TransPort: element.TransPort,
+      discount: element.discount,
+      sGST: element.sGST,
+      cGST: element.cGST,
+      date: new Date(element.date),
+      totalitem: element.totalitem,
+      product: element.product,
+      measurementUnits: element.measurementUnits,
+      HSNCode: element.HSNCode,
+      defectiveitem: element.defectiveitem,
+      price: element.price,
+      poNumber: element.poNumber
+    });
+  }
   // updateData() {
   //   if (this.invoiceForm.valid) {
   //     const updatedData = { id: this.currentEditId, ...this.invoiceForm.value };
@@ -273,31 +284,31 @@ edit(element: any) {
   //     this.editMode = false;
   //   }
   // }
-updateData() {
-  if (this.invoiceForm.valid) {
-    const updatedData = {
-      id: this.currentEditId,
-      ...this.invoiceForm.value
-    };
+  updateData() {
+    if (this.invoiceForm.valid) {
+      const updatedData = {
+        id: this.currentEditId,
+        ...this.invoiceForm.value
+      };
 
-    updatedData.finalAmount = this.calculateProductTotal(updatedData);
-    updatedData.date = moment(this.invoiceForm.value.date).format('L');
+      updatedData.finalAmount = this.calculateProductTotal(updatedData);
+      updatedData.date = moment(this.invoiceForm.value.date).format('L');
 
-    // 👉 Replace instead of push
-    this.data[this.currentEditIndex] = updatedData;
+      // 👉 Replace instead of push
+      this.data[this.currentEditIndex] = updatedData;
 
-    this.addinvoiceDataSource.data = [...this.data];
+      this.addinvoiceDataSource.data = [...this.data];
 
-    this.invoiceForm.controls['product'].reset()
+      this.invoiceForm.controls['product'].reset()
       this.invoiceForm.controls['defectiveitem'].reset()
       this.invoiceForm.controls['poNumber'].reset()
       this.invoiceForm.controls['price'].reset()
       this.invoiceForm.controls['measurementUnits'].reset()
       this.invoiceForm.controls['HSNCode'].reset()
       this.invoiceForm.controls['totalitem'].reset()
-    this.editMode = false;
+      this.editMode = false;
+    }
   }
-}
   deletedata(id: number) {
     this.data = this.data.filter(item => item.id !== id);
     this.addinvoiceDataSource.data = [...this.data];
@@ -364,19 +375,31 @@ updateData() {
 
   generateInvoice() {
     const invoiceData = this.transformInvoiceList(this.data);
-    const finalSubAmount = this.calculateSubTotal(invoiceData);
 
+    const finalSubAmount = this.calculateSubTotal(invoiceData);
     const partyData = this.getPartyName(invoiceData.partyId);
     const firmData = this.getFirmHeader(invoiceData.firmId);
     const TransPortData = this.gettransPortid(invoiceData.TransPort) ?? "";
 
+    const paymentDays = Number(invoiceData.paymentDays) ;
 
-    const paymentDays = 30;
+    const parts = invoiceData.date.split("-");
+    const invoiceDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
 
+    let dueDate = new Date(invoiceDate);
 
-    const invoiceDate = new Date(invoiceData.date);
-    const dueDate = new Date(invoiceDate);
-    dueDate.setDate(invoiceDate.getDate() + paymentDays);
+    if (paymentDays === 0) {
+      dueDate = new Date();
+    } else {
+      dueDate.setDate(dueDate.getDate() + paymentDays);
+    }
+
+    const formatDate = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
 
     const payload: any = {
       id: '',
@@ -394,17 +417,17 @@ updateData() {
       finalSubAmount: finalSubAmount,
       isPayment: false,
       receivePayment: [],
-      dueDate: dueDate.toISOString().split('T')[0]
+      paymentDays: paymentDays,
+      dueDate: formatDate(dueDate)
     };
-
-    // this.openPdfViewDialog(payload)  
     payload['firmName'] = firmData;
     payload['partyName'] = partyData;
     payload['TransPortName'] = TransPortData
 
+    console.log("FINAL PAYLOAD:", payload);
+
     this.loaderService.setInvoiceData(payload);
   }
-
 
   getPartyName(partyId: string) {
     return this.partyList.find((obj: any) => obj.id === partyId) ?? ''
@@ -433,6 +456,7 @@ updateData() {
       sGST: invoiceList[0].sGST,
       cGST: invoiceList[0].cGST,
       invoiceNumber: this.maxInvoiceNumber,
+      paymentDays: invoiceList[0].paymentDays,
       accountYear: localStorage.getItem('accountYear'),
       finalSubAmount: invoiceList[0].finalSubAmount,
       products: []
@@ -712,5 +736,29 @@ updateData() {
     }
   }
 
+
+
+  filterUnits(event: any) {
+    const value = event.target.value.toLowerCase();
+
+    this.filteredUnits = this.measurementUnits.filter((unit: any) =>
+      unit.label.toLowerCase().includes(value) ||
+      unit.code.toLowerCase().includes(value)
+    );
+  }
+
+  onUnitSelected(searchInput: HTMLInputElement) {
+    setTimeout(() => {
+      searchInput.value = '';
+      this.filteredUnits = this.measurementUnits;
+    });
+  }
+
+  onSelectOpen(isOpen: boolean, searchInput: HTMLInputElement) {
+    if (isOpen) {
+      searchInput.value = '';
+      this.filteredUnits = this.measurementUnits;
+    }
+  }
 }
 

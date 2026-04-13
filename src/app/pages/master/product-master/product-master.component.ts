@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, Optional, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -13,8 +13,8 @@ import { LoaderService } from 'src/app/services/loader.service';
   templateUrl: './product-master.component.html',
   styleUrls: ['./product-master.component.scss']
 })
-export class ProductMasterComponent implements OnInit{
-
+export class ProductMasterComponent implements OnInit {
+  productForm: FormGroup;
   displayedColumns: string[] = [
     'srno',
     'ProductName',
@@ -22,88 +22,218 @@ export class ProductMasterComponent implements OnInit{
     'hsnCode',
     'action',
   ];
-  productList :any = []
+  productList: any = []
+  filteredUnits: any[] = [];
+  searchText: string = '';
+    selectedProductId: string = '';   // ✅ ADD THIS
+  oldProductData: any = {};   
+
+  measurementUnits: any = [
+    { code: "PCS", label: "Pieces" },
+    { code: "nos", label: "Numbers" },
+    { code: "unit", label: "Units" },
+    { code: "dozen", label: "Dozen" },
+    { code: "pair", label: "Pair" },
+    { code: "kg", label: "Kilogram" },
+    { code: "g", label: "Gram" },
+    { code: "mg", label: "Milligram" },
+    { code: "Ton", label: "Ton" },
+    { code: "L", label: "Liter" },
+    { code: "ml", label: "Milliliter" },
+    { code: "M", label: "Meter" },
+    { code: "cm", label: "Centimeter" },
+    { code: "ft", label: "Foot" },
+    { code: "sq ft", label: "Square foot" },
+    { code: "sq m", label: "Square meter" },
+    { code: "Hour", label: "Hour" },
+    { code: "Day", label: "Day" },
+    { code: "Month", label: "Month" },
+    { code: "Box", label: "Box" },
+    { code: "Pack", label: "Pack" },
+    { code: "Bundle", label: "Bundle" },
+    { code: "Carton", label: "Carton" },
+  ]
+
   productDataSource = new MatTableDataSource(this.productList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
 
-  constructor(private dialog: MatDialog , 
-    private firebaseService : FirebaseService ,
-    private loaderService : LoaderService,
-    private _snackBar: MatSnackBar,) { }
+  constructor(
+    private fb: FormBuilder,
+    private dialog: MatDialog,
+    private firebaseService: FirebaseService,
+    private loaderService: LoaderService,
+    private _snackBar: MatSnackBar,
+  ) { }
 
 
   ngOnInit(): void {
-  this.getProductList()
+    this.getProductList()
+    this.buildForm()
+    this.filteredUnits = this.measurementUnits;
+  }
+
+  buildForm() {
+    this.productForm = this.fb.group({
+      productName: ['', Validators.required],
+      measurementUnits: ['', Validators.required],
+      hsnCode: [0, Validators.required],
+    })
   }
 
   applyFilter(filterValue: string): void {
     this.productDataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  
-  addParty(action: string, obj: any) {
-    obj.action = action;
 
-    const dialogRef = this.dialog.open(productMasterDialogComponent, { data: obj });
+  // addParty(action: string, obj: any) {
+  //   obj.action = action;
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.event === 'Add') {
-        const payload: ProductList = {
-          id: '',
-          productName: result.data.productName,
-          measurementUnits: result.data.measurementUnits,
-          hsnCode: result.data.hsnCode,
-          userId : localStorage.getItem("userId")
-        }
+  //   const dialogRef = this.dialog.open(productMasterDialogComponent, { data: obj });
 
-        this.firebaseService.addProduct(payload).then((res) => {
-          if (res) {
-              this.getProductList()
-              this.openConfigSnackBar('record create successfully')
-            }
-        } , (error) => {
-          console.log("error=>" , error);
-          
-        })
-      }
-      if (result?.event === 'Edit') {
-        this.productList.forEach((element: any) => {
-          if (element.id === result.data.id) {
-            const payload: ProductList = {
-              id: result.data.id,
-              productName: result.data.productName,
-              measurementUnits: result.data.measurementUnits,
-              hsnCode: result.data.hsnCode,
-              userId : localStorage.getItem("userId")
-            }
-              this.firebaseService.updateProduct(result.data.id , payload).then((res:any) => {
-                  this.getProductList()
-                  this.openConfigSnackBar('record update successfully')
-              }, (error) => {
-                console.log("error => " , error);
-                
-              })
-          }
-        });
-      }
-      if (result?.event === 'Delete') {
-        this.firebaseService.deleteProduct(result.data.id).then((res:any) => {
-            this.getProductList()
-            this.openConfigSnackBar('record delete successfully')
-        }, (error) => {
-          console.log("error => " , error);
-          
-        })
-      }
+  //   dialogRef.afterClosed().subscribe((result) => {
+  //     if (result?.event === 'Add') {
+  //       const payload: ProductList = {
+  //         id: '',
+  //         productName: result.data.productName,
+  //         measurementUnits: result.data.measurementUnits,
+  //         hsnCode: result.data.hsnCode,
+  //         userId : localStorage.getItem("userId")
+  //       }
+
+  //       this.firebaseService.addProduct(payload).then((res) => {
+  //         if (res) {
+  //             this.getProductList()
+  //             this.openConfigSnackBar('record create successfully')
+  //           }
+  //       } , (error) => {
+  //         console.log("error=>" , error);
+
+  //       })
+  //     }
+  //     if (result?.event === 'Edit') {
+  //       this.productList.forEach((element: any) => {
+  //         if (element.id === result.data.id) {
+  //           const payload: ProductList = {
+  //             id: result.data.id,
+  //             productName: result.data.productName,
+  //             measurementUnits: result.data.measurementUnits,
+  //             hsnCode: result.data.hsnCode,
+  //             userId : localStorage.getItem("userId")
+  //           }
+  //             this.firebaseService.updateProduct(result.data.id , payload).then((res:any) => {
+  //                 this.getProductList()
+  //                 this.openConfigSnackBar('record update successfully')
+  //             }, (error) => {
+  //               console.log("error => " , error);
+
+  //             })
+  //         }
+  //       });
+  //     }
+  //     if (result?.event === 'Delete') {
+  //       this.firebaseService.deleteProduct(result.data.id).then((res:any) => {
+  //           this.getProductList()
+  //           this.openConfigSnackBar('record delete successfully')
+  //       }, (error) => {
+  //         console.log("error => " , error);
+
+  //       })
+  //     }
+  //   });
+  // }
+
+  addproduct() {
+
+  const formValue = this.productForm.value;
+
+  // 👉 compare old vs new
+  const isChanged =
+    formValue.productName === this.oldProductData.productName ||
+    formValue.measurementUnits === this.oldProductData.measurementUnits ||
+    formValue.hsnCode === this.oldProductData.hsnCode;
+
+  if (this.selectedProductId) {
+
+    if (!isChanged) {
+      this.openConfigSnackBar('No changes detected');
+      return; 
+    }
+
+    // ✅ only if changed → update
+    const payload: ProductList = {
+      id: this.selectedProductId,
+      productName: formValue.productName,
+      measurementUnits: formValue.measurementUnits,
+      hsnCode: formValue.hsnCode,
+      userId: localStorage.getItem("userId")
+    };
+
+    this.firebaseService.updateProduct(this.selectedProductId, payload).then(() => {
+      this.getProductList();
+      this.openConfigSnackBar('record update successfully');
+      this.resetForm();
     });
+
+  } else {
+    // 👉 normal add
+    const payload: ProductList = {
+      id: '',
+      productName: formValue.productName,
+      measurementUnits: formValue.measurementUnits,
+      hsnCode: formValue.hsnCode,
+      userId: localStorage.getItem("userId")
+    };
+
+    this.firebaseService.addProduct(payload).then(() => {
+      this.getProductList();
+      this.openConfigSnackBar('record create successfully');
+      this.resetForm();
+    
+    });
+  }
+}
+
+
+Editproduct(obj: any) {
+
+  // 👉 store old data
+  this.oldProductData = { ...obj };
+
+  // 👉 set form
+  this.productForm.patchValue({
+    productName: obj.productName,
+    measurementUnits: obj.measurementUnits,
+    hsnCode: obj.hsnCode
+  });
+
+  this.selectedProductId = obj.id;
+  
+}
+
+resetForm() {
+  this.productForm.reset();
+  this.productForm.controls['hsnCode'].setValue(0);
+  this.selectedProductId = '';
+  this.oldProductData = {};
+}
+
+  deleteproduct(obj: any) {
+    this.firebaseService.deleteProduct(obj.id).then((res: any) => {
+      this.getProductList()
+      this.openConfigSnackBar('record delete successfully')
+    }, (error) => {
+      console.log("error => ", error);
+
+    })
+
   }
 
   getProductList() {
     this.loaderService.setLoader(true)
     this.firebaseService.getAllProduct().subscribe((res: any) => {
       if (res) {
-        this.productList = res.filter((id:any) => id.userId === localStorage.getItem("userId"))
+        this.productList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
         this.productDataSource = new MatTableDataSource(this.productList);
         this.productDataSource.paginator = this.paginator;
         this.loaderService.setLoader(false)
@@ -117,6 +247,29 @@ export class ProductMasterComponent implements OnInit{
       horizontalPosition: 'right',
       verticalPosition: 'top',
     });
+  }
+
+  filterUnits(event: any) {
+    const value = event.target.value.toLowerCase();
+
+    this.filteredUnits = this.measurementUnits.filter((unit: any) =>
+      unit.label.toLowerCase().includes(value) ||
+      unit.code.toLowerCase().includes(value)
+    );
+  }
+
+  onUnitSelected(searchInput: HTMLInputElement) {
+    setTimeout(() => {
+      searchInput.value = '';
+      this.filteredUnits = this.measurementUnits;
+    });
+  }
+
+  onSelectOpen(isOpen: boolean, searchInput: HTMLInputElement) {
+    if (isOpen) {
+      searchInput.value = '';
+      this.filteredUnits = this.measurementUnits;
+    }
   }
 
 }
@@ -133,31 +286,35 @@ export class productMasterDialogComponent implements OnInit {
   productForm: FormGroup;
   action: string;
   local_data: any;
-  measurementUnits:any = [
-    { code: "PCS", label: "Pieces"},
-    { code: "nos", label: "Numbers"},
-    { code: "unit", label: "Units"},
-    { code: "dozen", label: "Dozen"},
-    { code: "pair", label: "Pair"},
-    { code: "kg", label: "Kilogram"},
-    { code: "g", label: "Gram"},
-    { code: "mg", label: "Milligram"},
-    { code: "Ton", label: "Ton"},
-    { code: "L", label: "Liter"},
-    { code: "ml", label: "Milliliter"},
-    { code: "M", label: "Meter"},
-    { code: "cm", label: "Centimeter"},
-    { code: "ft", label: "Foot"},
-    { code: "sq ft", label: "Square foot"},
-    { code: "sq m", label: "Square meter"},
-    { code: "Hour", label: "Hour"},
-    { code: "Day", label: "Day"},
-    { code: "Month", label: "Month"},
-    { code: "Box", label: "Box"},
-    { code: "Pack", label: "Pack"},
-    { code: "Bundle", label: "Bundle"},
-    { code: "Carton", label: "Carton"},
-  ] 
+
+  filteredUnits: any[] = [];
+  searchText: string = '';
+
+  measurementUnits: any = [
+    { code: "PCS", label: "Pieces" },
+    { code: "nos", label: "Numbers" },
+    { code: "unit", label: "Units" },
+    { code: "dozen", label: "Dozen" },
+    { code: "pair", label: "Pair" },
+    { code: "kg", label: "Kilogram" },
+    { code: "g", label: "Gram" },
+    { code: "mg", label: "Milligram" },
+    { code: "Ton", label: "Ton" },
+    { code: "L", label: "Liter" },
+    { code: "ml", label: "Milliliter" },
+    { code: "M", label: "Meter" },
+    { code: "cm", label: "Centimeter" },
+    { code: "ft", label: "Foot" },
+    { code: "sq ft", label: "Square foot" },
+    { code: "sq m", label: "Square meter" },
+    { code: "Hour", label: "Hour" },
+    { code: "Day", label: "Day" },
+    { code: "Month", label: "Month" },
+    { code: "Box", label: "Box" },
+    { code: "Pack", label: "Pack" },
+    { code: "Bundle", label: "Bundle" },
+    { code: "Carton", label: "Carton" },
+  ]
 
   constructor(
     private fb: FormBuilder,
@@ -170,6 +327,9 @@ export class productMasterDialogComponent implements OnInit {
   }
   ngOnInit(): void {
     this.buildForm()
+
+    this.filteredUnits = this.measurementUnits;
+
     if (this.action === 'Edit') {
       this.productForm.controls['productName'].setValue(this.local_data.productName)
       this.productForm.controls['measurementUnits'].setValue(this.local_data.measurementUnits)
@@ -177,11 +337,36 @@ export class productMasterDialogComponent implements OnInit {
     }
   }
 
+  filterUnits(event: any) {
+    const value = event.target.value.toLowerCase();
+
+    this.filteredUnits = this.measurementUnits.filter((unit: any) =>
+      unit.label.toLowerCase().includes(value) ||
+      unit.code.toLowerCase().includes(value)
+    );
+  }
+
+  onUnitSelected(searchInput: HTMLInputElement) {
+    setTimeout(() => {
+      searchInput.value = '';
+      this.filteredUnits = this.measurementUnits;
+    });
+  }
+
+  onSelectOpen(isOpen: boolean, searchInput: HTMLInputElement) {
+    if (isOpen) {
+      searchInput.value = '';
+      this.filteredUnits = this.measurementUnits;
+    }
+  }
+
+
+
   buildForm() {
     this.productForm = this.fb.group({
-      productName: ['',Validators.required],
-      measurementUnits:['',Validators.required],
-      hsnCode:[0 , Validators.required],
+      productName: ['', Validators.required],
+      measurementUnits: ['', Validators.required],
+      hsnCode: [0, Validators.required],
     })
   }
 

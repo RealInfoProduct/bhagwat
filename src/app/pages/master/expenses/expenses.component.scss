@@ -155,3 +155,7 @@ mat-paginator {
 .cursor-pointer {
     cursor: pointer;
 }
+
+.mat-mdc-card-content:last-child {
+    padding-bottom: 0px;
+}

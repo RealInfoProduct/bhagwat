@@ -96,3 +96,7 @@
   color: #888;
   opacity: 1;
 }
+
+.mat-mdc-card-content:last-child {
+    padding-bottom: 0px;
+}

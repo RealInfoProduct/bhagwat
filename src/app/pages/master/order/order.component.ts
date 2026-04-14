@@ -8,6 +8,7 @@ import { LoaderService } from 'src/app/services/loader.service';
 import { OrderDialogComponent } from './order-dialog/order-dialog.component';
 import { OrderList } from 'src/app/interface/invoice';
 import { ViewDialogComponent } from './view-dialog/view-dialog.component';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-order',
@@ -33,6 +34,7 @@ export class OrderComponent implements OnInit {
   orderDataSource = new MatTableDataSource(this.orderList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
+    @ViewChild(MatSort) sort!: MatSort;
 
   constructor(private dialog: MatDialog,
     private firebaseService: FirebaseService,
@@ -66,21 +68,61 @@ export class OrderComponent implements OnInit {
   }
 
 
-  getOrderList() {
-    this.loaderService.setLoader(true)
+  // getOrderList() {
+  //   this.loaderService.setLoader(true)
+  //   this.firebaseService.getAllOrder().subscribe((res: any) => {
+  //     if (res) {
+  //       this.orderList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
+
+  //         .map((order:any) => ({
+  //         ...order,
+  //         status: order.status || 'Pending'  // ✅ Default to Pending if missing
+  //       }));
+  //       this.orderDataSource = new MatTableDataSource(this.orderList);
+  //       this.orderDataSource.paginator = this.paginator;
+  //       this.loaderService.setLoader(false)
+  //     }
+  //   })
+  // }
+
+   getOrderList() {
+    this.loaderService.setLoader(true);
+
     this.firebaseService.getAllOrder().subscribe((res: any) => {
       if (res) {
-        this.orderList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
 
-          .map((order:any) => ({
-          ...order,
-          status: order.status || 'Pending'  // ✅ Default to Pending if missing
-        }));
+        this.orderList = res
+          .filter((id: any) => id.userId === localStorage.getItem("userId"))
+          .map((order: any) => ({
+            ...order,
+            status: order.status || 'Pending'
+          }));
+
         this.orderDataSource = new MatTableDataSource(this.orderList);
+
         this.orderDataSource.paginator = this.paginator;
-        this.loaderService.setLoader(false)
+        this.orderDataSource.sort = this.sort;
+
+        // ✅ IMPORTANT: Firebase Timestamp sorting
+        this.orderDataSource.sortingDataAccessor = (item: any, property: string) => {
+          switch (property) {
+            case 'orderDate':
+              return item.orderDate ? item.orderDate.toDate().getTime() : 0;
+            default:
+              return item[property];
+          }
+        };
+
+        // ✅ DEFAULT SORT → Latest first
+        setTimeout(() => {
+          this.sort.active = 'orderDate';
+          this.sort.direction = 'desc';
+          this.sort.sortChange.emit();
+        });
+
+        this.loaderService.setLoader(false);
       }
-    })
+    });
   }
 
   addOrder(action: string, obj: any) {

@@ -231,7 +231,7 @@ export class FirebaseService {
     return deleteDoc(docRef)
   }
 
-  updateBonus(updateId: BonusList, payload: any) {
+  updateBonus(updateId: any, payload: any) {
     let dataRef = doc(this.fService, `BonusList/${updateId}`);
     return updateDoc(dataRef, payload)
   }
@@ -276,7 +276,7 @@ export class FirebaseService {
     return deleteDoc(docRef)
   }
 
-  updateWithdrawal(updateId: WithdrawalList, payload: any) {
+  updateWithdrawal(updateId: any, payload: any) {
     let dataRef = doc(this.fService, `WithdrawalList/${updateId}`);
     return updateDoc(dataRef, payload)
   }
@@ -299,7 +299,7 @@ export class FirebaseService {
     return deleteDoc(docRef)
   }
 
-  updateAttendance(updateId: AttendanceList, payload: any) {
+  updateAttendance(updateId: any, payload: any) {
     let dataRef = doc(this.fService, `AttendanceList/${updateId}`);
     return updateDoc(dataRef, payload)
   }

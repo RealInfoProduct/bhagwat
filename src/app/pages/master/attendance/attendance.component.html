@@ -1,112 +1,165 @@
 <mat-card class="cardWithShadow">
-    <mat-card-content >
-      <div class="row justify-content-between">
-        <div class="col-lg-4 m-t-10">
-          <mat-form-field appearance="outline" class="w-100 hide-hint">
-            <input matInput placeholder="{{'attendanceMaster.SearchAttendance' | translate}}" (keyup)="applyFilter($any($event.target).value)" />
-            <mat-icon matSuffix>
-              <i-tabler name="search" class="icon-20"></i-tabler>
-            </mat-icon>
+  <mat-card-content>
+    <form [formGroup]="attendanceForm">
+      <div class="row">
+
+        <div class="col-lg-4">
+          <mat-form-field appearance="outline" class="w-100 m-t-8">
+            <mat-label class="mat-subtitle-2 f-w-600 m-b-1 d-block">{{'attendanceMasterdialog.SelectDate' |
+              translate}}</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="date" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
         </div>
-        <div class="col-lg-4 m-t-10">
+
+        <div class="col-lg-4">
+          <mat-form-field appearance="outline" class="w-100 m-t-8">
+            <mat-label class="mat-subtitle-2 f-w-600 m-b-1">{{'attendanceMasterdialog.EmployeeList' |
+              translate}}</mat-label>
+            <mat-select value="no" formControlName="employee"
+              placeholder="{{'attendanceMasterdialog.Enteremployee' | translate}}" required>
+              <mat-option *ngFor="let item of employeeList" [value]="item.id">{{item.firstName}} -
+                {{item.lastName}}</mat-option>
+            </mat-select>
+            <mat-hint
+              *ngIf="attendanceForm.get('employee')?.hasError('required') && attendanceForm.get('employee')?.touched"
+              class="error-message error-color">
+              {{'attendanceMasterdialogerror.employeeisrequired' | translate}}
+            </mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="col-lg-3">
+          <mat-form-field appearance="outline" class="w-100 m-t-10">
+            <mat-label class="mat-subtitle-2 f-w-600 m-b-1">{{'attendanceMasterdialog.Day' | translate}}</mat-label>
+            <input type="number" matInput formControlName="day"
+              placeholder="{{'attendanceMasterdialog.EntereDay' | translate}}" required />
+            <mat-hint *ngIf="attendanceForm.get('day')?.hasError('required') && attendanceForm.get('day')?.touched"
+              class="error-message error-color">
+              {{'attendanceMasterdialogerror.dayisrequired' | translate}}
+            </mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="col-lg-1 d-flex align-items-center justify-content-end">
+          <button mat-flat-button color="primary" (click)="addAttendance()">
+            {{ selectedAttendanceId ? 'Edit ' : 'Add ' }}
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="cardWithShadow">
+  <mat-card-content >
+    <div class="row">
+
+      <div class="col-lg-4 m-t-10">
+        <mat-form-field appearance="outline" class="w-100 hide-hint">
+          <input matInput placeholder="{{'attendanceMaster.SearchAttendance' | translate}}"
+            (keyup)="applyFilter($any($event.target).value)" />
+          <mat-icon matSuffix>
+            <i-tabler name="search" class="icon-20"></i-tabler>
+          </mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="col-lg-4 m-t-10">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Select Attendance Date</mat-label>
-          <mat-date-range-input [rangePicker]="picker" [formGroup]="dateAttendanceListForm">
+          <mat-date-range-input [rangePicker]="rangePicker" [formGroup]="dateAttendanceListForm">
             <input matStartDate placeholder="Start date" formControlName="start">
             <input matEndDate placeholder="End date" formControlName="end">
           </mat-date-range-input>
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
+          <mat-datepicker-toggle matIconSuffix [for]="rangePicker"></mat-datepicker-toggle>
+          <mat-date-range-picker #rangePicker (closed)="filterDate()"></mat-date-range-picker>
         </mat-form-field>
       </div>
-        <div class="col-lg-3 d-flex align-items-center justify-content-end">
-          <button mat-flat-button color="primary" (click)="addAttendance('Add', {})">
-            {{'attendanceMaster.AddAttendance' | translate}}
+
+      <div class="col-lg-3 d-flex align-items-center justify-content-end">
+      </div>
+
+      <div class="col-lg-1">
+        <div class="m-t20">
+          <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
+            <i-tabler name="file-download" class="icon-25"></i-tabler>
           </button>
         </div>
-         <div class="col-lg-1">
-          <div class="m-t20">
-            <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
-              <i-tabler name="file-download" class="icon-25"></i-tabler>
-            </button>
-          </div>
-        </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
 
-  <mat-card class="cardWithShadow" >
-    <mat-card-content class="p-24">
-      <div class="table-responsive">
-        <table mat-table [dataSource]="attendanceDataSource" class="w-100">
-          <ng-container matColumnDef="srno">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No.</th>
-            <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
-          </ng-container>
-  
-          <ng-container matColumnDef="employee">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'attendanceMaster.Employee' | translate}}</th>
-            <td mat-cell *matCellDef="let element">
-              <div class="d-flex align-items-center">
-                <div class="m-l-16">
-                  <p class="mat-subtitle-1 f-s-16 m-t-0">
-                    {{ getemployeeid(element.employee) }} - {{getemployeelastid(element.employee) }}
-                  </p>
-                </div>
+    <div class="table-responsive">
+      <table mat-table [dataSource]="attendanceDataSource" class="w-100">
+        <ng-container matColumnDef="srno">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No.</th>
+          <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="employee">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'attendanceMaster.Employee' | translate}}</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="d-flex align-items-center">
+              <div class="m-l-16">
+                <p class="mat-subtitle-1 f-s-16 m-t-0">
+                  {{ getemployeeid(element.employee) }} - {{getemployeelastid(element.employee) }}
+                </p>
               </div>
-            </td>
-          </ng-container>
-  
-          <ng-container matColumnDef="day">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'attendanceMaster.Day' | translate}}</th>
-            <td mat-cell *matCellDef="let element">
-              <div class="d-flex align-items-center">
-                <div class="m-l-16">
-                  <p class="mat-subtitle-1 f-s-16 m-t-0">
-                    {{ element.day }}
-                  </p>
-                </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="day">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'attendanceMaster.Day' | translate}}</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="d-flex align-items-center">
+              <div class="m-l-16">
+                <p class="mat-subtitle-1 f-s-16 m-t-0">
+                  {{ element.day }}
+                </p>
               </div>
-            </td>
-          </ng-container>
-  
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'attendanceMaster.Date' | translate}}</th>
-            <td mat-cell *matCellDef="let element">
-              <div class="d-flex align-items-center">
-                <div class="m-l-16">
-                  <p class="mat-subtitle-1 f-s-16 m-t-0">
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">{{'attendanceMaster.Date' | translate}}</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="d-flex align-items-center">
+              <div class="m-l-16">
+                <p class="mat-subtitle-1 f-s-16 m-t-0">
                   {{ element.date?.toDate() | date:'dd/MM/yyyy' }}
-                  </p>
-                </div>
+                </p>
               </div>
-            </td>
-          </ng-container>
-  
-    
-          <ng-container matColumnDef="action">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
-              {{'attendanceMaster.Action' | translate}}
-            </th>
-            <td mat-cell *matCellDef="let element" class="action-link">
-              <a class="m-r-10 cursor-pointer"><i-tabler name="edit" (click)="addAttendance('Edit', element)"
-                  class="icon-18"></i-tabler></a>
-              <a class="m-r-10 cursor-pointer">
-                <i-tabler name="trash" (click)="addAttendance('Delete', element)" class="icon-18"></i-tabler>
-              </a>
-            </td>
-          </ng-container>
-  
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-          <tr class="mat-row" style="text-align: center;" *matNoDataRow>
-            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-              No record found
-            </td>
-          </tr>
-        </table>
-        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
-      </div>
-    </mat-card-content>
-  </mat-card>
+            </div>
+          </td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+            {{'attendanceMaster.Action' | translate}}
+          </th>
+          <td mat-cell *matCellDef="let element" class="action-link">
+            <a class="m-r-10 cursor-pointer"><i-tabler name="edit" (click)="EditAttendance(element)"
+                class="icon-18"></i-tabler></a>
+            <a class="m-r-10 cursor-pointer">
+              <i-tabler name="trash" (click)="DeleteAttendance(element)" class="icon-18"></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        <tr class="mat-row" style="text-align: center;" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            No record found
+          </td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>

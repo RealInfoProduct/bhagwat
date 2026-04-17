@@ -26,6 +26,11 @@ export class BonusComponent implements OnInit {
   ];
   bonusList: any = []
   employeeList: any = []
+
+  bonusForm:FormGroup;
+   selectedBonuslId: string = '';
+  oldBonusData: any = {};
+
   bonusListDataSource = new MatTableDataSource(this.bonusList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
@@ -38,6 +43,7 @@ export class BonusComponent implements OnInit {
 
 
   ngOnInit(): void {
+    this.bonusFormList()
     const today = new Date();
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
     const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -47,6 +53,14 @@ export class BonusComponent implements OnInit {
     });
     this.getBonusList();
     this.getEmployeeList();
+  }
+
+  bonusFormList() {
+    this.bonusForm = this.fb.group({
+       date: [new Date()],
+       employee:[''],
+       amount:[]
+    })
   }
 
   filterDate() {
@@ -88,62 +102,152 @@ export class BonusComponent implements OnInit {
     };
   }
 
-  openBonus(action: string, obj: any) {
-    obj.action = action;
+  // openBonus(action: string, obj: any) {
+  //   obj.action = action;
 
-    const dialogRef = this.dialog.open(BonusDialogComponent, { data: obj });
+  //   const dialogRef = this.dialog.open(BonusDialogComponent, { data: obj });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.event === 'Add') {
-        const payload: BonusList = {
-          id: '',
-          employee: result.data.employee,
-          amount: result.data.amount,
-          date: result.data.date,
-          userId: localStorage.getItem("userId")
-        }
+  //   dialogRef.afterClosed().subscribe((result) => {
+  //     if (result?.event === 'Add') {
+  //       const payload: BonusList = {
+  //         id: '',
+  //         employee: result.data.employee,
+  //         amount: result.data.amount,
+  //         date: result.data.date,
+  //         userId: localStorage.getItem("userId")
+  //       }
 
-        this.firebaseService.addBonus(payload).then((res) => {
-          if (res) {
-            this.getBonusList()
-            this.openConfigSnackBar('record create successfully')
-          }
-        }, (error) => {
-          console.log("error=>", error);
+  //       this.firebaseService.addBonus(payload).then((res) => {
+  //         if (res) {
+  //           this.getBonusList()
+  //           this.openConfigSnackBar('record create successfully')
+  //         }
+  //       }, (error) => {
+  //         console.log("error=>", error);
 
-        })
+  //       })
+  //     }
+  //     if (result?.event === 'Edit') {
+  //       this.bonusList.forEach((element: any) => {
+  //         if (element.id === result.data.id) {
+  //           const payload: BonusList = {
+  //             id: result.data.id,
+  //             employee: result.data.employee,
+  //             amount: result.data.amount,
+  //             date: result.data.date,
+  //             userId: localStorage.getItem("userId")
+  //           }
+  //           this.firebaseService.updateBonus(result.data.id, payload).then((res: any) => {
+  //             this.getBonusList()
+  //             this.openConfigSnackBar('record update successfully')
+  //           }, (error) => {
+  //             console.log("error => ", error);
+
+  //           })
+  //         }
+  //       });
+  //     }
+  //     if (result?.event === 'Delete') {
+  //       this.firebaseService.deleteBonus(result.data.id).then((res: any) => {
+  //         this.getBonusList()
+  //         this.openConfigSnackBar('record delete successfully')
+  //       }, (error) => {
+  //         console.log("error => ", error);
+
+  //       })
+  //     }
+  //   });
+  // }
+
+  AddBonus(){
+    const formValue = this.bonusForm.value;
+  
+    const isChanged =
+      formValue.employee === this.oldBonusData.employee &&
+      formValue.amount === this.oldBonusData.amount &&
+      new Date(formValue.date).getTime() ===
+        new Date(this.oldBonusData.date?.seconds * 1000).getTime();
+  
+    if (this.selectedBonuslId) {
+  
+      // 👉 No Change
+      if (isChanged) {
+        this.openConfigSnackBar('No changes detected');
+        return;
       }
-      if (result?.event === 'Edit') {
-        this.bonusList.forEach((element: any) => {
-          if (element.id === result.data.id) {
-            const payload: BonusList = {
-              id: result.data.id,
-              employee: result.data.employee,
-              amount: result.data.amount,
-              date: result.data.date,
-              userId: localStorage.getItem("userId")
-            }
-            this.firebaseService.updateBonus(result.data.id, payload).then((res: any) => {
-              this.getBonusList()
-              this.openConfigSnackBar('record update successfully')
-            }, (error) => {
-              console.log("error => ", error);
-
-            })
-          }
-        });
-      }
-      if (result?.event === 'Delete') {
-        this.firebaseService.deleteBonus(result.data.id).then((res: any) => {
-          this.getBonusList()
-          this.openConfigSnackBar('record delete successfully')
-        }, (error) => {
-          console.log("error => ", error);
-
-        })
-      }
-    });
+  
+      // 👉 UPDATE
+      const payload: BonusList = {
+        id: this.selectedBonuslId,
+        employee: formValue.employee,
+        amount: formValue.amount,
+        date: formValue.date,
+        userId: localStorage.getItem("userId")
+      };
+  
+      this.firebaseService.updateBonus(this.selectedBonuslId, payload).then(() => {
+        this.getBonusList()
+        this.resetBonusForm();
+        this.openConfigSnackBar('Record updated successfully');
+      });
+  
+    } else {
+  
+      // 👉 ADD
+      const payload: BonusList = {
+        id: '',
+        employee: formValue.employee,
+        amount: formValue.amount,
+        date: formValue.date,
+        userId: localStorage.getItem("userId")
+      };
+  
+      this.firebaseService.addBonus(payload).then(() => {
+         this.getBonusList()
+        this.resetBonusForm();
+        this.openConfigSnackBar('Record created successfully');
+      });
+    }
   }
+
+  EditBonus(obj: any) {
+
+  // 👉 store old data
+  this.oldBonusData = { ...obj };
+
+  // 👉 patch form
+  this.bonusForm.patchValue({
+    employee: obj.employee,
+    amount: obj.amount,
+    date: obj.date?.seconds
+      ? new Date(obj.date.seconds * 1000)
+      : new Date()
+  });
+
+  this.selectedBonuslId = obj.id;
+}
+
+  DeleteBonus(obj: any) {
+    this.firebaseService.deleteBonus(obj.id).then((res: any) => {
+      this.getBonusList()
+      this.openConfigSnackBar('record delete successfully')
+    }, (error) => {
+      console.log("error => ", error);
+
+    })
+  }
+
+  
+  resetBonusForm() {
+  this.bonusForm.reset();
+
+  this.bonusForm.patchValue({
+    date: new Date()
+  });
+
+  this.selectedBonuslId = '';
+  this.oldBonusData = {};
+}
 
   getBonusList() {
     this.loaderService.setLoader(true)

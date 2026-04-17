@@ -26,6 +26,11 @@ export class AttendanceComponent implements OnInit{
   ];
   attendanceList :any []= []
   employeeList :any []= []
+
+  attendanceForm:FormGroup;
+  selectedAttendanceId: string = '';
+oldAttendanceData: any = {};
+
   attendanceDataSource = new MatTableDataSource(this.attendanceList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
@@ -37,6 +42,7 @@ export class AttendanceComponent implements OnInit{
 
 
   ngOnInit(): void {
+    this.buildForm() 
        const today = new Date();
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
     const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -47,6 +53,15 @@ export class AttendanceComponent implements OnInit{
   this.getAttendanceList()
   this.getEmployeeList() 
   }
+
+   buildForm() {
+    this.attendanceForm = this.fb.group({
+       date: [new Date()],
+       employee:[''],
+       day:[]
+    })
+  }
+
   filterDate() {
     if (!this.attendanceList) return;
     const startDate = this.dateAttendanceListForm.value.start ? new Date(this.dateAttendanceListForm.value.start) : null;
@@ -72,62 +87,150 @@ export class AttendanceComponent implements OnInit{
   }
 
   
-  addAttendance(action: string, obj: any) {
-    obj.action = action;
+  // addAttendance(action: string, obj: any) {
+  //   obj.action = action;
 
-    const dialogRef = this.dialog.open(AttendanceDialogComponent, { data: obj });
+  //   const dialogRef = this.dialog.open(AttendanceDialogComponent, { data: obj });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.event === 'Add') {
-        const payload: AttendanceList = {
-          id: '',
-          employee: result.data.employee,
-          day: result.data.day,
-          date: result.data.date,
-          userId : localStorage.getItem("userId")
-        }
+  //   dialogRef.afterClosed().subscribe((result) => {
+  //     if (result?.event === 'Add') {
+  //       const payload: AttendanceList = {
+  //         id: '',
+  //         employee: result.data.employee,
+  //         day: result.data.day,
+  //         date: result.data.date,
+  //         userId : localStorage.getItem("userId")
+  //       }
 
-        this.firebaseService.addAttendance(payload).then((res) => {
-          if (res) {
-              this.getAttendanceList()
-              this.openConfigSnackBar('record create successfully')
-            }
-        } , (error) => {
-          console.log("error=>" , error);
+  //       this.firebaseService.addAttendance(payload).then((res) => {
+  //         if (res) {
+  //             this.getAttendanceList()
+  //             this.openConfigSnackBar('record create successfully')
+  //           }
+  //       } , (error) => {
+  //         console.log("error=>" , error);
           
-        })
-      }
-      if (result?.event === 'Edit') {
-        this.attendanceList.forEach((element: any) => {
-          if (element.id === result.data.id) {
-            const payload: AttendanceList = {
-              id: result.data.id,
-              employee: result.data.employee,
-              day: result.data.day,
-              date: result.data.date,
-              userId: localStorage.getItem("userId")
-            }
-              this.firebaseService.updateAttendance(result.data.id , payload).then((res:any) => {
-                  this.getAttendanceList()
-                  this.openConfigSnackBar('record update successfully')
-              }, (error) => {
-                console.log("error => " , error);
+  //       })
+  //     }
+  //     if (result?.event === 'Edit') {
+  //       this.attendanceList.forEach((element: any) => {
+  //         if (element.id === result.data.id) {
+  //           const payload: AttendanceList = {
+  //             id: result.data.id,
+  //             employee: result.data.employee,
+  //             day: result.data.day,
+  //             date: result.data.date,
+  //             userId: localStorage.getItem("userId")
+  //           }
+  //             this.firebaseService.updateAttendance(result.data.id , payload).then((res:any) => {
+  //                 this.getAttendanceList()
+  //                 this.openConfigSnackBar('record update successfully')
+  //             }, (error) => {
+  //               console.log("error => " , error);
                 
-              })
-          }
-        });
-      }
-      if (result?.event === 'Delete') {
-        this.firebaseService.deleteAttendance(result.data.id).then((res:any) => {
+  //             })
+  //         }
+  //       });
+  //     }
+  //     if (result?.event === 'Delete') {
+        // this.firebaseService.deleteAttendance(result.data.id).then((res:any) => {
+        //     this.getAttendanceList()
+        //     this.openConfigSnackBar('record delete successfully')
+        // }, (error) => {
+        //   console.log("error => " , error);
+          
+        // })
+  //     }
+  //   });
+  // }
+
+addAttendance() {
+  const formValue = this.attendanceForm.value;
+
+  const isChanged =
+    formValue.employee === this.oldAttendanceData.employee &&
+    formValue.day === this.oldAttendanceData.day &&
+    new Date(formValue.date).getTime() ===
+      new Date(this.oldAttendanceData.date?.seconds * 1000).getTime();
+
+  if (this.selectedAttendanceId) {
+
+    // 👉 No Change
+    if (isChanged) {
+      this.openConfigSnackBar('No changes detected');
+      return;
+    }
+
+    // 👉 UPDATE
+    const payload: AttendanceList = {
+      id: this.selectedAttendanceId,
+      employee: formValue.employee,
+      day: formValue.day,
+      date: formValue.date,
+      userId: localStorage.getItem("userId")
+    };
+
+    this.firebaseService.updateAttendance(this.selectedAttendanceId, payload).then(() => {
+      this.getAttendanceList();
+      this.resetAttendanceForm();
+      this.openConfigSnackBar('Record updated successfully');
+    });
+
+  } else {
+
+    // 👉 ADD
+    const payload: AttendanceList = {
+      id: '',
+      employee: formValue.employee,
+      day: formValue.day,
+      date: formValue.date,
+      userId: localStorage.getItem("userId")
+    };
+
+    this.firebaseService.addAttendance(payload).then(() => {
+      this.getAttendanceList();
+      this.resetAttendanceForm();
+      this.openConfigSnackBar('Record created successfully');
+    });
+  }
+}
+
+ EditAttendance(obj: any) {
+
+  // 👉 store old data
+  this.oldAttendanceData = { ...obj };
+
+  // 👉 patch form
+  this.attendanceForm.patchValue({
+    employee: obj.employee,
+    day: obj.day,
+    date: obj.date?.seconds
+      ? new Date(obj.date.seconds * 1000)
+      : new Date()
+  });
+
+  this.selectedAttendanceId = obj.id;
+}
+
+  DeleteAttendance(obj:any){
+     this.firebaseService.deleteAttendance(obj.id).then((res:any) => {
             this.getAttendanceList()
             this.openConfigSnackBar('record delete successfully')
         }, (error) => {
           console.log("error => " , error);
           
         })
-      }
-    });
   }
+
+  resetAttendanceForm() {
+  this.attendanceForm.reset();
+  this.attendanceForm.patchValue({
+    date: new Date()
+  });
+
+  this.selectedAttendanceId = '';
+  this.oldAttendanceData = {};
+}
 
 
   getAttendanceList() {

@@ -26,6 +26,11 @@ export class WithdrawalComponent implements OnInit {
   ];
   WithdrawalList: any = []
   employeeList: any = []
+
+  withdrawalForm: FormGroup;
+  selectedWithdrawalId: string = '';
+  oldWithdrawalData: any = {};
+
   WithdrawalListDataSource = new MatTableDataSource(this.WithdrawalList);
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
@@ -38,6 +43,7 @@ export class WithdrawalComponent implements OnInit {
 
 
   ngOnInit(): void {
+    this.buildForm() 
     const today = new Date();
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
     const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -48,6 +54,16 @@ export class WithdrawalComponent implements OnInit {
     this.getWithdrawalList();
     this.getEmployeeList();
   }
+
+  
+  buildForm() {
+    this.withdrawalForm = this.fb.group({
+       date: [new Date()],
+       employee:[''],
+       amount:[]
+    })
+  }
+
 
   filterDate() {
     if (!this.WithdrawalList) return;
@@ -89,62 +105,151 @@ export class WithdrawalComponent implements OnInit {
 
 
 
-  openwithdrawal(action: string, obj: any) {
-    obj.action = action;
+  // openwithdrawal(action: string, obj: any) {
+  //   obj.action = action;
 
-    const dialogRef = this.dialog.open(WithdrawalDialogComponent, { data: obj });
+  //   const dialogRef = this.dialog.open(WithdrawalDialogComponent, { data: obj });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.event === 'Add') {
-        const payload: WithdrawalList = {
-          id: '',
-          employee: result.data.employee,
-          amount: result.data.amount,
-          date: result.data.date,
-          userId: localStorage.getItem("userId")
-        }
+  //   dialogRef.afterClosed().subscribe((result) => {
+  //     if (result?.event === 'Add') {
+  //       const payload: WithdrawalList = {
+  //         id: '',
+  //         employee: result.data.employee,
+  //         amount: result.data.amount,
+  //         date: result.data.date,
+  //         userId: localStorage.getItem("userId")
+  //       }
 
-        this.firebaseService.addWithdrawal(payload).then((res) => {
-          if (res) {
-            this.getWithdrawalList()
-            this.openConfigSnackBar('record create successfully')
-          }
-        }, (error) => {
-          console.log("error=>", error);
+  //       this.firebaseService.addWithdrawal(payload).then((res) => {
+  //         if (res) {
+  //           this.getWithdrawalList()
+  //           this.openConfigSnackBar('record create successfully')
+  //         }
+  //       }, (error) => {
+  //         console.log("error=>", error);
 
-        })
-      }
-      if (result?.event === 'Edit') {
-        this.WithdrawalList.forEach((element: any) => {
-          if (element.id === result.data.id) {
-            const payload: WithdrawalList = {
-              id: result.data.id,
-              employee: result.data.employee,
-              amount: result.data.amount,
-              date: result.data.date,
-              userId: localStorage.getItem("userId")
-            }
-            this.firebaseService.updateWithdrawal(result.data.id, payload).then((res: any) => {
-              this.getWithdrawalList()
-              this.openConfigSnackBar('record update successfully')
-            }, (error) => {
-              console.log("error => ", error);
+  //       })
+  //     }
+  //     if (result?.event === 'Edit') {
+  //       this.WithdrawalList.forEach((element: any) => {
+  //         if (element.id === result.data.id) {
+  //           const payload: WithdrawalList = {
+  //             id: result.data.id,
+  //             employee: result.data.employee,
+  //             amount: result.data.amount,
+  //             date: result.data.date,
+  //             userId: localStorage.getItem("userId")
+  //           }
+  //           this.firebaseService.updateWithdrawal(result.data.id, payload).then((res: any) => {
+  //             this.getWithdrawalList()
+  //             this.openConfigSnackBar('record update successfully')
+  //           }, (error) => {
+  //             console.log("error => ", error);
 
-            })
-          }
-        });
-      }
-      if (result?.event === 'Delete') {
-        this.firebaseService.deleteWithdrawal(result.data.id).then((res: any) => {
+  //           })
+  //         }
+  //       });
+  //     }
+  //     if (result?.event === 'Delete') {
+  //       this.firebaseService.deleteWithdrawal(result.data.id).then((res: any) => {
+  //         this.getWithdrawalList()
+  //         this.openConfigSnackBar('record delete successfully')
+  //       }, (error) => {
+  //         console.log("error => ", error);
+
+  //       })
+  //     }
+  //   });
+  // }
+
+ Addwithdrawal() {
+  const formValue = this.withdrawalForm.value;
+
+  const isChanged =
+    formValue.employee === this.oldWithdrawalData.employee &&
+    formValue.amount === this.oldWithdrawalData.amount &&
+    new Date(formValue.date).getTime() ===
+      new Date(this.oldWithdrawalData.date?.seconds * 1000).getTime();
+
+  if (this.selectedWithdrawalId) {
+
+    // 👉 No Change
+    if (isChanged) {
+      this.openConfigSnackBar('No changes detected');
+      return;
+    }
+
+    // 👉 UPDATE
+    const payload: WithdrawalList = {
+      id: this.selectedWithdrawalId,
+      employee: formValue.employee,
+      amount: formValue.amount,
+      date: formValue.date,
+      userId: localStorage.getItem("userId")
+    };
+
+    this.firebaseService.updateWithdrawal(this.selectedWithdrawalId, payload).then(() => {
+      this.getWithdrawalList();
+      this.resetWithdrawalForm();
+      this.openConfigSnackBar('Record updated successfully');
+    });
+
+  } else {
+
+    // 👉 ADD
+    const payload: WithdrawalList = {
+      id: '',
+      employee: formValue.employee,
+      amount: formValue.amount,
+      date: formValue.date,
+      userId: localStorage.getItem("userId")
+    };
+
+    this.firebaseService.addWithdrawal(payload).then(() => {
+      this.getWithdrawalList();
+      this.resetWithdrawalForm();
+      this.openConfigSnackBar('Record created successfully');
+    });
+  }
+}
+
+ Editwithdrawal(obj: any) {
+
+  // 👉 store old data
+  this.oldWithdrawalData = { ...obj };
+
+  // 👉 patch form
+  this.withdrawalForm.patchValue({
+    employee: obj.employee,
+    amount: obj.amount,
+    date: obj.date?.seconds
+      ? new Date(obj.date.seconds * 1000)
+      : new Date()
+  });
+
+  this.selectedWithdrawalId = obj.id;
+}
+
+  Deletewithdrawal(obj:any){
+      this.firebaseService.deleteWithdrawal(obj.id).then((res: any) => {
           this.getWithdrawalList()
           this.openConfigSnackBar('record delete successfully')
         }, (error) => {
           console.log("error => ", error);
 
         })
-      }
-    });
   }
+
+  resetWithdrawalForm() {
+  this.withdrawalForm.reset();
+
+  this.withdrawalForm.patchValue({
+    date: new Date()
+  });
+
+  this.selectedWithdrawalId = '';
+  this.oldWithdrawalData = {};
+}
 
   getWithdrawalList() {
     this.loaderService.setLoader(true)

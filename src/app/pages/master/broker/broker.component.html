@@ -1,5 +1,5 @@
 <mat-card class="cardWithShadow">
-  <mat-card-content class="p-24">
+  <mat-card-content>
     <div class="row justify-content-between">
       <div class="col-lg-4">
         <mat-form-field appearance="outline" class="w-100 hide-hint">
@@ -9,7 +9,7 @@
           </mat-icon>
         </mat-form-field>
       </div>
-      <div class="col-lg-4 d-flex align-items-center justify-content-end">
+      <div class="col-lg-4 d-flex align-items-center justify-content-end ADDbutton">
         <button mat-flat-button color="primary" (click)="addBroker('Add', {})">
          ADD Broker
         </button>
@@ -20,7 +20,7 @@
 
 <mat-card class="cardWithShadow">
   <mat-card-content class="p-24">
-    <div class="table-responsive">
+    <div class="table-responsive desktop-view">
       <table style="min-width: 200%;" mat-table [dataSource]="brokerDataSource" class="w-100">
         <ng-container matColumnDef="#">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No.</th>
@@ -143,7 +143,81 @@
           </td>
         </tr>
       </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
     </div>
+
+     <div class="mobile-view">
+      <!-- Loop through the data source -->
+      <div *ngFor="let element of brokerDataSource.filteredData; let i = index" class="mobile-report-card">
+    
+        <!-- Card Header -->
+        <div class="card-header">
+          <h3 class="employee-name">{{ $any(element).header }}</h3>
+          <span class="sr-no">#{{ i + 1 }}</span>
+        </div>
+    
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="detail-item">
+            <span class="label">Sub Header : </span>
+            <span class="value">{{ $any(element).subHeader }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">GSTIN : </span>
+            <span class="value"> {{ $any(element).gstNo }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Pan : </span>
+            <span class="value"> {{ $any(element).panNo }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Mobile No : </span>
+            <span class="value"> {{ $any(element).mobileNo }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Personal Mobile No : </span>
+            <span class="value"> {{ $any(element).personalMobileNo }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Bank Name : </span>
+            <span class="value"> {{ $any(element).bankName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">IFSC : </span>
+            <span class="value"> {{ $any(element).bankIfsc }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Account Holders Name : </span>
+            <span class="value"> {{ $any(element).accountholdersname }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Bank Account No : </span>
+            <span class="value"> {{ $any(element).bankAccountNo }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Address : </span>
+            <span class="value"> {{ $any(element).address }}</span>
+          </div>
+        </div>
+    
+        <!-- Card Footer -->
+        <div class="card-footer">
+          <span class="final-label"> Action</span>
+          <span class="final-value">
+            <a class="m-r-10 cursor-pointer"><i-tabler name="edit" (click)="addBroker('Edit', element)"
+                class="icon-18"></i-tabler></a>
+            <a class="m-r-10 cursor-pointer">
+              <i-tabler name="trash" (click)="addBroker('Delete', element)" class="icon-18"></i-tabler>
+            </a>
+          </span>
+        </div>
+      </div>
+    
+      <!-- No record message for mobile -->
+      <div *ngIf="!brokerDataSource.filteredData.length" class="no-record-mobile">
+        No record found
+      </div>
+    </div>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
   </mat-card-content>
 </mat-card>

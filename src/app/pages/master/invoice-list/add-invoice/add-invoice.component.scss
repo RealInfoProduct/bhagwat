@@ -1,124 +1,162 @@
-.table-responsive {
-    table {
-        th {
-            text-align: center;
-        }
+$primary-color: #5d87ff;
+$success-color: #28a745; 
+$error-color: #fa896b;
+$border-color: #ebf1f6;
 
-        td {
-            text-align: center;
+.invoiceTab {
+    position: relative; 
+    padding: 10px;
+
+    
+    .GenerateInvoice {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        right: 4%;
+        top: 0;
+        z-index: 100;
+        padding-right: 10px;
+
+        .invoiceNumber {
+            padding-right: 20px;
+            h3 {
+                margin: 0;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #2a3547;
+            }
+        }
+    }
+   
+    ::ng-deep {
+        .mat-mdc-tab-header {
+            max-width: 50% !important; 
+        }
+        .mat-mdc-tab.mdc-tab {
+            font-weight: 600;
+        }
+    }
+
+    .cardWithShadow {
+        box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        border: 1px solid $border-color;
+    }
+
+    .error-message {
+        position: absolute;
+        left: 0;
+        font-size: 11px;
+    }
+
+    .payment-date {
+        background-color: $success-color;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        height: 56px; 
+        margin-top: 8px;
+    }
+
+    .productButton {
+        display: flex;
+        align-items: center;
+          justify-content: center;
+        
+        button {
+            width: 100%;
+        }
+    }
+
+    .search-container {
+        padding: 5px;
+        input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            outline: none;
+            border-bottom: 1px solid $border-color;
+            &::placeholder {
+                color: #888;
+                opacity: 1;
+            }
+        }
+    }
+
+    .table-responsive {
+      
+
+        table {
+            width: 100%;
+            
+            th, td {
+                text-align: center;
+                padding: 12px;
+                white-space: nowrap;
+            }
+
+            .action-link {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                a { cursor: pointer; }
+            }
         }
     }
 }
 
-.error-message {
-    position: absolute;
-    left: 0;
-}
 
-.productButton {
-    display: flex;
-    align-items: center;
-}
-
-.invoiceTab {
-    position: relative;
-}
-
-.invoiceNumber {
-    padding-right: 20px;
-}
-
-.GenerateInvoice {
-    display: flex;
-    align-items: center;
-    padding-right: 10px;
-    position: absolute;
-    z-index: 100;
-    right: 4%;
-}
-
-::ng-deep .mat-mdc-tab-header {
-    max-width: 50% !important;
-}
-
-::ng-deep .mat-mdc-tab.mdc-tab {
-    font-weight: 600;
-}
-
-.payment-date {
-    background-color: green;
-    color: #fff;
-    padding: 5px;
-    border-radius: 5px;
-    padding-left: 10px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    height: 56px;
-    margin-top: 8px;
-}
-
-
-@media (max-width: 1200px) {
-
-    
+@media (max-width: 1420px) {
     ::ng-deep .mat-mdc-tab-header {
         max-width: 100% !important;
     }
 
-  
-    .row {
-        flex-direction: column;
+    .invoiceTab .GenerateInvoice {
+        position: static; 
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 15px;
+        padding: 10px 0;
+    }
 
-        .col-2,
-        .col-3,
-        .col-4 {
+    .row {
+        .col-12, .col-md-4, .col-md-2, .col-md-1 {
             width: 100%;
             max-width: 100%;
             flex: 0 0 100%;
-        }
-
-        .productButton {
-            margin-top: 16px;
+            margin-bottom: 10px;
         }
     }
 
-        .goToNextTab {
-            margin-top: 13px;
-        }
-    
-    .table-responsive {
-        overflow-x: auto;
+    .productButton {
+        margin-top: 10px;
+    }
 
-        table {
-            min-width: 800px;
-           
-        }
+    .goToNextTab {
+        margin-top: 13px;
+    }
+
+    .table-responsive table {
+        min-width: 800px; 
     }
 }
 
 @media (max-width: 768px) {
-
-    
     .mat-card-content {
         padding: 16px !important;
     }
 
-   
-    .action-link {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-
-        a {
-            margin-right: 0 !important;
-        }
-    }
-
-    
     .payment-date {
         margin-top: 16px;
         width: 100%;
+        justify-content: center;
+    }
+
+    .action-link {
+        flex-direction: row; 
     }
 
     mat-paginator {
@@ -128,8 +166,6 @@
 }
 
 @media (max-width: 576px) {
-
- 
     .mat-form-field {
         margin-top: 4px !important;
         margin-bottom: 8px !important;
@@ -140,30 +176,18 @@
     }
 
     .mat-column-Defectiveitem,
-    .mat-column-PoNumber {
+    .mat-column-PoNumber,
+    .mat-column-HSNCode {
         display: none;
     }
 
     .GenerateInvoice {
-        position: static;
-        margin-top: 16px;
-        justify-content: center;
-        width: 100%;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        
+        .invoiceNumber {
+            padding-right: 0;
+        }
     }
-
-    .goToNextTab{
-        margin-top: 13px;
-    }
-}
-
-.search-container input {
-  width: 100%;
-  padding: 8px;
-  border: none;
-  outline: none;
-}
-
-.search-container input::placeholder {
-  color: #888;
-  opacity: 1;
 }

@@ -78,17 +78,13 @@ button .icon-25 {
     gap: 16px; // Gap between grid items
 
     .detail-item {
-      display: flex;
-      flex-direction: column;
-
-      .label {
-        font-size: 0.8rem;
+       .label {
+        font-size: 12px;
         color: #6c757d;
         margin-bottom: 4px;
-        text-transform: uppercase;
       }
       .value {
-        font-size: 1rem;
+        font-size:14px;
         font-weight: 500;
         color: #212529;
       }

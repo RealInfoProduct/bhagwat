@@ -21,20 +21,20 @@
         </mat-form-field>
       </div>
        <div class="col-lg-3"></div>
-       <div class="col-lg-1">
-          <div class="m-t20">
-            <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
-              <i-tabler name="file-download" class="icon-25"></i-tabler>
-            </button>
-          </div>
+      <div class="col-lg-1">
+        <div class="ADDbutton">
+          <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
+            <i-tabler name="file-download" class="icon-25"></i-tabler>
+          </button>
         </div>
+      </div>
     </div>
   </mat-card-content>
 </mat-card>
 
 <mat-card class="cardWithShadow">
   <mat-card-content class="p-24">
-    <div class=" p-3 bg-light border">
+    <div class="table-responsive desktop-view">
       <table mat-table [dataSource]="brokerageDataSource" class="table table-sm table-bordered w-100 mt-2">
 
         <ng-container matColumnDef="#">
@@ -161,7 +161,66 @@
           </td>
         </tr>
       </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+
     </div>
+
+    <div class="mobile-view">
+      <!-- Loop through the data source -->
+      <div *ngFor="let element of brokerageDataSource.filteredData; let i = index" class="mobile-report-card">
+
+        <!-- Card Header -->
+        <div class="card-header">
+          <h3 class="employee-name">{{ getPartyName(element.party) }}</h3>
+          <span class="sr-no">#{{ i + 1 }}</span>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="detail-item">
+            <span class="label">Broker : </span>
+            <span class="value">{{ getBrokerName( element.broker) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Invoice No : </span>
+            <span class="value"> {{ element.invoiceNo }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">P.O Number : </span>
+            <span class="value text-danger"> {{ element.pONumber}}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Final Amount : </span>
+            <span class="value"> {{ element.finalAmount}}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">B.Percentage : </span>
+            <span class="value">{{ element.brokerPercentage }}</span>
+          </div>
+          <div class="detail-item status">
+            <span class="label"> Status : </span>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select [(value)]="element.status" (selectionChange)="updateBrokerage(element)">
+
+                <mat-option value="Pending">Pending</mat-option>
+                <mat-option value="Paid">Paid</mat-option>
+                <mat-option value="Completed">Completed</mat-option>
+
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+        </div>
+        <div class="card-footer">
+          <span class="label">B.Amount : </span>
+          <span class="value text-success">{{getBrokerAmount(element) }}</span>
+        </div>
+
+      </div>
+
+      <div *ngIf="!brokerageDataSource.filteredData.length" class="no-record-mobile">
+        No record found
+      </div>
+    </div>
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
   </mat-card-content>
 </mat-card>

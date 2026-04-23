@@ -82,7 +82,7 @@
             <div style="align-items: baseline;" class="row">
 
                 <div class="col-lg-3">
-                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                  <mat-form-field appearance="outline" class="w-100 ">
                         <mat-label>Date</mat-label>
                         <input matInput [matDatepicker]="creditDate" formControlName="creditDate"
                             placeholder="{{'employeesdialogs.Selectcreditdate' | translate}}">
@@ -92,9 +92,8 @@
                 </div>
 
                 <div class="col-lg-3">
-                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                    <mat-form-field appearance="outline" class="w-100 ">
                         <mat-label>Expenses Type</mat-label>
-                
                         <input type="text" placeholder="Select expenses" matInput formControlName="expensesname"
                             [matAutocomplete]="auto" />
                 
@@ -103,7 +102,8 @@
                                 {{ option }}
                             </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="expensesForm.get('expensesname')?.touched && expensesForm.get('expensesname')?.invalid">
+                        <mat-error
+                            *ngIf="expensesForm.get('expensesname')?.touched && expensesForm.get('expensesname')?.invalid">
                             <span *ngIf="expensesForm.get('expensesname')?.errors?.['required']">
                                 Expenses type is required
                             </span>
@@ -111,11 +111,11 @@
                                 Only alphabets allowed
                             </span>
                         </mat-error>
-                        </mat-form-field>
+                    </mat-form-field>
                 </div>
                 
                 <div class="col-lg-3">
-                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                    <mat-form-field appearance="outline" class="w-100 ">
                         <mat-label>Description</mat-label>
                         <input type="text" matInput placeholder="{{'employeesdialogs.Enterdescription' | translate}}"
                             formControlName="description">
@@ -123,16 +123,16 @@
                 </div>
 
                 <div class="col-lg-2">
-                    <mat-form-field appearance="outline" class="w-100 m-t-10">
+                    <mat-form-field appearance="outline" class="w-100 ">
                         <mat-label>Amount</mat-label>
                         <input type="number" matInput placeholder="{{'employeesdialogs.Enteramount' | translate}}"
                             formControlName="amount" min="0">
                     </mat-form-field>
                 </div>
 
-                <div class="col-lg-1 d-flex align-items-center justify-content-end">
+                <div class="col-lg-1 d-flex align-items-center justify-content-end ADDbutton ">
                     <button mat-flat-button color="primary" (click)="ADDExpenses()" [disabled]="expensesForm.invalid ">
-                      {{ selectedExpensesId ? 'Edit ' : 'Add ' }}
+                        {{ selectedExpensesId ? 'Edit ' : 'Add ' }}
                     </button>
                 </div>
             </div>
@@ -143,7 +143,7 @@
 <mat-card class="cardWithShadow">
     <mat-card-content class="p-24">
         <div class="row">
-              <div class="col-lg-4 m-t-10">
+            <div class="col-lg-4 m-t-10">
                 <mat-form-field appearance="outline" class="w-100 hide-hint">
                     <input matInput placeholder="{{'ExpensessMaster.Searchexpenses' | translate}}"
                         (keyup)="applyFilter($any($event.target).value)">
@@ -163,15 +163,15 @@
                     <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
                 </mat-form-field>
             </div>
-             <div class="col-lg-3"></div>
-             <div class="col-lg-1 m-t-10">
-            <button mat-flat-button color="primary"  (click)="filedownload()">
-              <i-tabler name="file-download" class="icon-25"></i-tabler>
-            </button>
-        </div>
+            <div class="col-lg-3"></div>
+            <div class="col-lg-1 m-t-10">
+                <button mat-flat-button color="primary" (click)="filedownload()">
+                    <i-tabler name="file-download" class="icon-25"></i-tabler>
+                </button>
+            </div>
 
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive desktop-view">
             <table mat-table [dataSource]="expensesListDataSource" class="w-100">
 
                 <ng-container matColumnDef="#">
@@ -237,7 +237,50 @@
                     </td>
                 </tr>
             </table>
-            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
         </div>
+        <div class="mobile-view">
+            <!-- Loop through the data source -->
+            <div *ngFor="let element of expensesListDataSource.filteredData; let i = index" class="mobile-report-card">
+
+                <!-- Card Header -->
+                <div class="card-header">
+                    <h3 class="employee-name">{{ $any(element).expensesname }}</h3>
+                    <span class="sr-no">#{{ i + 1 }}</span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="detail-item">
+                        <span class="label">Date : </span>
+                        <span class="value">{{ convertTimestampToDate($any(element).creditDate) | date:'dd/MM/yyyy'}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Description : </span>
+                        <span class="value"> {{ $any(element).description }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label"> Amount : </span>
+                        <span class="value"> {{ $any(element).amount }}</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <span class="label">Action</span>
+                    <span class="value text-success">
+                        <a class="m-r-10 cursor-pointer">
+                            <i-tabler name="edit" class="icon-18" (click)="EditExpenses(element)"></i-tabler>
+                        </a>
+                        <a class="m-r-10 cursor-pointer">
+                            <i-tabler name="trash" class="icon-18" (click)="DeleteExpenses(element)"></i-tabler>
+                        </a>
+                    </span>
+                </div>
+
+            </div>
+
+            <div *ngIf="!expensesListDataSource.filteredData.length" class="no-record-mobile">
+                No record found
+            </div>
+        </div>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
     </mat-card-content>
 </mat-card>

@@ -37,11 +37,12 @@
   </mat-card-content>
 </mat-card>
 
-
+<mat-tab-group  mat-stretch-tabs="false" mat-align-tabs="start" #tabGroup>
+<mat-tab *ngFor="let firm of firms" [label]="firm.name">
 <mat-card class="cardWithShadow">
   <mat-card-content class="p-24">
     <div class="table-responsive">
-      <table mat-table [dataSource]="invoiceDataSource" class="w-100">
+      <table mat-table [dataSource]="firmWiseInvoices[firm.firmId]" class="w-100">
 
         <ng-container matColumnDef="#">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No.</th>
@@ -224,3 +225,5 @@
     </div>
   </mat-card-content>
 </mat-card>
+</mat-tab>
+</mat-tab-group>

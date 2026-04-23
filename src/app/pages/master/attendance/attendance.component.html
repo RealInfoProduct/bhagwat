@@ -82,7 +82,7 @@
       <div class="col-lg-3 d-flex align-items-center justify-content-end">
       </div>
 
-      <div class="col-lg-1">
+      <div class="col-lg-1 fillebutton">
         <div class="m-t20">
           <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
             <i-tabler name="file-download" class="icon-25"></i-tabler>
@@ -91,7 +91,7 @@
       </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive desktop-view">
       <table mat-table [dataSource]="attendanceDataSource" class="w-100">
         <ng-container matColumnDef="srno">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No.</th>
@@ -159,7 +159,48 @@
           </td>
         </tr>
       </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
     </div>
+    <div class="mobile-view">
+      <!-- Loop through the data source -->
+      <div *ngFor="let element of attendanceDataSource.filteredData; let i = index" class="mobile-report-card">
+    
+        <!-- Card Header -->
+        <div class="card-header">
+          <h3 class="employee-name">{{ getemployeeid(element.employee) }} - {{getemployeelastid(element.employee) }}</h3>
+          <span class="sr-no">#{{ i + 1 }}</span>
+        </div>
+    
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="detail-item">
+            <span class="label">Day : </span>
+            <span class="value">{{ element.day }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Date : </span>
+            <span class="value text-danger"> {{ $any(element).date?.toDate() | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+    
+        <!-- Card Footer -->
+        <div class="card-footer">
+          <span class="final-label"> Action</span>
+          <span class="final-value">
+            <a class="m-r-10 cursor-pointer"><i-tabler name="edit" (click)="EditAttendance(element)"
+                class="icon-18"></i-tabler></a>
+            <a class="m-r-10 cursor-pointer">
+              <i-tabler name="trash" (click)="DeleteAttendance(element)" class="icon-18"></i-tabler>
+            </a>
+          </span>
+        </div>
+      </div>
+    
+      <!-- No record message for mobile -->
+      <div *ngIf="!attendanceDataSource.filteredData.length" class="no-record-mobile">
+        No record found
+      </div>
+    </div>
+    
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
   </mat-card-content>
 </mat-card>

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, Optional, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, Optional, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
@@ -26,6 +26,9 @@ export class InvoiceListComponent implements OnInit {
   brokerageList: any = []
   brokerage: any = []
 
+  firms: any[] = [];
+  firmWiseInvoices: any = {};
+
   displayedColumns: string[] = [
     '#',
     'firmName',
@@ -43,6 +46,8 @@ export class InvoiceListComponent implements OnInit {
   @ViewChild(MatTable, { static: true }) table: MatTable<any> = Object.create(null);
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator = Object.create(null);
   @ViewChild(MatSort) sort!: MatSort
+  @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
+  @ViewChild('tabGroup') tabGroup: any;
 
   constructor(private router: Router,
     private fb: FormBuilder,
@@ -54,6 +59,7 @@ export class InvoiceListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.getInvoiceList()
     const today = new Date();
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
     const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -61,60 +67,56 @@ export class InvoiceListComponent implements OnInit {
       start: [startDate],
       end: [endDate]
     });
-    this.getInvoiceList()
     this.getFirmList()
     this.getPartyList()
     this.getBrokerageList()
   }
 
-  // filterDate() {
-  //   if (!this.invoiceList) return;
-  //   const startDate = this.dateInvoiceListForm.value.start ? new Date(this.dateInvoiceListForm.value.start) : null;
-  //   const endDate = this.dateInvoiceListForm.value.end ? new Date(this.dateInvoiceListForm.value.end) : null;
-  //   if (startDate && endDate) {
-  //     this.invoiceDataSource.data = this.invoiceList.filter((invoice: any) => {
-  //       if (!invoice.date) return false;
-  //       let invoiceDate;
-  //       if (typeof invoice.date === 'string') {
-  //         const dateParts = invoice.date.split('/');
-  //         invoiceDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
-  //       } else {
-  //         return false;
-  //       }
-  //       return invoiceDate >= startDate && invoiceDate <= endDate;
-  //     });
-  //   } else {
-  //     this.invoiceDataSource.data = this.invoiceList;
-  //   }
-  // }
   filterDate() {
   if (!this.invoiceList) return;
 
-  const selectedStart = this.dateInvoiceListForm.value.start
-    ? new Date(this.dateInvoiceListForm.value.start)
-    : null;
+  const start = this.dateInvoiceListForm.value.start;
+  const end = this.dateInvoiceListForm.value.end;
 
-  if (!selectedStart) {
-    this.invoiceDataSource.data = this.invoiceList;
+  if (!start || !end) {
+    this.getInvoiceList(); // reset
     return;
   }
 
-  const selectedMonth = selectedStart.getMonth(); // 0-indexed
-  const selectedYear = selectedStart.getFullYear();
+  const startDate = new Date(start);
+  const endDate = new Date(end);
 
-  this.invoiceDataSource.data = this.invoiceList.filter((invoice: any) => {
-    if (!invoice.date) return false;
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
 
-    let invoiceDate: Date;
+  Object.keys(this.firmWiseInvoices).forEach((firmId: string) => {
 
-    if (typeof invoice.date === 'string') {
-      const dateParts = invoice.date.split('/'); // assuming MM/DD/YYYY
-      invoiceDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
-    } else {
-      return false;
-    }
+    const originalData = this.invoiceList.filter((x: any) => x.firmId === firmId);
 
-    return invoiceDate.getMonth() === selectedMonth && invoiceDate.getFullYear() === selectedYear;
+    const filteredData = originalData.filter((invoice: any) => {
+
+      if (!invoice.date) return false;
+
+      let invoiceDate: Date;
+
+      // ✅ IMPORTANT: Your HTML uses Angular date pipe → means it's already a Date
+      if (invoice.date instanceof Date) {
+        invoiceDate = invoice.date;
+      } else {
+        invoiceDate = new Date(invoice.date);
+      }
+
+      if (isNaN(invoiceDate.getTime())) return false;
+
+      invoiceDate.setHours(0, 0, 0, 0);
+
+      return invoiceDate >= startDate && invoiceDate <= endDate;
+    });
+
+    this.firmWiseInvoices[firmId].data = filteredData;
+
+    // 🔥 Force table refresh (VERY IMPORTANT)
+    this.firmWiseInvoices[firmId]._updateChangeSubscription();
   });
 }
 
@@ -132,13 +134,16 @@ export class InvoiceListComponent implements OnInit {
     const dialogRef = this.dialog.open(amountlistdialog, { data: obj });
   }
 
-  applyFilter(filterValue: string): void {
-    this.invoiceDataSource.filter = filterValue.trim().toLowerCase();
-    this.SearchFilter()
-  }
+applyFilter(filterValue: string): void {
+  const filter = filterValue.trim().toLowerCase();
 
-  SearchFilter() {
-    this.invoiceDataSource.filterPredicate = (data: any, filter: string) => {
+  Object.keys(this.firmWiseInvoices).forEach((key: string) => {
+
+    const dataSource = this.firmWiseInvoices[key];
+
+    // ✅ Set predicate for EACH table
+    dataSource.filterPredicate = (data: any, filter: string) => {
+
       const searchText = filter.trim().toLowerCase();
       const invoiceNumber = data.invoiceNumber?.toString().toLowerCase() || '';
 
@@ -151,8 +156,14 @@ export class InvoiceListComponent implements OnInit {
         partyName.includes(searchText)
       );
     };
-  }
 
+    // ✅ Apply filter
+    dataSource.filter = filter;
+
+    // 🔥 Force refresh (important)
+    dataSource._updateChangeSubscription();
+  });
+}
   addInvoice() {
     this.router.navigate(['/master/addinvoice']);
   }
@@ -171,15 +182,45 @@ export class InvoiceListComponent implements OnInit {
           id.userId === localStorage.getItem("userId") &&
           id.accountYear === localStorage.getItem("accountYear")
         )
+        // this.invoiceDataSource = new MatTableDataSource(this.invoiceList);
+        
+        // this.invoiceDataSource.paginator = this.paginator;
+        // this.invoiceSorting()
+        // this.filterDate()
+           const uniqueFirmIds = [...new Set(this.invoiceList.map((x: any) => x.firmId))] as string[];
 
-        this.invoiceDataSource = new MatTableDataSource(this.invoiceList);
-        this.invoiceDataSource.paginator = this.paginator;
-        this.invoiceSorting()
-        this.filterDate()
+        // Tabs
+        this.firms = uniqueFirmIds.map((id: string) => {
+          const firm = this.getFirmHeader(id);
+          return {
+            firmId: id,
+            name: firm?.header || 'Firm ' + id
+          };
+        });
+
+        // Group data
+        this.firmWiseInvoices = {};
+        uniqueFirmIds.forEach((id: string) => {
+          const data = this.invoiceList.filter((x: any) => x.firmId === id)
+          .sort((a: any, b: any) => b.invoiceNumber - a.invoiceNumber); 
+          this.firmWiseInvoices[id] = new MatTableDataSource(data);
+        });
         this.loaderService.setLoader(false)
+         setTimeout(() => this.assignPaginators());
       }
     })
   }
+
+   assignPaginators() {
+  const paginatorArray = this.paginators.toArray();
+
+  this.firms.forEach((firm, index) => {
+    const ds = this.firmWiseInvoices[firm.firmId];
+    if (ds) {
+      ds.paginator = paginatorArray[index];
+    }
+  });
+}
 
   // deleteInvoice(action: string, obj: any) {
   //   this.firebaseService.deleteInvoice(obj.id).then((res: any) => {
@@ -285,6 +326,7 @@ export class InvoiceListComponent implements OnInit {
     this.firebaseService.getAllParty().subscribe((res: any) => {
       if (res) {
         this.partyList = res.filter((id: any) => id.userId === localStorage.getItem("userId"))
+           this.getInvoiceList();
         this.loaderService.setLoader(false)
       }
     })
@@ -298,100 +340,124 @@ export class InvoiceListComponent implements OnInit {
     return this.firmList.find((obj: any) => obj.id === firmId) ?? ''
   }
 
-  filedownload() {
-    if (!this.invoiceDataSource || this.invoiceDataSource.data.length === 0) {
-      this.openConfigSnackBar('No invoice data available to generate PDF.');
-      return;
-    }
+filedownload() {
 
-    const doc = new jsPDF();
-
-    // Get date range from form
-    const startDate = new Date(this.dateInvoiceListForm.value.start);
-    const endDate = new Date(this.dateInvoiceListForm.value.end);
-
-    const formattedStart = startDate.toLocaleDateString('en-GB');
-    const formattedEnd = endDate.toLocaleDateString('en-GB');
-
-    // PDF Title
-    doc.setFontSize(12);
-    doc.text(`Invoice Report: ${formattedStart} - ${formattedEnd}`, 14, 15);
-
-    // Total finalSubAmount
-    const totalAmount = this.invoiceDataSource.data.reduce(
-      (sum: number, invoice: any) => sum + parseFloat(invoice.finalSubAmount || 0),
-      0
-    );
-    const formattedAmount = totalAmount.toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-    doc.text(`Total Amount: ${formattedAmount}`, 145, 15);
-
-    // Total Pending Amount
-    const totalPendingAmount = this.invoiceDataSource.data.reduce((total: number, inv: any) => {
-
-      const receivedAmount = Array.isArray(inv.receivePayment)
-        ? inv.receivePayment.reduce((sum: number, payment: any) => {
-          return sum + Number(payment?.paymentAmount || 0);
-        }, 0)
-        : 0;
-
-      const finalAmount = Number(inv.finalSubAmount || 0);
-      const pendingAmount = finalAmount - receivedAmount;
-
-      return total + pendingAmount;
-
-    }, 0);
-    const formattedPendingAmount = totalPendingAmount.toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-
-
-    doc.text(`Pending Amount: ${formattedPendingAmount}`, 140, 20);
-
-    // Table headers
-    const headers = ['S.No', 'Party Name', 'Invoice No', 'CGST', 'SGST', 'Final Amount', 'Received', 'Pending Amount'];
-
-    // Table data
-    const data = this.invoiceDataSource.data.map((inv: any, index: number) => {
-      const firm = this.getPartyName(inv.partyId)?.partyName || '';
-      const receivedAmount = Array.isArray(inv.receivePayment)
-        ? inv.receivePayment.reduce((total: number, payment: any) => {
-          return total + Number(payment?.paymentAmount || 0);
-        }, 0)
-        : 0;
-
-      const finalAmount = Number(inv.finalSubAmount || 0);
-      const pendingAmount = finalAmount - receivedAmount;
-      return [
-        index + 1,
-        firm,
-        inv.invoiceNumber || '',
-        inv.cGST || 0,
-        inv.sGST || 0,
-        finalAmount,
-        receivedAmount,
-        pendingAmount
-      ];
-    });
-
-    // Generate table
-    (doc as any).autoTable({
-      head: [headers],
-      body: data,
-      startY: 25,
-      theme: 'grid',
-      headStyles: { fillColor: [255, 187, 0], textColor: [0, 0, 0], fontStyle: 'bold' },
-      styles: { fontSize: 10, halign: 'center', valign: 'middle' }
-    });
-
-    // Save PDF
-    doc.save(`Invoice_Report_${formattedStart.replace(/\//g, '-')}_to_${formattedEnd.replace(/\//g, '-')}.pdf`);
+  if (!this.tabGroup) {
+    this.openConfigSnackBar('Tab not initialized');
+    return;
   }
 
+  const selectedIndex = this.tabGroup.selectedIndex;
 
+  if (selectedIndex === null || selectedIndex === undefined) {
+    this.openConfigSnackBar('No tab selected');
+    return;
+  }
+
+  const firm = this.firms[selectedIndex];
+
+  if (!firm) {
+    this.openConfigSnackBar('Firm not found');
+    return;
+  }
+
+  const ds = this.firmWiseInvoices[firm.firmId];
+
+  if (!ds) {
+    this.openConfigSnackBar('No data source found');
+    return;
+  }
+
+  // ✅ IMPORTANT: filteredData sometimes undefined
+  const invoices = ds.filteredData && ds.filteredData.length
+    ? ds.filteredData
+    : ds.data;
+
+  if (!invoices || invoices.length === 0) {
+    this.openConfigSnackBar('No invoice data available');
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  // ✅ Dates
+  const startDate = new Date(this.dateInvoiceListForm.value.start);
+  const endDate = new Date(this.dateInvoiceListForm.value.end);
+
+  const formattedStart = startDate.toLocaleDateString('en-GB');
+  const formattedEnd = endDate.toLocaleDateString('en-GB');
+
+  const firmName = this.getFirmHeader(firm.firmId)?.header || '';
+  // ✅ Title
+  doc.setFontSize(12);
+  doc.text(`Firm Name: ${firmName}`, 14, 12);
+  doc.text(`Invoice Report Date: ${formattedStart} to ${formattedEnd}`, 14, 18);
+
+  // ✅ Totals
+  let total = 0;
+  let pendingTotal = 0;
+     const headers = [
+    'S.No',
+    'Firm',
+    'Party',
+    'Invoice No',
+    'CGST',
+    'SGST',
+    'Final',
+    'Received',
+    'Pending'
+  ];
+
+  const tableData = invoices.map((inv: any, index: number) => {
+
+    const finalAmt = Number(inv.finalSubAmount || 0);
+
+    const received = Array.isArray(inv.receivePayment)
+      ? inv.receivePayment.reduce((sum: number, p: any) => sum + Number(p.paymentAmount || 0), 0)
+      : 0;
+
+      
+      const pending = finalAmt - received;
+      total += finalAmt;
+      pendingTotal += pending;
+
+    const party = this.getPartyName(inv.partyId)?.partyName || '';
+     const firm = this.getFirmHeader(inv.firmId)?.header || '';
+
+    return [
+      index + 1,
+      firm,
+      party,
+      inv.invoiceNumber || '',
+      inv.cGST || 0,
+      inv.sGST || 0,
+      finalAmt,
+      received,
+      pending
+    ];
+  });
+
+  doc.text(`Total: ${total.toFixed(2)}`, 140, 12);
+  doc.text(`Pending: ${pendingTotal.toFixed(2)}`, 140, 18);
+
+  // ✅ Table
+     (doc as any).autoTable({
+    head: [headers],
+    body: tableData,
+    startY: 28,
+    theme: 'grid',
+    styles: {
+      fontSize: 9,
+      halign: 'center'
+    },
+    headStyles: {
+      fillColor: [255, 193, 7],
+      textColor: 0
+    }
+  });
+
+  doc.save(`${firmName}_Invoice.pdf`);
+}
 }
 
 

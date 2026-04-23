@@ -19,7 +19,7 @@
 
     <form [formGroup]="productForm">
       <div class="row">
-        <div class="col-12 col-md-4 m-t-10">
+        <div class="col-12 col-md-4">
           <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">Product Name</mat-label>
           <mat-form-field appearance="outline" class="w-100 m-t-10">
             <input type="text" matInput required formControlName="productName" placeholder="Enter Product Name" />
@@ -31,7 +31,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-12 col-md-4 m-t-10">
+        <div class="col-12 col-md-4">
           <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">
             Measurement Units
           </mat-label>
@@ -56,13 +56,13 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div class="col-12 col-md-2 m-t-10">
+        <div class="col-12 col-md-2">
           <mat-label class="mat-subtitle-2 f-w-600 m-b-8 d-block">HSN Code</mat-label>
           <mat-form-field appearance="outline" class="w-100 m-t-10">
             <input type="number" matInput required formControlName="hsnCode" placeholder="Enter HSN Code" />
           </mat-form-field>
         </div>
-        <div class="col-12 col-md-2 m-t-10 d-flex align-items-center justify-content-end">
+        <div class="col-12 col-md-2 d-flex align-items-center justify-content-end">
           <button mat-flat-button color="primary" (click)="addproduct()"  [disabled]="productForm.invalid ">
             {{ selectedProductId ? 'Edit Product' : 'Add Product' }}
           </button>
@@ -87,7 +87,7 @@
       </div>
     </div>
     
-    <div class="table-responsive">
+    <div class="table-responsive desktop-view">
       <table mat-table [dataSource]="productDataSource" class="w-100">
         <ng-container matColumnDef="srno">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sr No.</th>
@@ -154,7 +154,48 @@
           </td>
         </tr>
       </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
     </div>
+
+    <div class="mobile-view">
+      <!-- Loop through the data source -->
+      <div *ngFor="let element of productDataSource.filteredData; let i = index" class="mobile-report-card">
+    
+        <!-- Card Header -->
+        <div class="card-header">
+          <h3 class="employee-name">{{ $any(element).productName }}</h3>
+          <span class="sr-no">#{{ i + 1 }}</span>
+        </div>
+    
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="detail-item">
+            <span class="label">Measurement Unit : </span>
+            <span class="value">{{ $any(element).measurementUnits }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">HSN Code : </span>
+            <span class="value"> {{ $any(element).hsnCode }}</span>
+          </div>
+        </div>
+    
+        <!-- Card Footer -->
+        <div class="card-footer">
+          <span class="final-label"> Action</span>
+          <span class="final-value">
+            <a class="m-r-10 cursor-pointer"><i-tabler name="edit" (click)="Editproduct(element)"
+                class="icon-18"></i-tabler></a>
+            <a class="m-r-10 cursor-pointer">
+              <i-tabler name="trash" (click)="deleteproduct(element)" class="icon-18"></i-tabler>
+            </a>
+          </span>
+        </div>
+      </div>
+    
+      <!-- No record message for mobile -->
+      <div *ngIf="!productDataSource.filteredData.length" class="no-record-mobile">
+        No record found
+      </div>
+    </div>
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
   </mat-card-content>
 </mat-card>

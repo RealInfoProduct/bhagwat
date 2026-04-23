@@ -1,8 +1,8 @@
 <mat-card class="cardWithShadow">
-    <mat-card-content >
-        <div class="row justify-content-between">
-
-            <div class="col-lg-4 m-t-10">
+    <mat-card-content>
+        <div class="responsive-header-container">
+            <!-- Search Section -->
+            <div class="search-field">
                 <mat-form-field appearance="outline" class="w-100 hide-hint">
                     <input matInput placeholder="Search..." (keyup)="applyFilter($any($event.target).value)">
                     <mat-icon matSuffix>
@@ -10,7 +10,9 @@
                     </mat-icon>
                 </mat-form-field>
             </div>
-            <div class="col-lg-4 m-t-10">
+
+            <!-- Date Picker Section -->
+            <div class="date-field">
                 <mat-form-field appearance="outline" class="w-100">
                     <mat-label>Select Expenses Date</mat-label>
                     <mat-date-range-input [rangePicker]="picker" [formGroup]="dateRawListForm">
@@ -21,27 +23,24 @@
                     <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
                 </mat-form-field>
             </div>
-            <div class="col-lg-1"></div>
 
-            <div class="col-lg-2 d-flex align-items-center justify-content-end">
-                <button mat-flat-button color="primary" class="d-flex align-items-center gap-1"
-                    (click)="addDesign('Add', {})">
+            <!-- Buttons Section -->
+            <div class="button-group">
+                <button mat-flat-button color="primary" class="add-btn" (click)="addDesign('Add', {})">
                     <span>Add Raw</span>
                 </button>
+                
+                <button mat-flat-button color="primary" class="download-btn" (click)="filedownload()">
+                    <i-tabler name="file-download" class="icon-25"></i-tabler>
+                </button>
             </div>
-
-            <div class="col-lg-1 d-flex align-items-center justify-content-end">
-            <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
-              <i-tabler name="file-download" class="icon-25"></i-tabler>
-            </button>
-        </div>
-        
         </div>
     </mat-card-content>
 </mat-card>
+
 <mat-card class="cardWithShadow">
     <mat-card-content class="p-24">
-        <div class="table-responsive">
+        <div class="table-responsive desktop-view">
             <table mat-table [dataSource]="rowDataSource" class="w-100">
 
                 <ng-container matColumnDef="#">
@@ -133,7 +132,61 @@
                     </td>
                 </tr>
             </table>
-            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
         </div>
+
+          <div class="mobile-view">
+            <!-- Loop through the data source -->
+              <div *ngFor="let element of rowDataSource.filteredData; let i = index" class="mobile-report-card">
+        
+                <!-- Card Header -->
+                <div class="card-header">
+                    <h3 class="employee-name">{{ $any(element).name }}</h3>
+                    <span class="sr-no">#{{  i + 1 }}</span>
+                </div>
+        
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="detail-item">
+                      <span class="label"> Date : </span>
+                      <span class="value"> {{ $any(element).creditDate?.toDate() | date:'dd/MM/yyyy'  }}</span>
+                    </div>
+                  <div class="detail-item">
+                    <span class="label">Quantity : </span>
+                    <span class="value">{{ $any(element).quantity }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Price : </span>
+                    <span class="value"> {{ $any(element).price }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Total Amount : </span>
+                    <span class="value text-success">{{  $any(element).totalAmount | number:'1.0-2' }}</span>
+                  </div>
+                </div>
+                
+        
+                <!-- Card Footer -->
+                <div class="card-footer">
+                  <span class="final-label"> Action</span>
+                  <span class="final-value">
+                    <a class="m-r-10 cursor-pointer">
+                            <i-tabler (click)="addDesign('Edit', element)" name="edit" class="icon-18"></i-tabler>
+                        </a>
+                        <a class="m-r-10 cursor-pointer" (click)="showAmountList(element)">
+                            <i-tabler name="calculator" class="icon-18"></i-tabler>
+                        </a>
+                        <a class="m-r-10 cursor-pointer">
+                            <i-tabler (click)="addDesign('Delete', element)" name="trash" class="icon-18"></i-tabler>
+                        </a>
+                  </span>
+                </div>
+              </div>
+        
+            <!-- No record message for mobile -->
+            <div *ngIf="!rowDataSource.filteredData.length" class="no-record-mobile">
+                No record found
+            </div>
+        </div>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
     </mat-card-content>
 </mat-card>

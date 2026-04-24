@@ -405,67 +405,68 @@
                         </tr>
                     </table>
                 </div>
-                 <div class="mobile-view">
-            <!-- Loop through the data source -->
-              <div *ngFor="let element of addinvoiceDataSource.filteredData; let i = index" class="mobile-report-card">
-        
-                <!-- Card Header -->
-                <div class="card-header">
-                    <h3 class="employee-name">{{ $any(element).poNumber| number:'1.0-2'  }}</h3>
-                    <span class="sr-no">#{{  i + 1 }}</span>
+
+                <div class="mobile-view">
+                    <!-- Loop through the data source -->
+                    <div *ngFor="let element of addinvoiceDataSource.filteredData; let i = index" class="mobile-report-card">
+                
+                        <!-- Card Header -->
+                        <div class="card-header">
+                            <h3 class="employee-name">{{ $any(element).poNumber| number:'1.0-2' }}</h3>
+                            <span class="sr-no">#{{ i + 1 }}</span>
+                        </div>
+                
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <div class="detail-item">
+                                <span class="label">Product : </span>
+                                <span class="value">{{ $any(element).product.productName }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label"> HSN Code : </span>
+                                <span class="value"> {{ $any(element).product.hsnCode }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Measurement Units : </span>
+                                <span class="value">{{ $any(element).measurementUnits }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Qty: </span>
+                                <span class="value "> {{ $any(element).totalitem| number:'1.0-2' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Price : </span>
+                                <span class="value">{{ $any(element).price | number:'1.0-2' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Amount : </span>
+                                <span class="value text-success">{{ $any(element).finalAmount | number:'1.0-2' }}</span>
+                            </div>
+                            <!-- <div class="detail-item">
+                                    <span class="label">Joining Date : </span>
+                                    <span class="value text-danger"> {{ $any(element).date?.toDate() | date:'dd/MM/yyyy' }}</span>
+                                  </div> -->
+                        </div>
+                
+                        <!-- Card Footer -->
+                        <div class="card-footer">
+                            <span class="final-label"> Action</span>
+                            <span class="final-value">
+                                <a class="m-r-10 cursor-pointer">
+                                    <i-tabler name="edit" (click)="edit(element)" class="icon-18"></i-tabler>
+                                </a>
+                                <a class="m-r-10 cursor-pointer">
+                                    <i-tabler name="trash" (click)="deletedata(element.id)" class="icon-18"></i-tabler>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                
+                    <!-- No record message for mobile -->
+                    <div *ngIf="!addinvoiceDataSource.filteredData.length" class="no-record-mobile">
+                        No record found
+                    </div>
                 </div>
-        
-                <!-- Card Body -->
-                <div class="card-body">
-                  <div class="detail-item">
-                    <span class="label">Product : </span>
-                    <span class="value">{{ $any(element).product.productName }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">  HSN Code : </span>
-                    <span class="value"> {{ $any(element).product.hsnCode }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Measurement Units : </span>
-                    <span class="value">{{ $any(element).measurementUnits }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Qty: </span>
-                    <span class="value "> {{ $any(element).totalitem| number:'1.0-2'  }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Price : </span>
-                    <span class="value">{{ $any(element).price | number:'1.0-2' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Amount : </span>
-                    <span class="value text-success">{{ $any(element).finalAmount | number:'1.0-2'  }}</span>
-                  </div>
-                  <!-- <div class="detail-item">
-                    <span class="label">Joining Date : </span>
-                    <span class="value text-danger"> {{ $any(element).date?.toDate() | date:'dd/MM/yyyy' }}</span>
-                  </div> -->
-                </div>
-        
-                <!-- Card Footer -->
-                  <div class="card-footer">
-                    <span class="final-label"> Action</span>
-                    <span class="final-value">
-                        <a class="m-r-10 cursor-pointer">
-                            <i-tabler name="edit" (click)="edit(element)" class="icon-18"></i-tabler>
-                        </a>
-                        <a class="m-r-10 cursor-pointer">
-                            <i-tabler name="trash" (click)="deletedata(element.id)" class="icon-18"></i-tabler>
-                        </a>
-                    </span>
-                  </div>
-                </div>
-        
-            <!-- No record message for mobile -->
-            <div *ngIf="!addinvoiceDataSource.filteredData.length" class="no-record-mobile">
-                No record found
-            </div>
-        </div>
 
 
                 <div style="position: relative;">

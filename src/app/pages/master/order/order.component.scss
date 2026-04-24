@@ -1,7 +1,6 @@
-
 /* Form field overall height control */
 ::ng-deep .status .mat-mdc-form-field {
-   width: 140px;
+  width: 140px;
   height: 30px;
 }
 
@@ -27,19 +26,20 @@
 }
 
 .mat-mdc-card-content:last-child {
-    padding-bottom: 17px;
+  padding-bottom: 17px;
 }
 
 @media (max-width: 1279px) {
- .ADDbutton {
+  .ADDbutton {
     margin-top: 10px;
-}
+  }
 }
 
 
 .mobile-view {
   display: none; // Hidden by default
 }
+
 .no-record-mobile {
   text-align: center;
   padding: 20px;
@@ -49,12 +49,13 @@
 
 // Helper text color classes
 .text-danger {
-    color: #fa896b !important;
-    font-weight: 600;
+  color: #fa896b !important;
+  font-weight: 600;
 }
+
 .text-success {
-    color: #13deb9 !important;
-    font-weight: 600;
+  color: #13deb9 !important;
+  font-weight: 600;
 }
 
 
@@ -63,7 +64,7 @@
   background: #fff;
   border-radius: 8px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   border: 1px solid #e9ecef;
   overflow: hidden;
   display: flex;
@@ -84,6 +85,7 @@
       font-weight: 600;
       color: #343a40;
     }
+
     .sr-no {
       font-size: 0.9rem;
       font-weight: 500;
@@ -98,15 +100,16 @@
     grid-template-columns: 1fr 1fr; // 2-column layout
     gap: 16px; // Gap between grid items
 
-    .detail-item {     
+    .detail-item {
 
-        .label {
+      .label {
         font-size: 12px;
         color: #6c757d;
         margin-bottom: 4px;
       }
+
       .value {
-        font-size:14px;
+        font-size: 14px;
         font-weight: 500;
         color: #212529;
       }
@@ -127,6 +130,7 @@
       font-size: 1rem;
       font-weight: 500;
     }
+
     .final-value {
       font-size: 1.3rem;
       font-weight: 700;
@@ -139,13 +143,16 @@
   .desktop-view {
     display: none;
   }
+
   .mobile-view {
     display: block;
   }
+
   .cardWithShadow .p-24 {
     padding: 12px !important;
     background-color: #f8f9fa; // Light background for the whole page on mobile
   }
+
   // Remove the shadow from the parent card on mobile, as individual cards have them
   .cardWithShadow {
     box-shadow: none !important;

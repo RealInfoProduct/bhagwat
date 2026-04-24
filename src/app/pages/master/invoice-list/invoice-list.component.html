@@ -1,39 +1,51 @@
 <mat-card class="cardWithShadow">
-  <mat-card-content class="p-24">
-    <div class="row justify-content-between">
-      <div class="col-lg-4">
+  <mat-card-content  class="p-24">
+
+    <div class="row g-3 align-items-center">
+
+      <!-- Search -->
+      <div class="col-12 col-md-6 col-lg-4">
         <mat-form-field appearance="outline" class="w-100 hide-hint">
-          <input matInput placeholder="{{'invoicelist.Searchinvoice' | translate}}"
-            (keyup)="applyFilter($any($event.target).value)" />
+          <input matInput placeholder="Search Invoice"
+                 (keyup)="applyFilter($any($event.target).value)" />
           <mat-icon matSuffix>
             <i-tabler name="search" class="icon-20"></i-tabler>
           </mat-icon>
         </mat-form-field>
       </div>
-      <div class="col-4">
-        <mat-form-field appearance="outline" class="w-100  hide-hint">
+
+      <!-- Date -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <mat-form-field appearance="outline" class="w-100 hide-hint">
           <mat-label>Select Invoice Date</mat-label>
+
           <mat-date-range-input [rangePicker]="picker" [formGroup]="dateInvoiceListForm">
             <input matStartDate placeholder="Start date" formControlName="start">
             <input matEndDate placeholder="End date" formControlName="end">
           </mat-date-range-input>
+
           <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker (closed)="filterDate()"></mat-date-range-picker>
         </mat-form-field>
       </div>
-      <div class="col-lg-3 d-flex align-items-center justify-content-end">
-        <button mat-flat-button color="primary" (click)="addInvoice()">
-          {{'invoicelist.AddInvoice' | translate}}
-        </button>
-      </div>
-        <div class="col-lg-1">
-          <div class="m-t20">
-            <button mat-flat-button color="primary" class="d-flex align-items-center gap-1" (click)="filedownload()">
-              <i-tabler name="file-download" class="icon-25"></i-tabler>
-            </button>
-          </div>
+
+      <!-- Buttons -->
+      <div class="col-12 col-lg-4 ADDbutton">
+        <div class="button-group">
+
+          <button mat-flat-button color="primary" (click)="addInvoice()">
+            Add Invoice
+          </button>
+
+          <button mat-flat-button color="primary" (click)="filedownload()">
+            <i-tabler name="file-download" class="icon-25"></i-tabler>
+          </button>
+
         </div>
+      </div>
+
     </div>
+
   </mat-card-content>
 </mat-card>
 
@@ -41,7 +53,7 @@
 <mat-tab *ngFor="let firm of firms" [label]="firm.name">
 <mat-card class="cardWithShadow">
   <mat-card-content class="p-24">
-    <div class="table-responsive">
+    <div class="table-responsive desktop-view">
       <table mat-table [dataSource]="firmWiseInvoices[firm.firmId]" class="w-100">
 
         <ng-container matColumnDef="#">
@@ -221,8 +233,75 @@
           </td>
         </tr>
       </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
     </div>
+    <div class="mobile-view">
+      <!-- Loop through the data source -->
+      <div *ngFor="let element of firmWiseInvoices[firm.firmId].filteredData; let i = index" class="mobile-report-card">
+    
+        <!-- Card Header -->
+        <div class="card-header">
+          <h3 class="employee-name">{{ getPartyName(element.partyId).partyName }}</h3>
+          <span class="sr-no">#{{ i + 1 }}</span>
+        </div>
+    
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="detail-item">
+            <span class="label">InvoiceNo : </span>
+            <span class="value">{{ element.invoiceNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label"> Product Name : </span>
+            <span class="value"> {{ element.products[0].productName.productName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Qty : </span>
+            <span class="value">{{ element.products[0].qty }}{{ element.products[0].measurementUnits ? ' (' + element.products[0].measurementUnits + ')' : '' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Price: </span>
+            <span class="value text-success">   {{ element.products[0].price }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">CGST : </span>
+            <span class="value"> {{ element.cGST }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">SGST : </span>
+            <span class="value"> {{ element.sGST }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">FinalAmount : </span>
+            <span class="value text-success" [class.receivePayment]="element.finalSubAmount === calculateTotalReceivedPayment(element.receivePayment)">{{ element.finalSubAmount | number:'1.0-2' }}</span>
+          </div>
+        </div>
+    
+        <!-- Card Footer -->
+        <div class="card-footer">
+          <span class="final-label"> Action</span>
+          <span class="final-value">
+             <a class="m-r-10 cursor-pointer" (click)="addProduct(element.products)"><i-tabler name="list-check"
+                class="icon-18"></i-tabler></a>
+            <a class="m-r-10 cursor-pointer" (click)="generatePDFDownload(element)">
+              <i-tabler name="printer" class="icon-18"></i-tabler>
+            </a>
+            <a class="m-r-10 cursor-pointer" (click)="showAmountList(element)">
+              <i-tabler name="calculator" class="icon-18"></i-tabler>
+            </a>
+            <a class="m-r-10 cursor-pointer">
+              <i-tabler name="trash" class="icon-18" (click)="deleteInvoice('Delete', element)"></i-tabler>
+            </a>
+          </span>
+        </div>
+      </div>
+    
+      <!-- No record message for mobile -->
+      <div *ngIf="!firmWiseInvoices[firm.firmId].filteredData.length" class="no-record-mobile">
+        No record found
+      </div>
+    </div>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
   </mat-card-content>
 </mat-card>
 </mat-tab>

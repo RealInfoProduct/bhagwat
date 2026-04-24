@@ -1,211 +1,222 @@
 $primary-color: #5d87ff;
-$success-color: #28a745; 
+$success-color: #28a745;
 $error-color: #fa896b;
 $border-color: #ebf1f6;
 
 .invoiceTab {
-    position: relative; 
-    padding: 10px;
+  position: relative;
+  padding: 10px;
 
-    
-    .GenerateInvoice {
+
+  .GenerateInvoice {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 4%;
+    top: 0;
+    z-index: 100;
+    padding-right: 10px;
+
+    .invoiceNumber {
+      padding-right: 20px;
+
+      h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2a3547;
+      }
+    }
+  }
+
+  ::ng-deep {
+    .mat-mdc-tab-header {
+      max-width: 50% !important;
+    }
+
+    .mat-mdc-tab.mdc-tab {
+      font-weight: 600;
+    }
+  }
+
+  .cardWithShadow {
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    border: 1px solid $border-color;
+  }
+
+  .error-message {
+    position: absolute;
+    left: 0;
+    font-size: 11px;
+  }
+
+  .payment-date {
+    background-color: $success-color;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    margin-top: 8px;
+  }
+
+  .productButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .search-container {
+    padding: 5px;
+
+    input {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      outline: none;
+      border-bottom: 1px solid $border-color;
+
+      &::placeholder {
+        color: #888;
+        opacity: 1;
+      }
+    }
+  }
+
+  .table-responsive {
+    table {
+      width: 100%;
+
+      th,
+      td {
+        text-align: center;
+        padding: 12px;
+        white-space: nowrap;
+      }
+
+      .action-link {
         display: flex;
-        align-items: center;
-        position: absolute;
-        right: 4%;
-        top: 0;
-        z-index: 100;
-        padding-right: 10px;
+        justify-content: center;
+        gap: 10px;
 
-        .invoiceNumber {
-            padding-right: 20px;
-            h3 {
-                margin: 0;
-                font-size: 1.1rem;
-                font-weight: 700;
-                color: #2a3547;
-            }
+        a {
+          cursor: pointer;
         }
+      }
     }
-   
-    ::ng-deep {
-        .mat-mdc-tab-header {
-            max-width: 50% !important; 
-        }
-        .mat-mdc-tab.mdc-tab {
-            font-weight: 600;
-        }
-    }
-
-    .cardWithShadow {
-        box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.05);
-        border-radius: 8px;
-        border: 1px solid $border-color;
-    }
-
-    .error-message {
-        position: absolute;
-        left: 0;
-        font-size: 11px;
-    }
-
-    .payment-date {
-        background-color: $success-color;
-        color: #fff;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        height: 56px; 
-        margin-top: 8px;
-    }
-
-    .productButton {
-        display: flex;
-        align-items: center;
-          justify-content: center;
-        
-        button {
-            width: 100%;
-        }
-    }
-
-    .search-container {
-        padding: 5px;
-        input {
-            width: 100%;
-            padding: 8px;
-            border: none;
-            outline: none;
-            border-bottom: 1px solid $border-color;
-            &::placeholder {
-                color: #888;
-                opacity: 1;
-            }
-        }
-    }
-
-    .table-responsive {
-      
-
-        table {
-            width: 100%;
-            
-            th, td {
-                text-align: center;
-                padding: 12px;
-                white-space: nowrap;
-            }
-
-            .action-link {
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-                a { cursor: pointer; }
-            }
-        }
-    }
+  }
 }
 
 
 @media (max-width: 1420px) {
-    ::ng-deep .mat-mdc-tab-header {
-        max-width: 100% !important;
-    }
+  ::ng-deep .mat-mdc-tab-header {
+    max-width: 100% !important;
+  }
 
-    .invoiceTab .GenerateInvoice {
-        position: static; 
-        justify-content: space-between;
-        width: 100%;
-        margin-bottom: 15px;
-        padding: 10px 0;
-    }
+  .invoiceTab .GenerateInvoice {
+    position: static;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 10px 0;
+  }
 
-    .row {
-        .col-12, .col-md-4, .col-md-2, .col-md-1 {
-            width: 100%;
-            max-width: 100%;
-            flex: 0 0 100%;
-            margin-bottom: 10px;
-        }
-    }
+  .row {
 
-    .productButton {
-        margin-top: 10px;
+    .col-12,
+    .col-md-4,
+    .col-md-2,
+    .col-md-1 {
+      width: 100%;
+      max-width: 100%;
+      flex: 0 0 100%;
+      margin-bottom: 10px;
     }
+  }
 
-    .goToNextTab {
-        margin-top: 13px;
-    }
+  .productButton {
+    margin-top: 10px;
+  }
 
-    .table-responsive table {
-        min-width: 800px; 
-    }
+  .goToNextTab {
+    margin-top: 13px;
+  }
+
+  .table-responsive table {
+    min-width: 800px;
+  }
 }
 
 @media (max-width: 768px) {
-    .mat-card-content {
-        padding: 16px !important;
-    }
+  .mat-card-content {
+    padding: 16px !important;
+  }
 
-    .payment-date {
-        margin-top: 16px;
-        width: 100%;
-        justify-content: center;
-    }
+  .payment-date {
+    margin-top: 16px;
+    width: 100%;
+    justify-content: center;
+  }
 
-    .action-link {
-        flex-direction: row; 
-    }
+  .action-link {
+    flex-direction: row;
+  }
 
-    mat-paginator {
-        display: flex;
-        justify-content: center;
-    }
+  mat-paginator {
+    display: flex;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 576px) {
-    .mat-form-field {
-        margin-top: 4px !important;
-        margin-bottom: 8px !important;
-    }
+  .mat-form-field {
+    margin-top: 4px !important;
+    margin-bottom: 8px !important;
+  }
 
-    ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
-        font-size: 12px;
-    }
+  ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
+    font-size: 12px;
+  }
 
-    .mat-column-Defectiveitem,
-    .mat-column-PoNumber,
-    .mat-column-HSNCode {
-        display: none;
-    }
+  .mat-column-Defectiveitem,
+  .mat-column-PoNumber,
+  .mat-column-HSNCode {
+    display: none;
+  }
 
-    .GenerateInvoice {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-        
-        .invoiceNumber {
-            padding-right: 0;
-        }
+  .GenerateInvoice {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+
+    .invoiceNumber {
+      padding-right: 0;
     }
+  }
 }
 
 .mat-mdc-card-content:last-child {
-    padding-bottom: 0px;
+  padding-bottom: 0px;
 }
 
 @media (max-width: 1279px) {
- .ADDbutton {
+  .ADDbutton {
     margin-top: 10px;
-}
+  }
 }
 
 
 .mobile-view {
   display: none; // Hidden by default
 }
+
 .no-record-mobile {
   text-align: center;
   padding: 20px;
@@ -215,12 +226,13 @@ $border-color: #ebf1f6;
 
 // Helper text color classes
 .text-danger {
-    color: #fa896b !important;
-    font-weight: 600;
+  color: #fa896b !important;
+  font-weight: 600;
 }
+
 .text-success {
-    color: #13deb9 !important;
-    font-weight: 600;
+  color: #13deb9 !important;
+  font-weight: 600;
 }
 
 
@@ -229,7 +241,7 @@ $border-color: #ebf1f6;
   background: #fff;
   border-radius: 8px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   border: 1px solid #e9ecef;
   overflow: hidden;
   display: flex;
@@ -250,6 +262,7 @@ $border-color: #ebf1f6;
       font-weight: 600;
       color: #343a40;
     }
+
     .sr-no {
       font-size: 0.9rem;
       font-weight: 500;
@@ -264,15 +277,16 @@ $border-color: #ebf1f6;
     grid-template-columns: 1fr 1fr; // 2-column layout
     gap: 16px; // Gap between grid items
 
-    .detail-item {     
+    .detail-item {
 
       .label {
         font-size: 12px;
         color: #6c757d;
         margin-bottom: 4px;
       }
+
       .value {
-        font-size:14px;
+        font-size: 14px;
         font-weight: 500;
         color: #212529;
       }
@@ -293,6 +307,7 @@ $border-color: #ebf1f6;
       font-size: 1rem;
       font-weight: 500;
     }
+
     .final-value {
       font-size: 1.3rem;
       font-weight: 700;
@@ -305,13 +320,16 @@ $border-color: #ebf1f6;
   .desktop-view {
     display: none;
   }
+
   .mobile-view {
     display: block;
   }
+
   .cardWithShadow .p-24 {
     padding: 12px !important;
     background-color: #f8f9fa; // Light background for the whole page on mobile
   }
+
   // Remove the shadow from the parent card on mobile, as individual cards have them
   .cardWithShadow {
     box-shadow: none !important;
@@ -357,7 +375,8 @@ $border-color: #ebf1f6;
   }
 
   .buttons button {
-    flex: 1; /* Equal width buttons */
+    flex: 1;
+    /* Equal width buttons */
   }
 }
 
@@ -367,6 +386,7 @@ $border-color: #ebf1f6;
     flex-direction: column;
   }
 }
+
 .btn-group-custom {
   display: flex;
   justify-content: flex-end;
@@ -380,7 +400,8 @@ $border-color: #ebf1f6;
   .btn-group-custom {
     justify-content: flex-start;
   }
-  .allButton{
+
+  .allButton {
     margin-bottom: 15px;
   }
 }
@@ -392,12 +413,13 @@ $border-color: #ebf1f6;
   }
 
   .btn-group-custom button {
-    flex: 1; /* equal width */
+    flex: 1;
+    /* equal width */
   }
 }
 
-.allButton{
-    display: flex;
-    justify-content: end;
-    align-items: center;
+.allButton {
+  display: flex;
+  justify-content: end;
+  align-items: center;
 }

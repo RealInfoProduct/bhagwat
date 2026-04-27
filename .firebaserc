@@ -13,7 +13,7 @@
     },
     "bhagwat-5d4b7": {
       "hosting": {
-        "prod": [
+        "bhagwat": [
           "bhagwat"
         ]
       }

@@ -1,15 +1,18 @@
 {
   "projects": {
-    "default": "bhagwat-5d4b7"
+    "prod": "bhagwat-5d4b7",
+    "dev": "bhagwatdev-99a03"
   },
   "targets": {
     "bhagwat-5d4b7": {
       "hosting": {
-        "bhagwat": [
-          "bhagwat"
-        ]
+        "prod": ["bhagwat"]
+      }
+    },
+    "bhagwatdev-99a03": {
+      "hosting": {
+        "dev": ["bhagwat-dev"]
       }
     }
-  },
-  "etags": {}
+  }
 }

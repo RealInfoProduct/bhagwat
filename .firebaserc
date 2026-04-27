@@ -6,13 +6,19 @@
   "targets": {
     "bhagwat-5d4b7": {
       "hosting": {
-        "prod": ["bhagwat"]
+        "prod": [
+          "bhagwat"
+        ]
       }
     },
     "bhagwatdev-99a03": {
       "hosting": {
-        "dev": ["bhagwat-dev"]
+        "dev": [
+          "bhagwat-dev",
+          "bhagwatdev-99a03"
+        ]
       }
     }
-  }
+  },
+  "etags": {}
 }

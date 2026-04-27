@@ -174,11 +174,11 @@
         <div class="card-body">
           <div class="detail-item">
             <span class="label">Day : </span>
-            <span class="value">{{ element.day }}</span>
+            <span class="value  text-danger">{{ element.day }}</span>
           </div>
           <div class="detail-item">
             <span class="label">Date : </span>
-            <span class="value text-danger"> {{ $any(element).date?.toDate() | date:'dd/MM/yyyy' }}</span>
+            <span class="value"> {{ $any(element).date?.toDate() | date:'dd/MM/yyyy' }}</span>
           </div>
         </div>
     

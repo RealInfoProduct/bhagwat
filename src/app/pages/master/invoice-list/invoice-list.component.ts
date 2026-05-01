@@ -186,9 +186,8 @@ applyFilter(filterValue: string): void {
         
         // this.invoiceDataSource.paginator = this.paginator;
         // this.invoiceSorting()
-        // this.filterDate()
-           const uniqueFirmIds = [...new Set(this.invoiceList.map((x: any) => x.firmId))] as string[];
-
+        const uniqueFirmIds = [...new Set(this.invoiceList.map((x: any) => x.firmId))] as string[];
+        
         // Tabs
         this.firms = uniqueFirmIds.map((id: string) => {
           const firm = this.getFirmHeader(id);
@@ -206,7 +205,8 @@ applyFilter(filterValue: string): void {
           this.firmWiseInvoices[id] = new MatTableDataSource(data);
         });
         this.loaderService.setLoader(false)
-         setTimeout(() => this.assignPaginators());
+        setTimeout(() => this.assignPaginators());
+        this.filterDate()
       }
     })
   }
